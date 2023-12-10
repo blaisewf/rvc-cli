@@ -1,0 +1,8 @@
+faiss-cpu==1.7.3
+soundfile==0.12.1
+torchcrepe==0.0.21
+torch==2.0.0
+pyworld==0.3.4
+numpy==1.23.5
+librosa==0.9.1
+ffmpeg-python>=0.2.0

@@ -1,0 +1,7 @@
+ffmpeg.exe
+ffprobe.exe
+
+hubert_base.pt
+rmvpe.pt
+
+rvc/__pycache__
