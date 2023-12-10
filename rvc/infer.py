@@ -300,13 +300,9 @@ index_path = sys.argv[6]
 
 index_rate = float(0.66)
 
-
-
-
-
 sid = f0up_key
 input_audio = audio_input_path
-f0_pitch = 0
+f0_pitch = f0up_key
 crepe_hop_length = 64
 f0_file = None
 f0_method = f0method
@@ -315,7 +311,6 @@ index_rate = index_rate
 output_file = audio_output_path
 
 get_vc(model_path, 0)
-
 
 try:
     result, audio_opt = vc_single(
@@ -335,9 +330,8 @@ try:
     else:
         message = result
 
-    print(message)
-    print("finished")
+    print("Conversion completed. Output file: ", output_file)
 
 except Exception as error:
-    message = "Voice conversion failed", error
+    message = "Voice conversion failed:\n", error
     print(message)
