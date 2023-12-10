@@ -330,7 +330,7 @@ try:
     else:
         message = result
 
-    print("Conversion completed. Output file: ", output_file)
+    print("Conversion completed. Output file:", output_file)
 
 except Exception as error:
     message = "Voice conversion failed:\n", error
