@@ -34,8 +34,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Run the main.py script with specific parameters."
     )
-    parser.add_argument("f0up_key", type=validate_f0up_key, help="Value for f0up_key")
-    parser.add_argument("f0method", type=str, help="Value for f0method")
+    parser.add_argument("f0up_key", type=validate_f0up_key, help="Value for f0up_key (-12 to +12)")
+    parser.add_argument("f0method", type=str, help="Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)")
     parser.add_argument(
         "input_path", type=str, help="Input path (enclose in double quotes)"
     )
