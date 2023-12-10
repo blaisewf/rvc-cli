@@ -5,7 +5,7 @@
 Execute the RVC CLI with the following command:
 
 ```bash
-main.py 0 rmvpe "C:\Example\vocals.wav" "C:\Example\output.wav" "C:\Example\model_file.pth" "C:\Example\index_file.index"
+python main.py 0 rmvpe "input_path" "output_path" "model.pth" "index_file.index"
 ```
 
 ### Installation
