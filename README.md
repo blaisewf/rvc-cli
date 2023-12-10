@@ -38,3 +38,7 @@ The usage example illustrates the usage of the RVC CLI with the following parame
 - `index_path`: Path to the .index file (required; enclose in double quotes)
 
 _Make sure to adjust the parameters according to your specific use case._
+
+### Credits
+- https://github.com/Mangio621/Mangio-RVC-Fork
+- https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI
