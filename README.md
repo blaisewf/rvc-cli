@@ -2,7 +2,9 @@
 
 ### Usage Example
 
-Execute the RVC CLI with the following command:
+_At the moment only model inference is available._
+
+Infer a voice with the following command:
 
 ```bash
 python main.py 0 rmvpe "input_path" "output_path" "model.pth" "index_file.index"
