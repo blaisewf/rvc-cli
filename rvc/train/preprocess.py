@@ -72,9 +72,7 @@ class PreProcess:
             self.sr,
             tmp_audio.astype(np.float32),
         )
-        tmp_audio = librosa.resample(
-            tmp_audio, orig_sr=self.sr, target_sr=16000
-        )  # , res_type="soxr_vhq"
+        tmp_audio = librosa.resample(tmp_audio, orig_sr=self.sr, target_sr=16000)
         wavfile.write(
             "%s/%s_%s.wav" % (self.wavs16k_dir, idx0, idx1),
             16000,
@@ -84,8 +82,7 @@ class PreProcess:
     def pipeline(self, path, idx0):
         try:
             audio = load_audio(path, self.sr)
-            # zero phased digital filter cause pre-ringing noise...
-            # audio = signal.filtfilt(self.bh, self.ah, audio)
+
             audio = signal.lfilter(self.bh, self.ah, audio)
 
             idx1 = 0
