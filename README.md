@@ -5,13 +5,11 @@
 > [!NOTE]  
 > The training section is currently under development
 
-Ensure you have the required Python packages installed by running:
+Ensure you have the required Python packages installed by running (Python 3.9 is recommended):
 
 ```bash
 pip install -r requirements.txt
 ```
-
-Make sure to have Python installed on your system.
 
 ### Help
 
@@ -23,15 +21,9 @@ python main.py -h
 
 This will display the available modes and their corresponding parameters, helping you understand how to use the RVC CLI effectively.
 
-_Make sure to adjust the parameters according to your specific use case._
-
-### Help Command Example
-
-```bash
-python main.py -h
-```
 
 ### Examples
+_Make sure to adjust the parameters according to your specific use case._
 
 #### 1. Run Inference
 
