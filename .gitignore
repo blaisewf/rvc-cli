@@ -5,4 +5,7 @@ hubert_base.pt
 rmvpe.pt
 
 rvc/__pycache__
-rvc/infer_pack/__pycache__
+rvc/infer/infer_pack/__pycache__
+rvc/train/__pycache__
+
+logs

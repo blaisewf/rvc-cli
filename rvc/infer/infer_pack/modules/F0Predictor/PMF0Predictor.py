@@ -1,9 +1,9 @@
 from infer_pack.modules.F0Predictor.F0Predictor import F0Predictor
-import pyworld
+import parselmouth
 import numpy as np
 
 
-class HarvestF0Predictor(F0Predictor):
+class PMF0Predictor(F0Predictor):
     def __init__(self, hop_length=512, f0_min=50, f0_max=1100, sampling_rate=44100):
         self.hop_length = hop_length
         self.f0_min = f0_min
@@ -11,10 +11,6 @@ class HarvestF0Predictor(F0Predictor):
         self.sampling_rate = sampling_rate
 
     def interpolate_f0(self, f0):
-        """
-        对F0进行插值处理
-        """
-
         data = np.reshape(f0, (f0.size, 1))
 
         vuv_vector = np.zeros((data.size, 1), dtype=np.float32)
@@ -48,39 +44,50 @@ class HarvestF0Predictor(F0Predictor):
 
         return ip_data[:, 0], vuv_vector[:, 0]
 
-    def resize_f0(self, x, target_len):
-        source = np.array(x)
-        source[source < 0.001] = np.nan
-        target = np.interp(
-            np.arange(0, len(source) * target_len, len(source)) / target_len,
-            np.arange(0, len(source)),
-            source,
-        )
-        res = np.nan_to_num(target)
-        return res
-
     def compute_f0(self, wav, p_len=None):
+        x = wav
         if p_len is None:
-            p_len = wav.shape[0] // self.hop_length
-        f0, t = pyworld.harvest(
-            wav.astype(np.double),
-            fs=self.hop_length,
-            f0_ceil=self.f0_max,
-            f0_floor=self.f0_min,
-            frame_period=1000 * self.hop_length / self.sampling_rate,
+            p_len = x.shape[0] // self.hop_length
+        else:
+            assert abs(p_len - x.shape[0] // self.hop_length) < 4, "pad length error"
+        time_step = self.hop_length / self.sampling_rate * 1000
+        f0 = (
+            parselmouth.Sound(x, self.sampling_rate)
+            .to_pitch_ac(
+                time_step=time_step / 1000,
+                voicing_threshold=0.6,
+                pitch_floor=self.f0_min,
+                pitch_ceiling=self.f0_max,
+            )
+            .selected_array["frequency"]
         )
-        f0 = pyworld.stonemask(wav.astype(np.double), f0, t, self.fs)
-        return self.interpolate_f0(self.resize_f0(f0, p_len))[0]
+
+        pad_size = (p_len - len(f0) + 1) // 2
+        if pad_size > 0 or p_len - len(f0) - pad_size > 0:
+            f0 = np.pad(f0, [[pad_size, p_len - len(f0) - pad_size]], mode="constant")
+        f0, uv = self.interpolate_f0(f0)
+        return f0
 
     def compute_f0_uv(self, wav, p_len=None):
+        x = wav
         if p_len is None:
-            p_len = wav.shape[0] // self.hop_length
-        f0, t = pyworld.harvest(
-            wav.astype(np.double),
-            fs=self.sampling_rate,
-            f0_floor=self.f0_min,
-            f0_ceil=self.f0_max,
-            frame_period=1000 * self.hop_length / self.sampling_rate,
+            p_len = x.shape[0] // self.hop_length
+        else:
+            assert abs(p_len - x.shape[0] // self.hop_length) < 4, "pad length error"
+        time_step = self.hop_length / self.sampling_rate * 1000
+        f0 = (
+            parselmouth.Sound(x, self.sampling_rate)
+            .to_pitch_ac(
+                time_step=time_step / 1000,
+                voicing_threshold=0.6,
+                pitch_floor=self.f0_min,
+                pitch_ceiling=self.f0_max,
+            )
+            .selected_array["frequency"]
         )
-        f0 = pyworld.stonemask(wav.astype(np.double), f0, t, self.sampling_rate)
-        return self.interpolate_f0(self.resize_f0(f0, p_len))
+
+        pad_size = (p_len - len(f0) + 1) // 2
+        if pad_size > 0 or p_len - len(f0) - pad_size > 0:
+            f0 = np.pad(f0, [[pad_size, p_len - len(f0) - pad_size]], mode="constant")
+        f0, uv = self.interpolate_f0(f0)
+        return f0, uv

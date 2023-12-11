@@ -5,7 +5,6 @@ from multiprocessing import cpu_count
 global usefp16
 usefp16 = False
 
-
 def use_fp32_config():
     usefp16 = False
     device_capability = 0
@@ -47,7 +46,6 @@ class Config:
         self.gpu_name = None
         self.gpu_mem = None
         self.x_pad, self.x_query, self.x_center, self.x_max = self.device_config()
-        print("Config:", self.device, self.is_half, self.n_cpu, self.gpu_name, self.gpu_mem, self.x_pad, self.x_query, self.x_center, self.x_max)
     @staticmethod
     def has_mps() -> bool:
         if not torch.backends.mps.is_available():

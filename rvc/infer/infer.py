@@ -35,33 +35,6 @@ def find_folder_parent(search_dir, folder_name):
 now_dir = os.getcwd()
 file_path = find_folder_parent(now_dir, "models")
 
-zips_path = os.getcwd() + "/zips"
-
-if not os.path.exists("./hubert_base.pt"):
-    wget.download(
-        "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/hubert_base.pt",
-        out="./hubert_base.pt",
-    )
-
-if not os.path.exists("./rmvpe.pt"):
-    wget.download(
-        "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/rmvpe.pt",
-        out="./rmvpe.pt",
-    )
-
-if sys.platform == "win32":
-    if not os.path.exists("./ffmpeg.exe"):
-        wget.download(
-            "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/ffmpeg.exe",
-            out="./ffmpeg.exe",
-        )
-if sys.platform == "win32":
-    if not os.path.exists("./ffprobe.exe"):
-        wget.download(
-            "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/ffprobe.exe",
-            out="./ffprobe.exe",
-        )
-
 
 def load_hubert():
     global hubert_model

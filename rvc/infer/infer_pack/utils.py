@@ -1,7 +1,7 @@
 import ffmpeg
 import numpy as np
 
-def load_audio(file, sr):
+def load_audio(file, sr, do_formant=False, quefrency=1.0, timbre=1.0):
     try:
         file = file.strip(" ").strip('"').strip("\n").strip('"').strip(" ")
         out, _ = (

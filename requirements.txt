@@ -7,3 +7,5 @@ numpy==1.23.5
 librosa==0.9.1
 ffmpeg-python>=0.2.0
 wget
+time
+tensorboard
