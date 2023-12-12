@@ -243,10 +243,6 @@ class E2E(nn.Module):
                 nn.Dropout(0.25),
                 nn.Sigmoid(),
             )
-        else:
-            self.fc = nn.Sequential(
-                nn.Linear(3 * N_MELS, N_CLASS), nn.Dropout(0.25), nn.Sigmoid()
-            )
 
     def forward(self, mel):
         mel = mel.transpose(-1, -2).unsqueeze(1)
