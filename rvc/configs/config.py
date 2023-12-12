@@ -7,13 +7,13 @@ from multiprocessing import cpu_count
 import torch
 
 try:
-    import intel_extension_for_pytorch as ipex  # pylint: disable=import-error, unused-import
+    import intel_extension_for_pytorch as ipex
 
     if torch.xpu.is_available():
         from lib.ipex import ipex_init
 
         ipex_init()
-except Exception:  # pylint: disable=broad-exception-caught
+except Exception:
     pass
 
 
@@ -85,7 +85,6 @@ class Config:
             strr = f.read().replace("3.7", "3.0")
         with open("rvc/train/preprocess/preprocess.py", "w") as f:
             f.write(strr)
-        print("overwrite preprocess and configs.json")
 
     def device_config(self) -> tuple:
         if torch.cuda.is_available():
@@ -134,13 +133,11 @@ class Config:
             self.n_cpu = cpu_count()
 
         if self.is_half:
-            # 6G显存配置
             x_pad = 3
             x_query = 10
             x_center = 60
             x_max = 65
         else:
-            # 5G显存配置
             x_pad = 1
             x_query = 6
             x_center = 38
@@ -152,5 +149,5 @@ class Config:
             x_center = 30
             x_max = 32
 
-        print("is_half:%s, device:%s" % (self.is_half, self.device))
+        print(f"Using device {self.device}")
         return x_pad, x_query, x_center, x_max
