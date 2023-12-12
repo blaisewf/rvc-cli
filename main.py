@@ -64,15 +64,15 @@ def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, inde
 
 
 # Train
-def run_preprocess_script(dataset_path, sampling_rate, cpu_processes, model_name):
+def run_preprocess_script(model_name, dataset_path, sampling_rate, cpu_processes):
     per = 3.0 if config.is_half else 3.7
     command = [
         "python",
         "rvc/train/preprocess.py",
+        logs_path + "\\" + str(model_name),
         dataset_path,
         str(sampling_rate),
         str(cpu_processes),
-        logs_path + "\\" + str(model_name),
         "False",
         str(per),
     ]
@@ -161,6 +161,9 @@ def parse_arguments():
     # Parser for 'preprocess' mode
     preprocess_parser = subparsers.add_parser("preprocess", help="Run preprocessing")
     preprocess_parser.add_argument(
+        "model_name", type=str, help="Name of the model (enclose in double quotes)"
+    )
+    preprocess_parser.add_argument(
         "dataset_path",
         type=str,
         help="Path to the dataset (enclose in double quotes)",
@@ -170,9 +173,6 @@ def parse_arguments():
     )
     preprocess_parser.add_argument(
         "cpu_processes", type=int, help="Number of CPU processes"
-    )
-    preprocess_parser.add_argument(
-        "model_name", type=str, help="Name of the model (enclose in double quotes)"
     )
 
     # Parser for 'extract' mode
@@ -232,10 +232,10 @@ def main():
             )
         elif args.mode == "preprocess":
             run_preprocess_script(
+                args.model_name,
                 args.dataset_path,
                 str(args.sampling_rate),
                 str(args.cpu_processes),
-                args.model_name,
             )
 
         elif args.mode == "extract":

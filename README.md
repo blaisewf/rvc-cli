@@ -45,7 +45,7 @@ python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "in
 Run the preprocessing script with the following command:
 
 ```bash
-python main.py preprocess "dataset_path" sampling_rate cpu_processes "model_name"
+python main.py preprocess "model_name" "dataset_path" sampling_rate cpu_processes
 ```
 
 - `dataset_path`: Path to the dataset (enclosed in double quotes)

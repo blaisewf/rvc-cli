@@ -5,13 +5,14 @@ from scipy import signal
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
-print(sys.argv)
+
 inp_root = sys.argv[1]
-sr = int(sys.argv[2])
-n_p = int(sys.argv[3])
-exp_dir = sys.argv[4]
+sr = int(sys.argv[3])
+n_p = int(sys.argv[4])
+exp_dir = sys.argv[2]
 noparallel = sys.argv[5] == "True"
 per = float(sys.argv[6])
+
 import multiprocessing
 import os
 import traceback
@@ -133,10 +134,9 @@ class PreProcess:
 
 def preprocess_trainset(inp_root, sr, n_p, exp_dir, per):
     pp = PreProcess(sr, exp_dir, per)
-    println("Starting preprocessing...\n")
-    println(sys.argv)
+    println("Starting preprocessing...")
     pp.pipeline_mp_inp_dir(inp_root, n_p)
-    println("\nPreprocessing completed!\n\n")
+    println("Preprocessing completed!")
 
 
 if __name__ == "__main__":
