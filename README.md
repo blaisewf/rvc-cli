@@ -11,7 +11,7 @@ Ensure you have the required Python packages installed by running (Python 3.9 is
 pip install -r requirements.txt
 ```
 
-### Help
+### Getting Started
 
 For additional information and command-line options, refer to the help command:
 
@@ -21,8 +21,8 @@ python main.py -h
 
 This will display the available modes and their corresponding parameters, helping you understand how to use the RVC CLI effectively.
 
-
 ### Examples
+
 _Make sure to adjust the parameters according to your specific use case._
 
 #### 1. Run Inference
@@ -30,38 +30,38 @@ _Make sure to adjust the parameters according to your specific use case._
 Run the inference script with the following command:
 
 ```bash
-python main.py infer 0 crepe "input.wav" "output.wav" "model_file.pth" "index_file.index"
+python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "index_path"
 ```
 
 - `f0up_key`: Value for f0up_key (-12 to +12)
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)
-- `input_path`: Input path (enclose in double quotes)
-- `output_path`: Output path (enclose in double quotes)
-- `pth_file`: Path to the .pth file (enclose in double quotes)
-- `index_path`: Path to the .index file (enclose in double quotes)
+- `input_path`: Input path (enclosed in double quotes)
+- `output_path`: Output path (enclosed in double quotes)
+- `pth_file`: Path to the .pth file (enclosed in double quotes)
+- `index_path`: Path to the .index file (enclosed in double quotes)
 
 #### 2. Preprocess Dataset
 
 Run the preprocessing script with the following command:
 
 ```bash
-python main.py preprocess "dataset_path" 32000 4 "model_name"
+python main.py preprocess "dataset_path" sampling_rate cpu_processes "model_name"
 ```
 
-- `dataset_path`: Path to the dataset (enclose in double quotes)
+- `dataset_path`: Path to the dataset (enclosed in double quotes)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 - `cpu_processes`: Number of CPU processes
-- `model_name`: Name of the model (enclose in double quotes)
+- `model_name`: Name of the model (enclosed in double quotes)
 
 #### 3. Extract Features
 
 Run the extract script with the following command:
 
 ```bash
-python main.py extract "model_name" v1 4 crepe 512
+python main.py extract "model_name" rvc_version cpu_processes f0method crepe_hop_length
 ```
 
-- `model_name`: Name of the model (enclose in double quotes)
+- `model_name`: Name of the model (enclosed in double quotes)
 - `rvc_version`: Version of the model (v1 or v2)
 - `cpu_processes`: Number of CPU processes
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)
@@ -74,6 +74,16 @@ Launch TensorBoard with the following command:
 ```bash
 python main.py tensorboard
 ```
+
+#### 5. Download models
+
+Run the download script with the following command:
+
+```bash
+python main.py download "model_link"
+```
+
+- `model_link`: Link of the model (enclosed in double quotes; Google Drive, HuggingFace, or Mediafire)
 
 ### Credits
 

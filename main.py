@@ -110,7 +110,16 @@ def run_extract_script(
 def run_tensorboard_script():
     command = [
         "python",
-        "rvc/train/launch_tensorboard.py",
+        "rvc/tools/launch_tensorboard.py",
+    ]
+    subprocess.run(command)
+
+
+def run_download_script(model_link):
+    command = [
+        "python",
+        "rvc/tools/model_download.py",
+        model_link,
     ]
     subprocess.run(command)
 
@@ -193,10 +202,22 @@ def parse_arguments():
     # Parser for 'tensorboard' mode
     subparsers.add_parser("tensorboard", help="Run tensorboard")
 
+    # Parser for 'download' mode
+    download_parser = subparsers.add_parser("download", help="Download models")
+    download_parser.add_argument(
+        "model_link",
+        type=str,
+        help="Link of the model (enclose in double quotes)",
+    )
+
     return parser.parse_args()
 
 
 def main():
+    if len(sys.argv) == 1:
+        print("Please run the script with '-h' for more information.")
+        sys.exit(1)
+
     args = parse_arguments()
 
     try:
@@ -227,6 +248,10 @@ def main():
             )
         elif args.mode == "tensorboard":
             run_tensorboard_script()
+        elif args.mode == "download":
+            run_download_script(
+                args.model_link,
+            )
     except Exception as e:
         print(f"Error: {e}")
 
