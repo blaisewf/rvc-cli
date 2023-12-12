@@ -160,6 +160,6 @@ def ipex_init(): # pylint: disable=too-many-statements
 
         ipex_hijacks()
         attention_init()
-    except Exception as e:
-        return False, e
+    except Exception as error:
+        return False, error
     return True, None

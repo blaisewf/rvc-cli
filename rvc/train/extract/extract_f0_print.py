@@ -287,7 +287,7 @@ class FeatureInput(object):
                         allow_pickle=False,
                     )  # ori
                     pbar.update(1)
-                except Exception as e:
+                except Exception as error:
                     printt(f"f0fail-{idx}-{inp_path}-{traceback.format_exc()}")
 
 

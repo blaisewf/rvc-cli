@@ -24,15 +24,6 @@ from rvc.infer.infer_pack.utils import load_audio
 from rvc.train.slicer import Slicer
 
 mutex = multiprocessing.Lock()
-f = open("%s/preprocess.log" % exp_dir, "a+")
-
-
-def println(strr):
-    mutex.acquire()
-    print(strr)
-    f.write("%s\n" % strr)
-    f.flush()
-    mutex.release()
 
 
 class PreProcess:
@@ -100,9 +91,10 @@ class PreProcess:
                         idx1 += 1
                         break
                 self.norm_write(tmp_audio, idx0, idx1)
-            println("%s" % path)
-        except:
-            println("%s->%s" % (path, traceback.format_exc()))
+            print("%s" % path)
+        except Exception as error:
+            print(f"{path} -> {str(error)}\n{traceback.format_exc()}")
+
 
     def pipeline_mp(self, infos):
         for path, idx0 in infos:
@@ -124,14 +116,14 @@ class PreProcess:
             for i in range(n_p):
                 ps[i].join()
         except:
-            println("Fail. %s" % traceback.format_exc())
+            print("Fail. %s" % traceback.format_exc())
 
 
 def preprocess_trainset(inp_root, sr, n_p, exp_dir, per):
     pp = PreProcess(sr, exp_dir, per)
-    println("Starting preprocessing...")
+    print("Starting preprocessing...")
     pp.pipeline_mp_inp_dir(inp_root, n_p)
-    println("Preprocessing completed!")
+    print("Preprocessing completed!")
 
 
 if __name__ == "__main__":

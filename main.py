@@ -251,8 +251,8 @@ def main():
             run_download_script(
                 args.model_link,
             )
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception as error:
+        print(f"Error: {error}")
 
 
 if __name__ == "__main__":

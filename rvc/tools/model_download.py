@@ -67,8 +67,8 @@ def download_from_url(url):
                         quiet=False,
                         fuzzy=True,
                     )
-                except Exception as e:
-                    error_message = str(e)
+                except Exception as error:
+                    error_message = str(error)
                     if (
                         "Too many users have viewed or downloaded this file recently"
                         in error_message
