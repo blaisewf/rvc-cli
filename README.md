@@ -83,7 +83,7 @@ Run the download script with the following command:
 python main.py download "model_link"
 ```
 
-- `model_link`: Link of the model (enclosed in double quotes; Google Drive, HuggingFace, or Mediafire)
+- `model_link`: Link of the model (enclosed in double quotes; Google Drive, Hugging Face, or MediaFire)
 
 ### Credits
 
