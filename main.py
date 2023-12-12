@@ -3,7 +3,7 @@ import sys
 import wget
 import argparse
 import subprocess
-from rvc.config import Config
+from rvc.configs.config import Config
 
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
@@ -68,12 +68,11 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate, cpu_processes
     per = 3.0 if config.is_half else 3.7
     command = [
         "python",
-        "rvc/train/preprocess.py",
+        "rvc/train/preprocess/preprocess.py",
         logs_path + "\\" + str(model_name),
         dataset_path,
         str(sampling_rate),
         str(cpu_processes),
-        "False",
         str(per),
     ]
 

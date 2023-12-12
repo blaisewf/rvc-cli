@@ -1,23 +1,14 @@
 import os
 import traceback
-import logging
-
-logger = logging.getLogger(__name__)
-
 import numpy as np
 import torch
 import torch.utils.data
 
-from lib.modules.train.mel_processing import spectrogram_torch
-from lib.modules.train.utils import load_filepaths_and_text, load_wav_to_torch
+from train.mel_processing import spectrogram_torch
+from train.utils import load_filepaths_and_text, load_wav_to_torch
 
 
 class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
-    """
-    1) loads audio, text pairs
-    2) normalizes text and converts them to sequences of integers
-    3) computes spectrograms from audio files.
-    """
 
     def __init__(self, audiopaths_and_text, hparams):
         self.audiopaths_and_text = load_filepaths_and_text(audiopaths_and_text)
@@ -102,7 +93,7 @@ class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
             try:
                 spec = torch.load(spec_filename)
             except:
-                logger.warn("%s %s", spec_filename, traceback.format_exc())
+                print("%s %s", spec_filename, traceback.format_exc())
                 spec = spectrogram_torch(
                     audio_norm,
                     self.filter_length,
@@ -270,7 +261,7 @@ class TextAudioLoader(torch.utils.data.Dataset):
             try:
                 spec = torch.load(spec_filename)
             except:
-                logger.warn("%s %s", spec_filename, traceback.format_exc())
+                print("%s %s", spec_filename, traceback.format_exc())
                 spec = spectrogram_torch(
                     audio_norm,
                     self.filter_length,

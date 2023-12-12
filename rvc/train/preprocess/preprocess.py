@@ -7,11 +7,10 @@ now_dir = os.getcwd()
 sys.path.append(now_dir)
 
 inp_root = sys.argv[1]
+exp_dir = sys.argv[2]
 sr = int(sys.argv[3])
 n_p = int(sys.argv[4])
-exp_dir = sys.argv[2]
-noparallel = sys.argv[5] == "True"
-per = float(sys.argv[6])
+per = float(sys.argv[5])
 
 import multiprocessing
 import os
@@ -22,7 +21,7 @@ import numpy as np
 from scipy.io import wavfile
 
 from rvc.infer.infer_pack.utils import load_audio
-from slicer import Slicer
+from rvc.train.slicer import Slicer
 
 mutex = multiprocessing.Lock()
 f = open("%s/preprocess.log" % exp_dir, "a+")
@@ -37,7 +36,7 @@ def println(strr):
 
 
 class PreProcess:
-    def __init__(self, sr, exp_dir, per=3.7):
+    def __init__(self, sr, exp_dir, per=3.0):
         self.slicer = Slicer(
             sr=sr,
             threshold=-42,
@@ -115,19 +114,15 @@ class PreProcess:
                 ("%s/%s" % (inp_root, name), idx)
                 for idx, name in enumerate(sorted(list(os.listdir(inp_root))))
             ]
-            if noparallel:
-                for i in range(n_p):
-                    self.pipeline_mp(infos[i::n_p])
-            else:
-                ps = []
-                for i in range(n_p):
-                    p = multiprocessing.Process(
-                        target=self.pipeline_mp, args=(infos[i::n_p],)
-                    )
-                    ps.append(p)
-                    p.start()
-                for i in range(n_p):
-                    ps[i].join()
+            ps = []
+            for i in range(n_p):
+                p = multiprocessing.Process(
+                    target=self.pipeline_mp, args=(infos[i::n_p],)
+                )
+                ps.append(p)
+                p.start()
+            for i in range(n_p):
+                ps[i].join()
         except:
             println("Fail. %s" % traceback.format_exc())
 

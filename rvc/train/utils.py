@@ -1,7 +1,7 @@
 import argparse
 import glob
 import json
-import logging
+
 import os
 import subprocess
 import sys
@@ -32,7 +32,7 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
             try:
                 new_state_dict[k] = saved_state_dict[k]
                 if saved_state_dict[k].shape != state_dict[k].shape:
-                    logger.warn(
+                    print(
                         "shape-%s-mismatch. need: %s, get: %s",
                         k,
                         state_dict[k].shape,
@@ -40,7 +40,7 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
                     )  #
                     raise KeyError
             except:
-                logger.info("%s is not in the checkpoint", k)
+                print("%s is not in the checkpoint", k)
                 new_state_dict[k] = v
         if hasattr(model, "module"):
             model.module.load_state_dict(new_state_dict, strict=False)
@@ -50,7 +50,7 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
 
     go(combd, "combd")
     model = go(sbd, "sbd")
-    logger.info("Loaded model weights")
+    print("Loaded model weights")
 
     iteration = checkpoint_dict["iteration"]
     learning_rate = checkpoint_dict["learning_rate"]
@@ -61,7 +61,7 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
         optimizer.load_state_dict(checkpoint_dict["optimizer"])
     #   except:
     #     traceback.print_exc()
-    logger.info("Loaded checkpoint '{}' (epoch {})".format(checkpoint_path, iteration))
+    print("Loaded checkpoint '{}' (epoch {})".format(checkpoint_path, iteration))
     return model, optimizer, learning_rate, iteration
 
 
@@ -79,7 +79,7 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
         try:
             new_state_dict[k] = saved_state_dict[k]
             if saved_state_dict[k].shape != state_dict[k].shape:
-                logger.warn(
+                print(
                     "shape-%s-mismatch|need-%s|get-%s",
                     k,
                     state_dict[k].shape,
@@ -87,13 +87,13 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
                 )  #
                 raise KeyError
         except:
-            logger.info("%s is not in the checkpoint", k)
+            print("%s is not in the checkpoint", k)
             new_state_dict[k] = v
     if hasattr(model, "module"):
         model.module.load_state_dict(new_state_dict, strict=False)
     else:
         model.load_state_dict(new_state_dict, strict=False)
-    logger.info("Loaded model weights")
+    print("Loaded model weights")
 
     iteration = checkpoint_dict["iteration"]
     learning_rate = checkpoint_dict["learning_rate"]
@@ -101,12 +101,12 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
         optimizer.load_state_dict(checkpoint_dict["optimizer"])
     #   except:
     #     traceback.print_exc()
-    logger.info("Loaded checkpoint '{}' (epoch {})".format(checkpoint_path, iteration))
+    print("Loaded checkpoint '{}' (epoch {})".format(checkpoint_path, iteration))
     return model, optimizer, learning_rate, iteration
 
 
 def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path):
-    logger.info(
+    print(
         "Saving model and optimizer state at epoch {} to {}".format(
             iteration, checkpoint_path
         )
@@ -127,7 +127,7 @@ def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path)
 
 
 def save_checkpoint_d(combd, sbd, optimizer, learning_rate, iteration, checkpoint_path):
-    logger.info(
+    print(
         "Saving model and optimizer state at epoch {} to {}".format(
             iteration, checkpoint_path
         )
@@ -175,7 +175,7 @@ def latest_checkpoint_path(dir_path, regex="G_*.pth"):
     f_list = glob.glob(os.path.join(dir_path, regex))
     f_list.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
     x = f_list[-1]
-    logger.debug(x)
+    print(x)
     return x
 
 
@@ -186,8 +186,6 @@ def plot_spectrogram_to_numpy(spectrogram):
 
         matplotlib.use("Agg")
         MATPLOTLIB_FLAG = True
-        mpl_logger = logging.getLogger("matplotlib")
-        mpl_logger.setLevel(logging.WARNING)
     import matplotlib.pylab as plt
     import numpy as np
 
@@ -212,8 +210,6 @@ def plot_alignment_to_numpy(alignment, info=None):
 
         matplotlib.use("Agg")
         MATPLOTLIB_FLAG = True
-        mpl_logger = logging.getLogger("matplotlib")
-        mpl_logger.setLevel(logging.WARNING)
     import matplotlib.pylab as plt
     import numpy as np
 
@@ -387,7 +383,7 @@ def get_hparams_from_file(config_path):
 def check_git_hash(model_dir):
     source_dir = os.path.dirname(os.path.realpath(__file__))
     if not os.path.exists(os.path.join(source_dir, ".git")):
-        logger.warn(
+        print(
             "{} is not a git repository, therefore hash value comparison will be ignored.".format(
                 source_dir
             )
@@ -400,29 +396,13 @@ def check_git_hash(model_dir):
     if os.path.exists(path):
         saved_hash = open(path).read()
         if saved_hash != cur_hash:
-            logger.warn(
+            print(
                 "git hash values are different. {}(saved) != {}(current)".format(
                     saved_hash[:8], cur_hash[:8]
                 )
             )
     else:
         open(path, "w").write(cur_hash)
-
-
-def get_logger(model_dir, filename="train.log"):
-    global logger
-    logger = logging.getLogger(os.path.basename(model_dir))
-    logger.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s")
-    if not os.path.exists(model_dir):
-        os.makedirs(model_dir)
-    h = logging.FileHandler(os.path.join(model_dir, filename))
-    h.setLevel(logging.DEBUG)
-    h.setFormatter(formatter)
-    logger.addHandler(h)
-    return logger
-
 
 class HParams:
     def __init__(self, **kwargs):

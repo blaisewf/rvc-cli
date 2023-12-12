@@ -2,7 +2,7 @@ import math
 import os
 import shutil
 import sys
-import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +24,8 @@ try:
     import intel_extension_for_pytorch as ipex
 
     if torch.xpu.is_available():
-        from lib.modules.ipex import ipex_init
-        from lib.modules.ipex.gradscaler import gradscaler_init
+        from lib.ipex import ipex_init
+        from lib.ipex.gradscaler import gradscaler_init
         from torch.xpu.amp import autocast
 
         GradScaler = gradscaler_init()
@@ -72,14 +72,14 @@ else:
         MultiPeriodDiscriminatorV2 as MultiPeriodDiscriminator,
     )
 
-from lib.modules.train.losses import (
+from train.losses import (
     discriminator_loss,
     feature_loss,
     generator_loss,
     kl_loss,
 )
-from lib.modules.train.mel_processing import mel_spectrogram_torch, spec_to_mel_torch
-from lib.modules.train.process_ckpt import savee
+from mel_processing import mel_spectrogram_torch, spec_to_mel_torch
+from train.process_ckpt import savee
 
 global_step = 0
 bestEpochStep = 0
@@ -108,7 +108,7 @@ class EpochRecorder:
 
 
 def reset_stop_flag():
-    with open("lib/csvdb/stop.csv", "w+", newline="") as STOPCSVwrite:
+    with open("rvc/lib/csvdb/stop.csv", "w+", newline="") as STOPCSVwrite:
         csv_writer = csv.writer(STOPCSVwrite, delimiter=",")
         csv_writer.writerow(["False"])
 
@@ -182,7 +182,7 @@ def main():
     if torch.cuda.is_available() == False and torch.backends.mps.is_available() == True:
         n_gpus = 1
     if n_gpus < 1:
-        logger.warn("NO GPU DETECTED: falling back to CPU, this may take a while...")
+        print("NO GPU DETECTED: falling back to CPU, this may take a while...")
         n_gpus = 1
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = str(randint(20000, 55555))
@@ -207,7 +207,7 @@ def run(rank, n_gpus, hps):
     global global_step
     if rank == 0:
         logger = utils.get_logger(hps.model_dir)
-        logger.info(hps)
+        print(hps)
         writer = SummaryWriter(log_dir=hps.model_dir)
         writer_eval = SummaryWriter(log_dir=os.path.join(hps.model_dir, "eval"))
 
@@ -292,7 +292,7 @@ def run(rank, n_gpus, hps):
             utils.latest_checkpoint_path(hps.model_dir, "D_*.pth"), net_d, optim_d
         )
         if rank == 0:
-            logger.info("loaded D")
+            print("loaded D")
 
         _, _, _, epoch_str = utils.load_checkpoint(
             utils.latest_checkpoint_path(hps.model_dir, "G_*.pth"), net_g, optim_g
@@ -328,30 +328,30 @@ def run(rank, n_gpus, hps):
         global_step = 0
         if hps.pretrainG != "":
             if rank == 0:
-                logger.info("Loaded pretrained %s" % (hps.pretrainG))
+                print("Loaded pretrained %s" % (hps.pretrainG))
             if hasattr(net_g, "module"):
-                logger.info(
+                print(
                     net_g.module.load_state_dict(
                         torch.load(hps.pretrainG, map_location="cpu")["model"]
                     )
                 )
             else:
-                logger.info(
+                print(
                     net_g.load_state_dict(
                         torch.load(hps.pretrainG, map_location="cpu")["model"]
                     )
                 )
         if hps.pretrainD != "":
             if rank == 0:
-                logger.info("Loaded pretrained %s" % (hps.pretrainD))
+                print("Loaded pretrained %s" % (hps.pretrainD))
             if hasattr(net_d, "module"):
-                logger.info(
+                print(
                     net_d.module.load_state_dict(
                         torch.load(hps.pretrainD, map_location="cpu")["model"]
                     )
                 )
             else:
-                logger.info(
+                print(
                     net_d.load_state_dict(
                         torch.load(hps.pretrainD, map_location="cpu")["model"]
                     )
@@ -589,7 +589,7 @@ def train_and_evaluate(
         if rank == 0 and not hps.if_stop_on_fit:
             if global_step % hps.train.log_interval == 0:
                 lr = optim_g.param_groups[0]["lr"]
-                logger.info(
+                print(
                     "Train Epoch: {} [{:.0f}%]".format(
                         epoch, 100.0 * batch_idx / len(train_loader)
                     )
@@ -599,8 +599,8 @@ def train_and_evaluate(
                 if loss_kl > 9:
                     loss_kl = 9
 
-                logger.info([global_step, lr])
-                logger.info(
+                print([global_step, lr])
+                print(
                     f"[loss_disc={loss_disc:.3f}] | [loss_gen={loss_gen:.3f}] | [loss_fm={loss_fm:.3f}] | [loss_mel={loss_mel:.3f}] | [loss_kl={loss_kl:.3f}]"
                 )
                 scalar_dict = {
@@ -672,7 +672,7 @@ def train_and_evaluate(
                 ckpt = net_g.module.state_dict()
             else:
                 ckpt = net_g.state_dict()
-            logger.info(
+            print(
                 "saving ckpt %s_e%s:%s"
                 % (
                     hps.name,
@@ -702,14 +702,14 @@ def train_and_evaluate(
     if stopbtn:
         if os.path.exists(f"{hps.model_dir}/col"):
             os.remove(f"{hps.model_dir}/col")
-        logger.info("Stop Button was pressed. The program is closed.")
+        print("Stop button pressed, closing the program...")
         ckpt = (
             net_g.module.state_dict()
             if hasattr(net_g, "module")
             else net_g.state_dict()
         )
-        logger.info(
-            "saving final ckpt:%s"
+        print(
+            "Saving final file... %s"
             % (
                 savee(
                     ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
@@ -727,14 +727,14 @@ def train_and_evaluate(
         and hps.if_retrain_collapse
         and loss_gen_all / lastValue < hps.collapse_threshold
     ):
-        logger.warning(
+        printing(
             "Mode collapse detected, model quality may be hindered. More information here: https://rentry.org/RVC_making-models#mode-collapse"
         )
-        logger.warning(
+        printing(
             f"loss_gen_all={loss_gen_all.item()}, last value={lastValue}, drop % {loss_gen_all.item() / lastValue * 100}"
         )
         if hps.if_retrain_collapse:
-            logger.info("Restarting training from last fit epoch...")
+            print("Restarting training from last fit epoch...")
             with open(f"{hps.model_dir}/col", "w") as f:
                 f.write(f"{bestEpochStep},{epoch}")
             os._exit(15)
@@ -742,10 +742,10 @@ def train_and_evaluate(
         lastValue = loss_gen_all.item()
 
     if rank == 0 and not hps.if_stop_on_fit:
-        logger.info("Epoch: {} {}".format(epoch, epoch_recorder.record()))
+        print("Epoch: {} {}".format(epoch, epoch_recorder.record()))
     if rank == 0 and hps.if_stop_on_fit:
         lr = optim_g.param_groups[0]["lr"]
-        logger.info(
+        print(
             f"Epoch: {epoch} Step: {global_step} Learning Rate: {lr:.5} {epoch_recorder.record()}"
         )
         if loss_mel > 75:
@@ -753,7 +753,7 @@ def train_and_evaluate(
         if loss_kl > 9:
             loss_kl = 9
         # update tensorboard every epoch
-        logger.info(
+        print(
             f"loss_gen_all={loss_gen_all:.3f}, loss_disc={loss_disc:.3f}, loss_gen={loss_gen:.3f}, loss_fm={loss_fm:.3f}, loss_mel={loss_mel:.3f}, loss_kl={loss_kl:.3f}"
         )
         scalar_dict = {
@@ -843,7 +843,7 @@ def train_and_evaluate(
                     ckpt = net_g.module.state_dict()
                 else:
                     ckpt = net_g.state_dict()
-                logger.info(
+                print(
                     f'Saving current fittest ckpt: {hps.name}_fittest:{savee(ckpt, hps.sample_rate, hps.if_f0, f"{hps.name}_fittest", epoch, hps.version, hps)}'
                 )
         if epoch < 10:
@@ -854,25 +854,25 @@ def train_and_evaluate(
             message = f"New best epoch!! [e{epoch}]\n"
         else:
             message = f'Last best epoch [e{best["epoch"]}] seen {epoch - best["epoch"]} epochs ago\n'
-        logger.info(message)
+        print(message)
         if epoch - best["epoch"] >= 100:
             shutil.copy2(
                 f"logs/weights/{hps.name}_fittest.pth",
                 os.path.join(hps.model_dir, f"{hps.name}_{epoch}.pth"),
             )
-            logger.info(
+            print(
                 f'No improvement found after epoch: [e{best["epoch"]}]. The program is closed.'
             )
             os._exit(2333333)
 
     if epoch >= hps.total_epoch and rank == 0:
-        logger.info("Training successfully completed, closing the program...")
+        print("Training successfully completed, closing the program...")
 
         if hasattr(net_g, "module"):
             ckpt = net_g.module.state_dict()
         else:
             ckpt = net_g.state_dict()
-        logger.info(
+        print(
             "Saving final ckpt... %s"
             % (
                 savee(

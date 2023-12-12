@@ -1,12 +1,11 @@
 import os
 import sys
-import wget
 import torch
 import warnings
 import traceback
 import numpy as np
 import soundfile as sf
-from config import Config
+from configs.config import Config
 from vc_infer_pipeline import VC
 from fairseq import checkpoint_utils
 from infer_pack.models import (

@@ -12,3 +12,4 @@ gdown
 tqdm
 beautifulsoup4
 requests
+torch_directml
