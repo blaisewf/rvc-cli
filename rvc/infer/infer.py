@@ -15,7 +15,7 @@ from infer_pack.models import (
     SynthesizerTrnMs768NSFsid_nono,
 )
 
-from infer_pack.utils import load_audio
+from lib.utils import load_audio
 
 warnings.filterwarnings("ignore")
 torch.manual_seed(114514)

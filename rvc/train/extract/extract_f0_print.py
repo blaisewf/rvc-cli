@@ -16,9 +16,8 @@ import torch
 
 # from torch import Tensor  # Fork Feature. Used for pitch prediction for torch crepe.
 import tqdm
-from rvc.infer.infer_pack.utils import load_audio
+from lib.utils import load_audio
 
-logging.getLogger("numba").setLevel(logging.WARNING)
 from multiprocessing import Process
 
 exp_dir = sys.argv[1]

@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import sys
 
@@ -5,13 +6,14 @@ from scipy import signal
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
-
-inp_root = sys.argv[1]
-exp_dir = sys.argv[2]
+print(sys.argv)
+inp_root = sys.argv[2]
+exp_dir = sys.argv[1]
 sr = int(sys.argv[3])
 n_p = int(sys.argv[4])
 per = float(sys.argv[5])
 
+noparallel = "True"
 import multiprocessing
 import os
 import traceback
@@ -20,10 +22,9 @@ import librosa
 import numpy as np
 from scipy.io import wavfile
 
-from rvc.infer.infer_pack.utils import load_audio
+from rvc.lib.utils import load_audio
 from rvc.train.slicer import Slicer
 
-mutex = multiprocessing.Lock()
 
 
 class PreProcess:
@@ -63,7 +64,9 @@ class PreProcess:
             self.sr,
             tmp_audio.astype(np.float32),
         )
-        tmp_audio = librosa.resample(tmp_audio, orig_sr=self.sr, target_sr=16000)
+        tmp_audio = librosa.resample(
+            tmp_audio, orig_sr=self.sr, target_sr=16000
+        )  # , res_type="soxr_vhq"
         wavfile.write(
             "%s/%s_%s.wav" % (self.wavs16k_dir, idx0, idx1),
             16000,
@@ -73,7 +76,8 @@ class PreProcess:
     def pipeline(self, path, idx0):
         try:
             audio = load_audio(path, self.sr)
-
+            # zero phased digital filter cause pre-ringing noise...
+            # audio = signal.filtfilt(self.bh, self.ah, audio)
             audio = signal.lfilter(self.bh, self.ah, audio)
 
             idx1 = 0
@@ -91,10 +95,9 @@ class PreProcess:
                         idx1 += 1
                         break
                 self.norm_write(tmp_audio, idx0, idx1)
-            print("%s" % path)
-        except Exception as error:
-            print(f"{path} -> {str(error)}\n{traceback.format_exc()}")
-
+            print("%s->Suc." % path)
+        except:
+            print("%s->%s" % (path, traceback.format_exc()))
 
     def pipeline_mp(self, infos):
         for path, idx0 in infos:
@@ -106,24 +109,29 @@ class PreProcess:
                 ("%s/%s" % (inp_root, name), idx)
                 for idx, name in enumerate(sorted(list(os.listdir(inp_root))))
             ]
-            ps = []
-            for i in range(n_p):
-                p = multiprocessing.Process(
-                    target=self.pipeline_mp, args=(infos[i::n_p],)
-                )
-                ps.append(p)
-                p.start()
-            for i in range(n_p):
-                ps[i].join()
+            if noparallel:
+                for i in range(n_p):
+                    self.pipeline_mp(infos[i::n_p])
+            else:
+                ps = []
+                for i in range(n_p):
+                    p = multiprocessing.Process(
+                        target=self.pipeline_mp, args=(infos[i::n_p],)
+                    )
+                    ps.append(p)
+                    p.start()
+                for i in range(n_p):
+                    ps[i].join()
         except:
             print("Fail. %s" % traceback.format_exc())
 
 
 def preprocess_trainset(inp_root, sr, n_p, exp_dir, per):
     pp = PreProcess(sr, exp_dir, per)
-    print("Starting preprocessing...")
+    print("start preprocess")
+    print(sys.argv)
     pp.pipeline_mp_inp_dir(inp_root, n_p)
-    print("Preprocessing completed!")
+    print("end preprocess")
 
 
 if __name__ == "__main__":
