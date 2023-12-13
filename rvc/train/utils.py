@@ -12,8 +12,6 @@ from scipy.io.wavfile import read
 
 MATPLOTLIB_FLAG = False
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-logger = logging
 
 
 def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):

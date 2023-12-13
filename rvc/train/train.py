@@ -3,17 +3,14 @@ import os
 import shutil
 import sys
 
-
-logger = logging.getLogger(__name__)
-
 now_dir = os.getcwd()
 sys.path.append(os.path.join(now_dir))
 
 import datetime
 
-from utils import utils
+from rvc.train.utils import get_hparams
 
-hps = utils.get_hparams()
+hps = get_hparams()
 os.environ["CUDA_VISIBLE_DEVICES"] = hps.gpus.replace("-", ",")
 n_gpus = len(hps.gpus.split("-"))
 from random import randint, shuffle
@@ -206,7 +203,6 @@ def main():
 def run(rank, n_gpus, hps):
     global global_step
     if rank == 0:
-        logger = utils.get_logger(hps.model_dir)
         print(hps)
         writer = SummaryWriter(log_dir=hps.model_dir)
         writer_eval = SummaryWriter(log_dir=os.path.join(hps.model_dir, "eval"))

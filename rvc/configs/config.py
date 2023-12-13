@@ -105,7 +105,7 @@ class Config:
                 self.is_half = False
                 self.use_fp32_config()
             else:
-                print("Found GPU %s", self.gpu_name)
+                print("Found GPU", self.gpu_name)
             self.gpu_mem = int(
                 torch.cuda.get_device_properties(i_device).total_memory
                 / 1024
@@ -149,5 +149,4 @@ class Config:
             x_center = 30
             x_max = 32
 
-        print(f"Using device {self.device}")
         return x_pad, x_query, x_center, x_max

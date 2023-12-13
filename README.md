@@ -2,18 +2,22 @@
 
 > [!NOTE]  
 > The training section is currently under development
-### Installation
 
+### Installation
 
 Ensure you have the required Python packages installed by running (Python 3.9 is recommended):
 
 #### Windows
+
 Execute the install.bat file to activate a Conda environment. Subsequently, launch the application using `env/python main.py` instead of the conventional `python main.py` command.
 
 #### Linux
+
 ```bash
 pip install -r requirements.txt
 ```
+
+Then download the necessary files [from this url](https://huggingface.co/lj1995/VoiceConversionWebUI/tree/main) or run `python rvc/tools/prerequisites_download.py`
 
 ### Getting Started
 
@@ -71,7 +75,15 @@ python main.py extract "model_name" rvc_version cpu_processes f0method crepe_hop
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)
 - `crepe_hop_length`: Value for crepe_hop_length (1 to 512)
 
-#### 4. Launch TensorBoard
+#### 5. Train
+
+Run the train script with the following command:
+
+```bash
+python main.py train
+```
+
+#### 6. Launch TensorBoard
 
 Launch TensorBoard with the following command:
 
@@ -79,7 +91,7 @@ Launch TensorBoard with the following command:
 python main.py tensorboard
 ```
 
-#### 5. Download models
+#### 7. Download models
 
 Run the download script with the following command:
 

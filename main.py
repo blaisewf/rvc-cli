@@ -8,33 +8,6 @@ from rvc.configs.config import Config
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
 
-# Download models
-if not os.path.exists("./hubert_base.pt"):
-    wget.download(
-        "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/hubert_base.pt",
-        out="./hubert_base.pt",
-    )
-
-if not os.path.exists("./rmvpe.pt"):
-    wget.download(
-        "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/rmvpe.pt",
-        out="./rmvpe.pt",
-    )
-
-if sys.platform == "win32":
-    if not os.path.exists("./ffmpeg.exe"):
-        wget.download(
-            "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/ffmpeg.exe",
-            out="./ffmpeg.exe",
-        )
-if sys.platform == "win32":
-    if not os.path.exists("./ffprobe.exe"):
-        wget.download(
-            "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/ffprobe.exe",
-            out="./ffprobe.exe",
-        )
-
-
 # Infer
 def validate_f0up_key(value):
     try:
@@ -104,6 +77,23 @@ def run_extract_script(
     ]
     subprocess.run(command_1)
     subprocess.run(command_2)
+
+
+def run_train_script(
+    model_name, save_every_epoch, total_epoch, batch_size, rvc_version
+):
+    command = [
+        "python",
+        "rvc/train/train.py",
+        "-se" + save_every_epoch,
+        "-te" + total_epoch,
+        "-pg" + "rvc/pretrained/pretrainedG.pt",
+        "-pd" + "rvc/pretrained/pretrainedD.pt",
+        "-bs" + batch_size,
+        "-e" + logs_path + "\\" + str(model_name),
+        "-v" + rvc_version,
+    ]
+    subprocess.run(command)
 
 
 def run_tensorboard_script():
@@ -198,6 +188,34 @@ def parse_arguments():
         "crepe_hop_length", type=str, help="Value for crepe_hop_length (1 to 512)"
     )
 
+    # Parser for 'train' mode
+    train_parser = subparsers.add_parser("train", help="Run training")
+    train_parser.add_argument(
+        "model_name",
+        type=str,
+        help="Name of the model (enclose in double quotes)",
+    )
+    train_parser.add_argument(
+        "save_every_epoch",
+        type=str,
+        help="Save every epoch",
+    )
+    train_parser.add_argument(
+        "total_epoch",
+        type=str,
+        help="Total epoch",
+    )
+    train_parser.add_argument(
+        "batch_size",
+        type=str,
+        help="Batch size",
+    )
+    train_parser.add_argument(
+        "rvc_version",
+        type=str,
+        help="Version of the model (v1 or v2)",
+    )
+
     # Parser for 'tensorboard' mode
     subparsers.add_parser("tensorboard", help="Run tensorboard")
 
@@ -245,6 +263,15 @@ def main():
                 args.f0method,
                 args.crepe_hop_length,
             )
+        elif args.mode == "train":
+            run_train_script(
+                args.model_name,
+                args.save_every_epoch,
+                args.total_epoch,
+                args.batch_size,
+                args.rvc_version,
+            )
+
         elif args.mode == "tensorboard":
             run_tensorboard_script()
         elif args.mode == "download":
