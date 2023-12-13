@@ -7,6 +7,10 @@
 
 Ensure you have the required Python packages installed by running (Python 3.9 is recommended):
 
+#### Windows
+Run the install.bat file to use a conda env, then start using `env/python main.py`
+
+#### Linux
 ```bash
 pip install -r requirements.txt
 ```
@@ -48,10 +52,10 @@ Run the preprocessing script with the following command:
 python main.py preprocess "model_name" "dataset_path" sampling_rate cpu_processes
 ```
 
+- `model_name`: Name of the model (enclosed in double quotes)
 - `dataset_path`: Path to the dataset (enclosed in double quotes)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 - `cpu_processes`: Number of CPU processes
-- `model_name`: Name of the model (enclosed in double quotes)
 
 #### 3. Extract Features
 
