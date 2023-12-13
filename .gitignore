@@ -1,8 +1,10 @@
 ffmpeg.exe
 ffprobe.exe
-
 hubert_base.pt
 rmvpe.pt
+rmvpe.onnx
+
+rvc/pretraineds/
 
 rvc/__pycache__
 rvc/infer/infer_pack/__pycache__
