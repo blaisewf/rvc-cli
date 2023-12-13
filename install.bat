@@ -67,10 +67,6 @@ pip install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 --index-url https
 call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" deactivate
 echo.
 
-echo Downloading models...
-call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" activate "%INSTALL_ENV_DIR%"
-python "rvc\tools\prerequisites_download.py"
-
 echo RVC_CLI has been installed successfully!
 pause
 cls

@@ -17,8 +17,6 @@ Execute the install.bat file to activate a Conda environment. Subsequently, laun
 pip install -r requirements.txt
 ```
 
-Then download the necessary files [from this url](https://huggingface.co/lj1995/VoiceConversionWebUI/tree/main) or run `python rvc/tools/prerequisites_download.py`
-
 ### Getting Started
 
 For additional information and command-line options, refer to the help command:

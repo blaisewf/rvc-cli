@@ -71,4 +71,4 @@ for remote_folder, file_list in MODELS_DOWNLOAD:
             wget.download(url, out=destination_path)
 
 
-print("\nAll downloads completed successfully.")
+print("All the files needed to use this program are downloaded.")

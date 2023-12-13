@@ -8,6 +8,8 @@ from rvc.configs.config import Config
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
 
+subprocess.run(["python", "rvc/tools/prerequisites_download.py"])
+
 # Infer
 def validate_f0up_key(value):
     try:
