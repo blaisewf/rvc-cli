@@ -1,14 +1,14 @@
 ## RVC_CLI: Retrieval-based-Voice-Conversion Command Line Interface
 
-### Installation
-
 > [!NOTE]  
 > The training section is currently under development
+### Installation
+
 
 Ensure you have the required Python packages installed by running (Python 3.9 is recommended):
 
 #### Windows
-Run the install.bat file to use a conda env, then start using `env/python main.py`
+Execute the install.bat file to activate a Conda environment. Subsequently, launch the application using `env/python main.py` instead of the conventional `python main.py` command.
 
 #### Linux
 ```bash
