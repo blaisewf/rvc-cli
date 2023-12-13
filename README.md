@@ -75,7 +75,7 @@ python main.py extract "model_name" rvc_version cpu_processes f0method crepe_hop
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)
 - `crepe_hop_length`: Value for crepe_hop_length (1 to 512)
 
-#### 5. Train
+#### 4. Train
 
 Run the train script with the following command:
 
@@ -83,7 +83,7 @@ Run the train script with the following command:
 python main.py train
 ```
 
-#### 6. Launch TensorBoard
+#### 5. Launch TensorBoard
 
 Launch TensorBoard with the following command:
 
@@ -91,7 +91,7 @@ Launch TensorBoard with the following command:
 python main.py tensorboard
 ```
 
-#### 7. Download models
+#### 6. Download models
 
 Run the download script with the following command:
 
