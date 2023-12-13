@@ -6,7 +6,6 @@ from scipy import signal
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
-print(sys.argv)
 inp_root = sys.argv[2]
 exp_dir = sys.argv[1]
 sr = int(sys.argv[3])
@@ -128,10 +127,9 @@ class PreProcess:
 
 def preprocess_trainset(inp_root, sr, n_p, exp_dir, per):
     pp = PreProcess(sr, exp_dir, per)
-    print("start preprocess")
-    print(sys.argv)
+    print("Start preprocess")
     pp.pipeline_mp_inp_dir(inp_root, n_p)
-    print("end preprocess")
+    print("End preprocess")
 
 
 if __name__ == "__main__":

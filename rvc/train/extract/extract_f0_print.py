@@ -16,7 +16,7 @@ import torch
 
 # from torch import Tensor  # Fork Feature. Used for pitch prediction for torch crepe.
 import tqdm
-from lib.utils import load_audio
+from rvc.lib.utils import load_audio
 
 from multiprocessing import Process
 
@@ -166,10 +166,8 @@ class FeatureInput(object):
     def get_rmvpe(self, x):
         if hasattr(self, "model_rmvpe") == False:
             from rvc.rmvpe import RMVPE
-
-            print("Loading rmvpe model")
             self.model_rmvpe = RMVPE(
-                "assets/rmvpe/rmvpe.pt", is_half=False, device="cpu"
+                "rmvpe.pt", is_half=False, device="cpu"
             )
         return self.model_rmvpe.infer_from_audio(x, thred=0.03)
 
@@ -294,7 +292,6 @@ if __name__ == "__main__":
     # exp_dir=r"E:\codes\py39\dataset\mi-test"
     # n_p=16
     # f = open("%s/log_extract_f0.log"%exp_dir, "w")
-    printt(sys.argv)
     featureInput = FeatureInput()
     paths = []
     inp_root = "%s/1_16k_wavs" % (exp_dir)

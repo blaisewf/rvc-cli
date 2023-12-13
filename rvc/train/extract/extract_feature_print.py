@@ -52,8 +52,7 @@ def printt(strr):
     f.flush()
 
 
-printt(sys.argv)
-model_path = "assets/hubert/hubert_base.pt"
+model_path = "hubert_base.pt"
 
 printt(exp_dir)
 wavPath = "%s/1_16k_wavs" % exp_dir
