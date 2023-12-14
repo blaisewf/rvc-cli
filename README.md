@@ -1,4 +1,4 @@
-## RVC_CLI: Retrieval-based-Voice-Conversion Command Line Interface
+## RVC_CLI: Retrieval based Voice Conversion Command Line Interface
 
 ### Installation
 
