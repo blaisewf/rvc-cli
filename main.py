@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 import argparse
 import subprocess
 from rvc.configs.config import Config
@@ -10,8 +9,19 @@ logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
 
 subprocess.run(["python", "rvc/tools/prerequisites_download.py"])
 
+def validate_sampling_rate(value):
+    valid_sampling_rates = [32000, 40000, 48000]
+    try:
+        sampling_rate = int(value)
+        if sampling_rate in valid_sampling_rates:
+            return sampling_rate
+        else:
+            raise argparse.ArgumentTypeError(
+                f"Invalid sampling rate. Please choose from {valid_sampling_rates}"
+            )
+    except ValueError:
+        raise argparse.ArgumentTypeError("Sampling rate must be a valid integer")
 
-# Infer
 def validate_f0up_key(value):
     try:
         f0up_key = int(value)
@@ -24,7 +34,7 @@ def validate_f0up_key(value):
     except ValueError:
         raise argparse.ArgumentTypeError("f0up_key must be a valid integer")
 
-
+# Infer
 def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, index_path):
     command = [
         "python",
@@ -212,7 +222,7 @@ def parse_arguments():
         help="Path to the dataset (enclose in double quotes)",
     )
     preprocess_parser.add_argument(
-        "sampling_rate", type=int, help="Sampling rate (32000, 40000 or 48000)"
+        "sampling_rate", type=validate_sampling_rate, help="Sampling rate (32000, 40000 or 48000)"
     )
     preprocess_parser.add_argument(
         "cpu_processes", type=int, help="Number of CPU processes"
@@ -271,7 +281,7 @@ def parse_arguments():
     )
     train_parser.add_argument(
         "sampling_rate",
-        type=str,
+        type=validate_sampling_rate,
         help="Sampling rate (32000, 40000 or 48000)",
     )
 
