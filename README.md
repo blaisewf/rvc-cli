@@ -85,8 +85,8 @@ python main.py train "model_name" save_every_epoch total_epoch batch_size rvc_ve
 - `rvc_version`: Version of the model (v1 or v2)
 - `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
 
-  > [!NOTE]  
-  > The training section is currently under development
+> [!NOTE]  
+> The training section is currently under development
 
 #### 5. Launch TensorBoard
 
