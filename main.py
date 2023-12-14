@@ -1,6 +1,6 @@
 import os
 import sys
-import wget
+import json
 import argparse
 import subprocess
 from rvc.configs.config import Config
@@ -9,6 +9,7 @@ config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
 
 subprocess.run(["python", "rvc/tools/prerequisites_download.py"])
+
 
 # Infer
 def validate_f0up_key(value):
@@ -82,19 +83,70 @@ def run_extract_script(
 
 
 def run_train_script(
-    model_name, save_every_epoch, total_epoch, batch_size, rvc_version
+    model_name, save_every_epoch, total_epoch, batch_size, rvc_version, sampling_rate
 ):
+    pretrained_path = {
+        "v1": {
+            "32000": (
+                "rvc/pretraineds/pretrained/f0G32k.pth",
+                "rvc/pretraineds/pretrained/f0D32k.pth",
+            ),
+            "40000": (
+                "rvc/pretraineds/pretrained/f0G40k.pth",
+                "rvc/pretraineds/pretrained/f0D40k.pth",
+            ),
+            "48000": (
+                "rvc/pretraineds/pretrained/f0G48k.pth",
+                "rvc/pretraineds/pretrained/f0D48k.pth",
+            ),
+        },
+        "v2": {
+            "32000": (
+                "rvc/pretraineds/pretrained_v2/f0G32k.pth",
+                "rvc/pretraineds/pretrained_v2/f0D32k.pth",
+            ),
+            "40000": (
+                "rvc/pretraineds/pretrained_v2/f0G40k.pth",
+                "rvc/pretraineds/pretrained_v2/f0D40k.pth",
+            ),
+            "48000": (
+                "rvc/pretraineds/pretrained_v2/f0G48k.pth",
+                "rvc/pretraineds/pretrained_v2/f0D48k.pth",
+            ),
+        },
+    }
+
+    pg, pd = pretrained_path[rvc_version][sampling_rate]
+
     command = [
         "python",
         "rvc/train/train.py",
-        "-se" + save_every_epoch,
-        "-te" + total_epoch,
-        "-pg" + "rvc/pretrained/pretrainedG.pt",
-        "-pd" + "rvc/pretrained/pretrainedD.pt",
-        "-bs" + batch_size,
-        "-e" + logs_path + "\\" + str(model_name),
-        "-v" + rvc_version,
+        "-se",
+        str(save_every_epoch),
+        "-te",
+        str(total_epoch),
+        "-pg",
+        pg,
+        "-pd",
+        pd,
+        "-sr",
+        str(sampling_rate),
+        "-bs",
+        str(batch_size),
+        "-e",
+        os.path.join(logs_path, str(model_name)),
+        "-v",
+        rvc_version,
+        "-l",
+        "0",
+        "-c",
+        "0",
+        "-sw",
+        "0",
+        "-f0",
+        "1",
     ]
+
     subprocess.run(command)
 
 
@@ -217,6 +269,11 @@ def parse_arguments():
         type=str,
         help="Version of the model (v1 or v2)",
     )
+    train_parser.add_argument(
+        "sampling_rate",
+        type=str,
+        help="Sampling rate (32000, 40000 or 48000)",
+    )
 
     # Parser for 'tensorboard' mode
     subparsers.add_parser("tensorboard", help="Run tensorboard")
@@ -272,6 +329,7 @@ def main():
                 args.total_epoch,
                 args.batch_size,
                 args.rvc_version,
+                args.sampling_rate,
             )
 
         elif args.mode == "tensorboard":

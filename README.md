@@ -1,8 +1,5 @@
 ## RVC_CLI: Retrieval-based-Voice-Conversion Command Line Interface
 
-> [!NOTE]  
-> The training section is currently under development
-
 ### Installation
 
 Ensure you have the required Python packages installed by running (Python 3.9 is recommended):
@@ -78,8 +75,18 @@ python main.py extract "model_name" rvc_version cpu_processes f0method crepe_hop
 Run the train script with the following command:
 
 ```bash
-python main.py train
+python main.py train "model_name" save_every_epoch total_epoch batch_size rvc_version sampling_rate
 ```
+
+- `model_name`: Name of the model (enclosed in double quotes)
+- `save_every_epoch`: Number of epochs after which to save the model checkpoint (1 to 50)
+- `total_epoch`: Total number of training epochs (1 to 10000)
+- `batch_size`: Batch size, limited by GPU VRAM
+- `rvc_version`: Version of the model (v1 or v2)
+- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
+
+  > [!NOTE]  
+  > The training section is currently under development
 
 #### 5. Launch TensorBoard
 

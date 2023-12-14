@@ -1,42 +1,28 @@
 import os
 import sys
 import traceback
-
-import parselmouth
-
-now_dir = os.getcwd()
-sys.path.append(now_dir)
-
-
-
 import numpy as np
 import pyworld
 import torchcrepe
 import torch
-
-# from torch import Tensor  # Fork Feature. Used for pitch prediction for torch crepe.
+import parselmouth
 import tqdm
 from rvc.lib.utils import load_audio
 
 from multiprocessing import Process
 
+now_dir = os.getcwd()
+sys.path.append(now_dir)
+
 exp_dir = sys.argv[1]
-f = open("%s/extract_f0_feature.log" % exp_dir, "a+")
+n_p = int(sys.argv[2])
+f0method = sys.argv[3]
 
 DoFormant = False
 Quefrency = 1.0
 Timbre = 1.0
-
-
-def printt(strr):
-    print(strr)
-    f.write(f"{strr}\n")
-    f.flush()
-
-
-n_p = int(sys.argv[2])
-f0method = sys.argv[3]
 crepe_hop_length = 0
+
 try:
     crepe_hop_length = int(sys.argv[4])
 except:
@@ -166,9 +152,8 @@ class FeatureInput(object):
     def get_rmvpe(self, x):
         if hasattr(self, "model_rmvpe") == False:
             from rvc.rmvpe import RMVPE
-            self.model_rmvpe = RMVPE(
-                "rmvpe.pt", is_half=False, device="cpu"
-            )
+
+            self.model_rmvpe = RMVPE("rmvpe.pt", is_half=False, device="cpu")
         return self.model_rmvpe.infer_from_audio(x, thred=0.03)
 
     def get_rmvpe_dml(self, x):
@@ -257,7 +242,7 @@ class FeatureInput(object):
 
     def go(self, paths, f0_method, crepe_hop_length, thread_n):
         if len(paths) == 0:
-            printt("no-f0-todo")
+            print("no-f0-todo")
             return
         with tqdm.tqdm(total=len(paths), leave=True, position=thread_n) as pbar:
             description = f"Thread {thread_n} | Hop-Length: {crepe_hop_length}"
@@ -285,7 +270,7 @@ class FeatureInput(object):
                     )  # ori
                     pbar.update(1)
                 except Exception as error:
-                    printt(f"f0fail-{idx}-{inp_path}-{traceback.format_exc()}")
+                    print(f"f0fail-{idx}-{inp_path}-{traceback.format_exc()}")
 
 
 if __name__ == "__main__":

@@ -94,7 +94,6 @@ class PreProcess:
                         idx1 += 1
                         break
                 self.norm_write(tmp_audio, idx0, idx1)
-            print("%s->Suc." % path)
         except:
             print("%s->%s" % (path, traceback.format_exc()))
 
