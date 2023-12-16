@@ -73,10 +73,7 @@ def readwave(wav_path, normalize=False):
     return feats
 
 
-# HuBERT model
-
 print("Starting feature extraction...")
-print("Loaded model {}".format(model_path))
 models, saved_cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task(
     [model_path],
     suffix="",
@@ -134,4 +131,4 @@ else:
             except:
                 print(traceback.format_exc())
             pbar.update(1)
-    print("\nFeature extraction completed successfully!")
+    print("Feature extraction completed successfully!")
