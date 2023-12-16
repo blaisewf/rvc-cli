@@ -1,7 +1,5 @@
 import os
 import sys
-import json
-import pathlib
 import argparse
 import subprocess
 from rvc.configs.config import Config
@@ -10,6 +8,8 @@ from rvc.tools.validators import (
     validate_f0up_key,
     validate_f0method,
 )
+
+from rvc.tools.config_generator import config_generator
 
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
@@ -73,22 +73,7 @@ def run_extract_script(
     ]
     subprocess.run(command_1)
     subprocess.run(command_2)
-
-    if rvc_version == "v1" or sampling_rate == "40000":
-        config_path = "v1/%s.json" % sampling_rate
-    else:
-        config_path = "v2/%s.json" % sampling_rate
-    config_save_path = os.path.join(model_path, "config.json")
-    if not pathlib.Path(config_save_path).exists():
-        with open(config_save_path, "w", encoding="utf-8") as f:
-            json.dump(
-                config.json_config[config_path],
-                f,
-                ensure_ascii=False,
-                indent=4,
-                sort_keys=True,
-            )
-            f.write("\n")
+    config_generator(rvc_version, sampling_rate, model_path)
 
 
 def run_train_script(
