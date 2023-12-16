@@ -13,6 +13,7 @@ config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
 subprocess.run(["python", "rvc/tools/prerequisites_download.py"])
 
+
 # Infer
 def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, index_path):
     command = [
@@ -46,15 +47,15 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate, cpu_processes
 
 
 def run_extract_script(
-    model_name, rvc_version, cpu_processes, f0method, crepe_hop_length
+    model_name, rvc_version, f0method, crepe_hop_length, cpu_processes
 ):
     command_1 = [
         "python",
         "rvc/train/extract/extract_f0_print.py",
         logs_path + "\\" + str(model_name),
-        cpu_processes,
         f0method,
         crepe_hop_length,
+        cpu_processes,
     ]
     command_2 = [
         "python",
@@ -222,15 +223,15 @@ def parse_arguments():
         help="Version of the model (v1 or v2)",
     )
     extract_parser.add_argument(
-        "cpu_processes", type=str, help="Number of CPU processes"
-    )
-    extract_parser.add_argument(
         "f0method",
         type=validate_f0method,
         help="Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)",
     )
     extract_parser.add_argument(
         "crepe_hop_length", type=str, help="Value for crepe_hop_length (1 to 512)"
+    )
+    extract_parser.add_argument(
+        "cpu_processes", type=str, help="Number of CPU processes"
     )
 
     # Parser for 'train' mode
@@ -309,9 +310,9 @@ def main():
             run_extract_script(
                 args.model_name,
                 args.rvc_version,
-                args.cpu_processes,
                 args.f0method,
                 args.crepe_hop_length,
+                args.cpu_processes,
             )
         elif args.mode == "train":
             run_train_script(

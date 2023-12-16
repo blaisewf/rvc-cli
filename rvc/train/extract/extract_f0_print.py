@@ -15,19 +15,16 @@ now_dir = os.getcwd()
 sys.path.append(now_dir)
 
 exp_dir = sys.argv[1]
-n_p = int(sys.argv[2])
-f0method = sys.argv[3]
+f0method = sys.argv[2]
+n_p = int(sys.argv[4])
 
+try:
+    crepe_hop_length = int(sys.argv[3])
+except:
+    crepe_hop_length = 128
 DoFormant = False
 Quefrency = 1.0
 Timbre = 1.0
-crepe_hop_length = 0
-
-try:
-    crepe_hop_length = int(sys.argv[4])
-except:
-    print("Temp Issue. echl is not being passed with argument!")
-    crepe_hop_length = 128
 
 
 class FeatureInput(object):

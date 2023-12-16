@@ -126,9 +126,9 @@ class PreProcess:
 
 def preprocess_trainset(inp_root, sr, n_p, exp_dir, per):
     pp = PreProcess(sr, exp_dir, per)
-    print("Start preprocess")
+    print("Starting preprocessing...")
     pp.pipeline_mp_inp_dir(inp_root, n_p)
-    print("End preprocess")
+    print("Preprocessing completed!")
 
 
 if __name__ == "__main__":

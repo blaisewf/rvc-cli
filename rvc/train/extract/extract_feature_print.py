@@ -43,18 +43,9 @@ else:
 
     fairseq.modules.grad_multiply.GradMultiply.forward = forward_dml
 
-f = open("%s/extract_f0_feature.log" % exp_dir, "a+")
-
-
-def printt(strr):
-    print(strr)
-    f.write("%s\n" % strr)
-    f.flush()
-
 
 model_path = "hubert_base.pt"
 
-printt(exp_dir)
 wavPath = "%s/1_16k_wavs" % exp_dir
 outPath = (
     "%s/3_feature256" % exp_dir if version == "v1" else "%s/3_feature768" % exp_dir
@@ -84,34 +75,27 @@ def readwave(wav_path, normalize=False):
 
 # HuBERT model
 
-print("Starting feature extraction...\n")
-printt("Loaded model {}".format(model_path))
-# if hubert model is exist
-if os.access(model_path, os.F_OK) == False:
-    printt(
-        "Error: Extracting is shut down because %s does not exist, you may download it from https://huggingface.co/lj1995/VoiceConversionWebUI/tree/main"
-        % model_path
-    )
-    exit(0)
+print("Starting feature extraction...")
+print("Loaded model {}".format(model_path))
 models, saved_cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task(
     [model_path],
     suffix="",
 )
 model = models[0]
 model = model.to(device)
-printt("Using %s" % device)
+print("Using %s" % device)
 if device not in ["mps", "cpu"]:
     model = model.half()
 model.eval()
 
 todo = sorted(list(os.listdir(wavPath)))[i_part::n_part]
-n = max(1, len(todo) // 10)  # 最多打印十条
+n = max(1, len(todo) // 10)
 if len(todo) == 0:
-    printt(
+    print(
         "An error occurred in the feature extraction, make sure you have provided the audios correctly."
     )
 else:
-    printt("- %s" % len(todo))
+    print("- %s" % len(todo))
     with tqdm.tqdm(total=len(todo)) as pbar:
         for idx, file in enumerate(todo):
             try:
@@ -141,13 +125,13 @@ else:
                     if np.isnan(feats).sum() == 0:
                         np.save(out_path, feats, allow_pickle=False)
                     else:
-                        printt("%s-contains nan" % file)
+                        print("%s-contains nan" % file)
                     # if idx % n == 0:
-                    #     printt("now-%s,all-%s,%s,%s" % (idx, len(todo), file, feats.shape))
+                    #     print("now-%s,all-%s,%s,%s" % (idx, len(todo), file, feats.shape))
                     pbar.set_description(
                         f"Processing: %s - Shape: %s" % (file, feats.shape)
                     )
             except:
-                printt(traceback.format_exc())
+                print(traceback.format_exc())
             pbar.update(1)
-    printt("\nFeature extraction completed successfully!")
+    print("\nFeature extraction completed successfully!")
