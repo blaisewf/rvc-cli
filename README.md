@@ -75,7 +75,7 @@ python main.py extract "model_name" rvc_version f0method crepe_hop_length cpu_pr
 Run the train script with the following command:
 
 ```bash
-python main.py train "model_name" save_every_epoch total_epoch batch_size rvc_version sampling_rate
+python main.py train "model_name" rvc_version save_every_epoch total_epoch sampling_rate batch_size
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)

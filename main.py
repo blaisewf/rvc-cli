@@ -77,7 +77,7 @@ def run_extract_script(
 
 
 def run_train_script(
-    model_name, save_every_epoch, total_epoch, batch_size, rvc_version, sampling_rate
+    model_name, rvc_version, save_every_epoch, total_epoch, sampling_rate, batch_size
 ):
     pretrained_path = {
         "v1": {
@@ -251,6 +251,11 @@ def parse_arguments():
         help="Name of the model (enclose in double quotes)",
     )
     train_parser.add_argument(
+        "rvc_version",
+        type=str,
+        help="Version of the model (v1 or v2)",
+    )
+    train_parser.add_argument(
         "save_every_epoch",
         type=str,
         help="Save every epoch",
@@ -261,19 +266,14 @@ def parse_arguments():
         help="Total epoch",
     )
     train_parser.add_argument(
-        "batch_size",
-        type=str,
-        help="Batch size",
-    )
-    train_parser.add_argument(
-        "rvc_version",
-        type=str,
-        help="Version of the model (v1 or v2)",
-    )
-    train_parser.add_argument(
         "sampling_rate",
         type=validate_sampling_rate,
         help="Sampling rate (32000, 40000 or 48000)",
+    )
+    train_parser.add_argument(
+        "batch_size",
+        type=str,
+        help="Batch size",
     )
 
     # Parser for 'tensorboard' mode
@@ -327,11 +327,11 @@ def main():
         elif args.mode == "train":
             run_train_script(
                 args.model_name,
+                args.rvc_version,
                 args.save_every_epoch,
                 args.total_epoch,
-                args.batch_size,
-                args.rvc_version,
                 args.sampling_rate,
+                args.batch_size,
             )
 
         elif args.mode == "tensorboard":
