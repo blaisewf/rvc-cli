@@ -144,6 +144,18 @@ def run_train_script(
     subprocess.run(command)
 
 
+def run_index_script(model_name, rvc_version):
+    command = [
+        "python",
+        "rvc/train/index_generator.py",
+        model_name,
+        rvc_version,
+        logs_path + "\\" + str(model_name),
+    ]
+
+    subprocess.run(command)
+
+
 def run_tensorboard_script():
     command = [
         "python",
@@ -165,7 +177,6 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Run the main.py script with specific parameters."
     )
-
     subparsers = parser.add_subparsers(
         title="subcommands", dest="mode", help="Choose a mode"
     )
@@ -276,6 +287,19 @@ def parse_arguments():
         help="Batch size",
     )
 
+    # Parser for 'index' mode
+    index_parser = subparsers.add_parser("index", help="Generate index file")
+    index_parser.add_argument(
+        "model_name",
+        type=str,
+        help="Name of the model (enclose in double quotes)",
+    )
+    index_parser.add_argument(
+        "rvc_version",
+        type=str,
+        help="Version of the model (v1 or v2)",
+    )
+
     # Parser for 'tensorboard' mode
     subparsers.add_parser("tensorboard", help="Run tensorboard")
 
@@ -333,7 +357,11 @@ def main():
                 args.sampling_rate,
                 args.batch_size,
             )
-
+        elif args.mode == "index":
+            run_index_script(
+                args.model_name,
+                args.rvc_version,
+            )
         elif args.mode == "tensorboard":
             run_tensorboard_script()
         elif args.mode == "download":
