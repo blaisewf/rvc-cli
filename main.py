@@ -1,5 +1,7 @@
 import os
 import sys
+import json
+import pathlib
 import argparse
 import subprocess
 from rvc.configs.config import Config
@@ -47,12 +49,13 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate, cpu_processes
 
 
 def run_extract_script(
-    model_name, rvc_version, f0method, crepe_hop_length, cpu_processes
+    model_name, rvc_version, f0method, crepe_hop_length, sampling_rate, cpu_processes
 ):
+    model_path = logs_path + "\\" + str(model_name)
     command_1 = [
         "python",
         "rvc/train/extract/extract_f0_print.py",
-        logs_path + "\\" + str(model_name),
+        model_path,
         f0method,
         crepe_hop_length,
         cpu_processes,
@@ -64,12 +67,28 @@ def run_extract_script(
         "1",
         "0",
         "0",
-        logs_path + "\\" + str(model_name),
+        model_path,
         rvc_version,
         "True",
     ]
     subprocess.run(command_1)
     subprocess.run(command_2)
+
+    if rvc_version == "v1" or sampling_rate == "40000":
+        config_path = "v1/%s.json" % sampling_rate
+    else:
+        config_path = "v2/%s.json" % sampling_rate
+    config_save_path = os.path.join(model_path, "config.json")
+    if not pathlib.Path(config_save_path).exists():
+        with open(config_save_path, "w", encoding="utf-8") as f:
+            json.dump(
+                config.json_config[config_path],
+                f,
+                ensure_ascii=False,
+                indent=4,
+                sort_keys=True,
+            )
+            f.write("\n")
 
 
 def run_train_script(
@@ -231,6 +250,11 @@ def parse_arguments():
         "crepe_hop_length", type=str, help="Value for crepe_hop_length (1 to 512)"
     )
     extract_parser.add_argument(
+        "sampling_rate",
+        type=validate_sampling_rate,
+        help="Sampling rate (32000, 40000 or 48000)",
+    )
+    extract_parser.add_argument(
         "cpu_processes", type=str, help="Number of CPU processes"
     )
 
@@ -312,6 +336,7 @@ def main():
                 args.rvc_version,
                 args.f0method,
                 args.crepe_hop_length,
+                args.sampling_rate,
                 args.cpu_processes,
             )
         elif args.mode == "train":

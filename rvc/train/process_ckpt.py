@@ -66,7 +66,7 @@ def extract_small_model(path, name, sr, if_f0, info, version):
             if "enc_q" in key:
                 continue
             opt["weight"][key] = ckpt[key].half()
-        if sr == "40k":
+        if sr == "40000":
             opt["config"] = [
                 1025,
                 32,
@@ -87,7 +87,7 @@ def extract_small_model(path, name, sr, if_f0, info, version):
                 256,
                 40000,
             ]
-        elif sr == "48k":
+        elif sr == "48000":
             if version == "v1":
                 opt["config"] = [
                     1025,
@@ -130,7 +130,7 @@ def extract_small_model(path, name, sr, if_f0, info, version):
                     256,
                     48000,
                 ]
-        elif sr == "32k":
+        elif sr == "32000":
             if version == "v1":
                 opt["config"] = [
                     513,
