@@ -48,27 +48,26 @@ python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "in
 Run the preprocessing script with the following command:
 
 ```bash
-python main.py preprocess "model_name" "dataset_path" sampling_rate cpu_processes
+python main.py preprocess "model_name" "dataset_path" sampling_rate
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
 - `dataset_path`: Path to the dataset (enclosed in double quotes)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
-- `cpu_processes`: Number of CPU processes
 
 #### 3. Extract Features
 
 Run the extract script with the following command:
 
 ```bash
-python main.py extract "model_name" rvc_version f0method crepe_hop_length cpu_processes
+python main.py extract "model_name" rvc_version f0method crepe_hop_length sampling_rate
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
 - `rvc_version`: Version of the model (v1 or v2)
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)
 - `crepe_hop_length`: Value for crepe_hop_length (1 to 512)
-- `cpu_processes`: Number of CPU processes
+- `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 
 #### 4. Train
 

@@ -1,4 +1,4 @@
-import multiprocessing
+from multiprocessing import cpu_count
 import os
 import sys
 
@@ -9,8 +9,8 @@ sys.path.append(now_dir)
 inp_root = sys.argv[2]
 exp_dir = sys.argv[1]
 sr = int(sys.argv[3])
-n_p = int(sys.argv[4])
-per = float(sys.argv[5])
+per = float(sys.argv[4])
+n_p = cpu_count()
 
 noparallel = "True"
 import multiprocessing
@@ -23,7 +23,6 @@ from scipy.io import wavfile
 
 from rvc.lib.utils import load_audio
 from rvc.train.slicer import Slicer
-
 
 
 class PreProcess:

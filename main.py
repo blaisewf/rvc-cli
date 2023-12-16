@@ -32,7 +32,7 @@ def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, inde
 
 
 # Train
-def run_preprocess_script(model_name, dataset_path, sampling_rate, cpu_processes):
+def run_preprocess_script(model_name, dataset_path, sampling_rate):
     per = 3.0 if config.is_half else 3.7
     command = [
         "python",
@@ -40,7 +40,6 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate, cpu_processes
         logs_path + "\\" + str(model_name),
         dataset_path,
         str(sampling_rate),
-        str(cpu_processes),
         str(per),
     ]
 
@@ -49,7 +48,7 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate, cpu_processes
 
 
 def run_extract_script(
-    model_name, rvc_version, f0method, crepe_hop_length, sampling_rate, cpu_processes
+    model_name, rvc_version, f0method, crepe_hop_length, sampling_rate
 ):
     model_path = logs_path + "\\" + str(model_name)
     command_1 = [
@@ -58,7 +57,6 @@ def run_extract_script(
         model_path,
         f0method,
         crepe_hop_length,
-        cpu_processes,
     ]
     command_2 = [
         "python",
@@ -148,12 +146,12 @@ def run_index_script(model_name, rvc_version):
     command = [
         "python",
         "rvc/train/index_generator.py",
-        model_name,
         rvc_version,
         logs_path + "\\" + str(model_name),
     ]
 
     subprocess.run(command)
+    print(command)
 
 
 def run_tensorboard_script():
@@ -221,9 +219,6 @@ def parse_arguments():
         type=validate_sampling_rate,
         help="Sampling rate (32000, 40000 or 48000)",
     )
-    preprocess_parser.add_argument(
-        "cpu_processes", type=int, help="Number of CPU processes"
-    )
 
     # Parser for 'extract' mode
     extract_parser = subparsers.add_parser("extract", help="Run extract")
@@ -250,10 +245,6 @@ def parse_arguments():
         type=validate_sampling_rate,
         help="Sampling rate (32000, 40000 or 48000)",
     )
-    extract_parser.add_argument(
-        "cpu_processes", type=str, help="Number of CPU processes"
-    )
-
     # Parser for 'train' mode
     train_parser = subparsers.add_parser("train", help="Run training")
     train_parser.add_argument(
@@ -336,7 +327,6 @@ def main():
                 args.model_name,
                 args.dataset_path,
                 str(args.sampling_rate),
-                str(args.cpu_processes),
             )
 
         elif args.mode == "extract":
@@ -346,7 +336,6 @@ def main():
                 args.f0method,
                 args.crepe_hop_length,
                 args.sampling_rate,
-                args.cpu_processes,
             )
         elif args.mode == "train":
             run_train_script(

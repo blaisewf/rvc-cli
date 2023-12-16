@@ -13,11 +13,11 @@ sys.path.append(now_dir)
 
 from rvc.lib.utils import load_audio
 
-from multiprocessing import Process
+from multiprocessing import Process, cpu_count
 
 exp_dir = sys.argv[1]
 f0method = sys.argv[2]
-n_p = int(sys.argv[4])
+n_p = cpu_count()
 
 try:
     crepe_hop_length = int(sys.argv[3])
