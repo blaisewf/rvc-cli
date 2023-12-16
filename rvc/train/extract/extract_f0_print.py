@@ -149,7 +149,7 @@ class FeatureInput(object):
 
     def get_rmvpe(self, x):
         if hasattr(self, "model_rmvpe") == False:
-            from rvc.rmvpe import RMVPE
+            from rvc.lib.rmvpe import RMVPE
 
             self.model_rmvpe = RMVPE("rmvpe.pt", is_half=False, device="cpu")
         return self.model_rmvpe.infer_from_audio(x, thred=0.03)
