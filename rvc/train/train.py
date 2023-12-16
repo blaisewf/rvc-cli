@@ -1,51 +1,30 @@
-import math
-import os
-import shutil
-import sys
-
-now_dir = os.getcwd()
-sys.path.append(os.path.join(now_dir))
-
 import datetime
-
-from rvc.train.utils import get_hparams
-
-hps = get_hparams()
-os.environ["CUDA_VISIBLE_DEVICES"] = hps.gpus.replace("-", ",")
-n_gpus = len(hps.gpus.split("-"))
-from random import randint, shuffle
+import shutil
 import utils
 import torch
+import math
+import sys
+import csv
+import os
 
-try:
-    import intel_extension_for_pytorch as ipex
-
-    if torch.xpu.is_available():
-        from lib.ipex import ipex_init
-        from lib.ipex.gradscaler import gradscaler_init
-        from torch.xpu.amp import autocast
-
-        GradScaler = gradscaler_init()
-        ipex_init()
-    else:
-        from torch.cuda.amp import GradScaler, autocast
-except Exception:
-    from torch.cuda.amp import GradScaler, autocast
-
-torch.backends.cudnn.deterministic = False
-torch.backends.cudnn.benchmark = False
+from utils import get_hparams
+from random import randint, shuffle
 from time import sleep
 from time import time as ttime
 
-import torch.distributed as dist
-import torch.multiprocessing as mp
+from torch.cuda.amp import GradScaler, autocast
 
 from torch.nn import functional as F
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import torch.distributed as dist
+import torch.multiprocessing as mp
 
-from rvc.infer.infer_pack import commons
+now_dir = os.getcwd()
+sys.path.append(os.path.join(now_dir))
+
+
 from data_utils import (
     DistributedBucketSampler,
     TextAudioCollate,
@@ -54,29 +33,38 @@ from data_utils import (
     TextAudioLoaderMultiNSFsid,
 )
 
-if hps.version == "v1":
-    from rvc.infer.infer_pack.models import MultiPeriodDiscriminator
-    from rvc.infer.infer_pack.models import (
-        SynthesizerTrnMs256NSFsid as RVC_Model_f0,
-    )
-    from rvc.infer.infer_pack.models import (
-        SynthesizerTrnMs256NSFsid_nono as RVC_Model_nof0,
-    )
-else:
-    from rvc.infer.infer_pack.models import (
-        SynthesizerTrnMs768NSFsid as RVC_Model_f0,
-        SynthesizerTrnMs768NSFsid_nono as RVC_Model_nof0,
-        MultiPeriodDiscriminatorV2 as MultiPeriodDiscriminator,
-    )
-
-from train.losses import (
+from losses import (
     discriminator_loss,
     feature_loss,
     generator_loss,
     kl_loss,
 )
 from mel_processing import mel_spectrogram_torch, spec_to_mel_torch
-from train.process_ckpt import savee
+from process_ckpt import savee
+
+from rvc.lib.infer_pack import commons
+hps = get_hparams()
+if hps.version == "v1":
+    from lib.infer_pack.models import MultiPeriodDiscriminator
+    from lib.infer_pack.models import (
+        SynthesizerTrnMs256NSFsid as RVC_Model_f0,
+    )
+    from lib.infer_pack.models import (
+        SynthesizerTrnMs256NSFsid_nono as RVC_Model_nof0,
+    )
+else:
+    from lib.infer_pack.models import (
+        SynthesizerTrnMs768NSFsid as RVC_Model_f0,
+        SynthesizerTrnMs768NSFsid_nono as RVC_Model_nof0,
+        MultiPeriodDiscriminatorV2 as MultiPeriodDiscriminator,
+    )
+
+os.environ["CUDA_VISIBLE_DEVICES"] = hps.gpus.replace("-", ",")
+n_gpus = len(hps.gpus.split("-"))
+
+
+torch.backends.cudnn.deterministic = False
+torch.backends.cudnn.benchmark = False
 
 global_step = 0
 bestEpochStep = 0
@@ -87,8 +75,6 @@ dirtyValues = []
 dirtySteps = []
 dirtyEpochs = []
 continued = False
-
-import csv
 
 
 class EpochRecorder:
@@ -102,12 +88,6 @@ class EpochRecorder:
         elapsed_time_str = str(datetime.timedelta(seconds=elapsed_time))
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return f"[{current_time}] | ({elapsed_time_str})"
-
-
-def reset_stop_flag():
-    with open("rvc/lib/csvdb/stop.csv", "w+", newline="") as STOPCSVwrite:
-        csv_writer = csv.writer(STOPCSVwrite, delimiter=",")
-        csv_writer.writerow(["False"])
 
 
 def create_model(hps, model_f0, model_nof0):
@@ -395,9 +375,7 @@ def run(rank, n_gpus, hps):
         scheduler_d.step()
 
 
-def train_and_evaluate(
-    rank, epoch, hps, nets, optims, scaler, loaders, writers, cache
-):
+def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
     net_g, net_d = nets
     optim_g, optim_d = optims
     train_loader = loaders
@@ -683,37 +661,6 @@ def train_and_evaluate(
                     ),
                 )
             )
-
-    stopbtn = False
-    try:
-        with open("lib/csvdb/stop.csv", "r") as csv_file:
-            stopbtn_str = next(csv.reader(csv_file), [None])[0]
-            if stopbtn_str is not None:
-                stopbtn = stopbtn_str.lower() == "true"
-    except (ValueError, TypeError, FileNotFoundError, IndexError) as e:
-        print(f"Handling exception: {e}")
-        stopbtn = False
-
-    if stopbtn:
-        if os.path.exists(f"{hps.model_dir}/col"):
-            os.remove(f"{hps.model_dir}/col")
-        print("Stop button pressed, closing the program...")
-        ckpt = (
-            net_g.module.state_dict()
-            if hasattr(net_g, "module")
-            else net_g.state_dict()
-        )
-        print(
-            "Saving final file... %s"
-            % (
-                savee(
-                    ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
-                )
-            )
-        )
-        sleep(1)
-        reset_stop_flag()
-        os._exit(2333333)
 
     global dirtyTb, dirtySteps, dirtyValues, dirtyEpochs, bestEpochStep, lastValue, continued
 

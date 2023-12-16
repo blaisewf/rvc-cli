@@ -7,7 +7,7 @@ import soundfile as sf
 from vc_infer_pipeline import VC
 from rvc.lib.utils import load_audio
 from fairseq import checkpoint_utils
-from infer_pack.models import (
+from lib.infer_pack.models import (
     SynthesizerTrnMs256NSFsid,
     SynthesizerTrnMs256NSFsid_nono,
     SynthesizerTrnMs768NSFsid,

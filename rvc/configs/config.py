@@ -6,17 +6,6 @@ from multiprocessing import cpu_count
 
 import torch
 
-try:
-    import intel_extension_for_pytorch as ipex
-
-    if torch.xpu.is_available():
-        from lib.ipex import ipex_init
-
-        ipex_init()
-except Exception:
-    pass
-
-
 version_config_list = [
     "v1/32000.json",
     "v1/40000.json",
