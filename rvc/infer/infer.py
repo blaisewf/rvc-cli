@@ -5,7 +5,6 @@ import warnings
 import traceback
 import numpy as np
 import soundfile as sf
-from configs.config import Config
 from vc_infer_pipeline import VC
 from fairseq import checkpoint_utils
 from infer_pack.models import (
@@ -15,7 +14,8 @@ from infer_pack.models import (
     SynthesizerTrnMs768NSFsid_nono,
 )
 
-from lib.utils import load_audio
+from rvc.configs.config import Config
+from rvc.lib.utils import load_audio
 
 warnings.filterwarnings("ignore")
 torch.manual_seed(114514)

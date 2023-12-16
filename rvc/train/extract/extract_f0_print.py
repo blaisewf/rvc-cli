@@ -167,41 +167,6 @@ class FeatureInput(object):
             "rmvpe": self.get_rmvpe,
         }
 
-    def get_f0_hybrid_computation(
-        self,
-        methods_str,
-        x,
-        p_len,
-        crepe_hop_length,
-    ):
-        # Get various f0 methods from input to use in the computation stack
-        s = methods_str
-        s = s.split("hybrid")[1]
-        s = s.replace("[", "").replace("]", "")
-        methods = s.split("+")
-        f0_computation_stack = []
-
-        for method in methods:
-            if method in self.f0_method_dict:
-                f0 = (
-                    self.f0_method_dict[method](x, p_len)
-                    if method == "pm"
-                    else self.f0_method_dict[method](x)
-                )
-                f0_computation_stack.append(f0)
-            elif method == "crepe" or method == "mangio-crepe":
-                self.the_other_complex_function(x, method, crepe_hop_length)
-
-        if len(f0_computation_stack) != 0:
-            f0_median_hybrid = (
-                np.nanmedian(f0_computation_stack, axis=0)
-                if len(f0_computation_stack) > 1
-                else f0_computation_stack[0]
-            )
-            return f0_median_hybrid
-        else:
-            raise ValueError("No valid methods were provided")
-
     def compute_f0(self, path, f0_method, crepe_hop_length):
         x = load_audio(path, self.fs, DoFormant, Quefrency, Timbre)
         p_len = x.shape[0] // self.hop
@@ -214,14 +179,6 @@ class FeatureInput(object):
             )
         elif f0_method in ["crepe", "mangio-crepe"]:
             f0 = self.mncrepe(f0_method, x, p_len, crepe_hop_length)
-        elif "hybrid" in f0_method:  # EXPERIMENTAL
-            # Perform hybrid median pitch estimation
-            f0 = self.get_f0_hybrid_computation(
-                f0_method,
-                x,
-                p_len,
-                crepe_hop_length,
-            )
         return f0
 
     def coarse_f0(self, f0):

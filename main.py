@@ -5,6 +5,7 @@ import subprocess
 from rvc.configs.config import Config
 
 config = Config()
+
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
 
 subprocess.run(["python", "rvc/tools/prerequisites_download.py"])
@@ -33,6 +34,24 @@ def validate_f0up_key(value):
             )
     except ValueError:
         raise argparse.ArgumentTypeError("f0up_key must be a valid integer")
+
+def validate_f0method(value):
+    valid_f0methods = [
+        "pm",
+        "dio",
+        "crepe",
+        "crepe-tiny",
+        "mangio-crepe",
+        "mangio-crepe-tiny",
+        "harvest",
+        "rmvpe",
+    ]
+    if value in valid_f0methods:
+        return value
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Invalid f0method. Please choose from {valid_f0methods}"
+        )
 
 # Infer
 def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, index_path):
@@ -193,7 +212,7 @@ def parse_arguments():
     )
     infer_parser.add_argument(
         "f0method",
-        type=str,
+        type=validate_f0method,
         help="Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)",
     )
     infer_parser.add_argument(
@@ -245,7 +264,7 @@ def parse_arguments():
     )
     extract_parser.add_argument(
         "f0method",
-        type=str,
+        type=validate_f0method,
         help="Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)",
     )
     extract_parser.add_argument(

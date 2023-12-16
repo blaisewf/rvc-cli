@@ -370,7 +370,7 @@ class SourceModuleHnNSF(torch.nn.Module):
         if self.is_half:
             sine_wavs = sine_wavs.half()
         sine_merge = self.l_tanh(self.l_linear(sine_wavs))
-        return sine_merge, None, None   
+        return sine_merge, None, None
 
 
 class GeneratorNSF(torch.nn.Module):
@@ -476,13 +476,6 @@ class GeneratorNSF(torch.nn.Module):
             l.remove_weight_norm()
 
 
-sr2sr = {
-    "32000": 32000,
-    "40000": 40000,
-    "48000": 48000,
-}
-
-
 class SynthesizerTrnMs256NSFsid(nn.Module):
     def __init__(
         self,
@@ -507,8 +500,7 @@ class SynthesizerTrnMs256NSFsid(nn.Module):
         **kwargs
     ):
         super().__init__()
-        if type(sr) == type("strr"):
-            sr = sr2sr[sr]
+        sr = sr
         self.spec_channels = spec_channels
         self.inter_channels = inter_channels
         self.hidden_channels = hidden_channels
@@ -561,7 +553,6 @@ class SynthesizerTrnMs256NSFsid(nn.Module):
             inter_channels, hidden_channels, 5, 1, 3, gin_channels=gin_channels
         )
         self.emb_g = nn.Embedding(self.spk_embed_dim, gin_channels)
-        print("gin_channels:", gin_channels, "self.spk_embed_dim:", self.spk_embed_dim)
 
     def remove_weight_norm(self):
         self.dec.remove_weight_norm()
@@ -618,8 +609,7 @@ class SynthesizerTrnMs768NSFsid(nn.Module):
         **kwargs
     ):
         super().__init__()
-        if type(sr) == type("strr"):
-            sr = sr2sr[sr]
+        sr = sr
         self.spec_channels = spec_channels
         self.inter_channels = inter_channels
         self.hidden_channels = hidden_channels
@@ -672,7 +662,6 @@ class SynthesizerTrnMs768NSFsid(nn.Module):
             inter_channels, hidden_channels, 5, 1, 3, gin_channels=gin_channels
         )
         self.emb_g = nn.Embedding(self.spk_embed_dim, gin_channels)
-        print("gin_channels:", gin_channels, "self.spk_embed_dim:", self.spk_embed_dim)
 
     def remove_weight_norm(self):
         self.dec.remove_weight_norm()
@@ -780,7 +769,6 @@ class SynthesizerTrnMs256NSFsid_nono(nn.Module):
             inter_channels, hidden_channels, 5, 1, 3, gin_channels=gin_channels
         )
         self.emb_g = nn.Embedding(self.spk_embed_dim, gin_channels)
-        print("gin_channels:", gin_channels, "self.spk_embed_dim:", self.spk_embed_dim)
 
     def remove_weight_norm(self):
         self.dec.remove_weight_norm()
@@ -882,7 +870,6 @@ class SynthesizerTrnMs768NSFsid_nono(nn.Module):
             inter_channels, hidden_channels, 5, 1, 3, gin_channels=gin_channels
         )
         self.emb_g = nn.Embedding(self.spk_embed_dim, gin_channels)
-        print("gin_channels:", gin_channels, "self.spk_embed_dim:", self.spk_embed_dim)
 
     def remove_weight_norm(self):
         self.dec.remove_weight_norm()

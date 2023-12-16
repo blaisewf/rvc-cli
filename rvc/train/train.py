@@ -14,7 +14,7 @@ hps = get_hparams()
 os.environ["CUDA_VISIBLE_DEVICES"] = hps.gpus.replace("-", ",")
 n_gpus = len(hps.gpus.split("-"))
 from random import randint, shuffle
-
+import utils
 import torch
 
 try:
@@ -374,7 +374,6 @@ def run(rank, n_gpus, hps):
                 [scheduler_g, scheduler_d],
                 scaler,
                 [train_loader, None],
-                logger,
                 [writer, writer_eval],
                 cache,
             )
@@ -397,11 +396,11 @@ def run(rank, n_gpus, hps):
 
 
 def train_and_evaluate(
-    rank, epoch, hps, nets, optims, schedulers, scaler, loaders, logger, writers, cache
+    rank, epoch, hps, nets, optims, scaler, loaders, writers, cache
 ):
     net_g, net_d = nets
     optim_g, optim_d = optims
-    train_loader, eval_loader = loaders
+    train_loader = loaders
     if writers is not None:
         writer, writer_eval = writers
 
@@ -723,10 +722,10 @@ def train_and_evaluate(
         and hps.if_retrain_collapse
         and loss_gen_all / lastValue < hps.collapse_threshold
     ):
-        printing(
+        print(
             "Mode collapse detected, model quality may be hindered. More information here: https://rentry.org/RVC_making-models#mode-collapse"
         )
-        printing(
+        print(
             f"loss_gen_all={loss_gen_all.item()}, last value={lastValue}, drop % {loss_gen_all.item() / lastValue * 100}"
         )
         if hps.if_retrain_collapse:

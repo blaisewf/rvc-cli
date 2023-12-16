@@ -147,87 +147,6 @@ class VC(object):
         f0 = f0[1:]
         return f0
 
-    def get_f0_hybrid_computation(
-        self,
-        methods_str,
-        input_audio_path,
-        x,
-        f0_min,
-        f0_max,
-        p_len,
-        filter_radius,
-        crepe_hop_length,
-        time_step,
-    ):
-        s = methods_str
-        s = s.split("hybrid")[1]
-        s = s.replace("[", "").replace("]", "")
-        methods = s.split("+")
-        f0_computation_stack = []
-
-        print("Calculating f0 pitch estimations for methods: %s" % str(methods))
-        x = x.astype(np.float32)
-        x /= np.quantile(np.abs(x), 0.999)
-        for method in methods:
-            f0 = None
-            if method == "pm":
-                f0 = (
-                    parselmouth.Sound(x, self.sr)
-                    .to_pitch_ac(
-                        time_step=time_step / 1000,
-                        voicing_threshold=0.6,
-                        pitch_floor=f0_min,
-                        pitch_ceiling=f0_max,
-                    )
-                    .selected_array["frequency"]
-                )
-                pad_size = (p_len - len(f0) + 1) // 2
-                if pad_size > 0 or p_len - len(f0) - pad_size > 0:
-                    f0 = np.pad(
-                        f0, [[pad_size, p_len - len(f0) - pad_size]], mode="constant"
-                    )
-            elif method == "crepe":
-                f0 = self.get_f0_official_crepe_computation(x, f0_min, f0_max)
-                f0 = f0[1:]
-            elif method == "crepe-tiny":
-                f0 = self.get_f0_official_crepe_computation(x, f0_min, f0_max, "tiny")
-                f0 = f0[1:]
-            elif method == "mangio-crepe":
-                f0 = self.get_f0_crepe_computation(
-                    x, f0_min, f0_max, p_len, crepe_hop_length
-                )
-            elif method == "mangio-crepe-tiny":
-                f0 = self.get_f0_crepe_computation(
-                    x, f0_min, f0_max, p_len, crepe_hop_length, "tiny"
-                )
-            elif method == "harvest":
-                f0 = cache_harvest_f0(input_audio_path, self.sr, f0_max, f0_min, 10)
-                if filter_radius > 2:
-                    f0 = signal.medfilt(f0, 3)
-                f0 = f0[1:]
-            elif method == "dio":
-                f0, t = pyworld.dio(
-                    x.astype(np.double),
-                    fs=self.sr,
-                    f0_ceil=f0_max,
-                    f0_floor=f0_min,
-                    frame_period=10,
-                )
-                f0 = pyworld.stonemask(x.astype(np.double), f0, t, self.sr)
-                f0 = signal.medfilt(f0, 3)
-                f0 = f0[1:]
-            f0_computation_stack.append(f0)
-
-        for fc in f0_computation_stack:
-            print(len(fc))
-
-        print("Calculating hybrid median f0 from the stack of: %s" % str(methods))
-        f0_median_hybrid = None
-        if len(f0_computation_stack) == 1:
-            f0_median_hybrid = f0_computation_stack[0]
-        else:
-            f0_median_hybrid = np.nanmedian(f0_computation_stack, axis=0)
-        return f0_median_hybrid
 
     def get_f0(
         self,
@@ -291,26 +210,12 @@ class VC(object):
             )
         elif f0_method == "rmvpe":
             if hasattr(self, "model_rmvpe") == False:
-                from rmvpe import RMVPE
+                from rvc.rmvpe import RMVPE
 
                 self.model_rmvpe = RMVPE(
                     "rmvpe.pt", is_half=self.is_half, device=self.device
                 )
             f0 = self.model_rmvpe.infer_from_audio(x, thred=0.03)
-
-        elif "hybrid" in f0_method:
-            input_audio_path2wav[input_audio_path] = x.astype(np.double)
-            f0 = self.get_f0_hybrid_computation(
-                f0_method,
-                input_audio_path,
-                x,
-                f0_min,
-                f0_max,
-                p_len,
-                filter_radius,
-                crepe_hop_length,
-                time_step,
-            )
 
         f0 *= pow(2, f0_up_key / 12)
         tf0 = self.sr // self.window
