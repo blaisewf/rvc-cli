@@ -126,7 +126,7 @@ else:
                     # if idx % n == 0:
                     #     print("now-%s,all-%s,%s,%s" % (idx, len(todo), file, feats.shape))
                     pbar.set_description(
-                        f"Processing: %s - Shape: %s" % (file, feats.shape)
+                        f"Processing %s %s" % (file, feats.shape)
                     )
             except:
                 print(traceback.format_exc())
