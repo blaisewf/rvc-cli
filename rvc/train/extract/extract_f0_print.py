@@ -7,12 +7,13 @@ import torchcrepe
 import torch
 import parselmouth
 import tqdm
-from rvc.lib.utils import load_audio
-
-from multiprocessing import Process
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
+
+from rvc.lib.utils import load_audio
+
+from multiprocessing import Process
 
 exp_dir = sys.argv[1]
 f0method = sys.argv[2]
