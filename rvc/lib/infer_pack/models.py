@@ -11,7 +11,9 @@ from torch.nn import Conv1d, ConvTranspose1d, AvgPool1d, Conv2d
 from torch.nn.utils import weight_norm, remove_weight_norm, spectral_norm
 import numpy as np
 from typing import Optional
+
 has_xpu = bool(hasattr(torch, "xpu") and torch.xpu.is_available())
+
 
 class TextEncoder256(nn.Module):
     def __init__(
@@ -868,7 +870,6 @@ class SynthesizerTrnMs768NSFsid(nn.Module):
         )
         self.emb_g = nn.Embedding(self.spk_embed_dim, gin_channels)
 
-
     def remove_weight_norm(self):
         self.dec.remove_weight_norm()
         self.flow.remove_weight_norm()
@@ -1017,7 +1018,6 @@ class SynthesizerTrnMs256NSFsid_nono(nn.Module):
         )
         self.emb_g = nn.Embedding(self.spk_embed_dim, gin_channels)
 
-
     def remove_weight_norm(self):
         self.dec.remove_weight_norm()
         self.flow.remove_weight_norm()
@@ -1156,7 +1156,6 @@ class SynthesizerTrnMs768NSFsid_nono(nn.Module):
             inter_channels, hidden_channels, 5, 1, 3, gin_channels=gin_channels
         )
         self.emb_g = nn.Embedding(self.spk_embed_dim, gin_channels)
-
 
     def remove_weight_norm(self):
         self.dec.remove_weight_norm()

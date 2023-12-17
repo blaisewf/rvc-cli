@@ -2,11 +2,12 @@ import os
 import sys
 import wget
 import gdown
-import zipfile 
+import zipfile
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import unquote
 import re
+
 
 def find_folder_parent(search_dir, folder_name):
     for dirpath, dirnames, filenames in os.walk(search_dir):
@@ -19,6 +20,7 @@ now_dir = os.getcwd()
 file_path = find_folder_parent(now_dir, "models")
 
 zips_path = os.getcwd() + "/zips"
+
 
 def search_pth_index(folder):
     pth_paths = [
@@ -33,6 +35,7 @@ def search_pth_index(folder):
     ]
 
     return pth_paths, index_paths
+
 
 def get_mediafire_download_link(url):
     response = requests.get(url)
@@ -174,7 +177,7 @@ def extract_and_show_progress(zipfile_path, unzips_path):
     try:
         with zipfile.ZipFile(zipfile_path, "r") as zip_ref:
             for file_info in zip_ref.infolist():
-                    zip_ref.extract(file_info, unzips_path)
+                zip_ref.extract(file_info, unzips_path)
 
         return True
     except Exception as error:

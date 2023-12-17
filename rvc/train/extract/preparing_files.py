@@ -4,8 +4,10 @@ import pathlib
 from random import shuffle
 
 from rvc.configs.config import Config
+
 config = Config()
 now_dir = os.getcwd()
+
 
 def config_generator(rvc_version, sampling_rate, model_path):
     if rvc_version == "v1" or sampling_rate == "40000":
@@ -23,6 +25,7 @@ def config_generator(rvc_version, sampling_rate, model_path):
                 sort_keys=True,
             )
             f.write("\n")
+
 
 def filelist_generator(f0method, model_path, rvc_version, sampling_rate):
     gt_wavs_dir = "%s/0_gt_wavs" % (model_path)

@@ -125,9 +125,7 @@ else:
                         print("%s-contains nan" % file)
                     # if idx % n == 0:
                     #     print("now-%s,all-%s,%s,%s" % (idx, len(todo), file, feats.shape))
-                    pbar.set_description(
-                        f"Processing %s %s" % (file, feats.shape)
-                    )
+                    pbar.set_description(f"Processing %s %s" % (file, feats.shape))
             except:
                 print(traceback.format_exc())
             pbar.update(1)

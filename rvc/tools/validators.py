@@ -1,5 +1,6 @@
 import argparse
 
+
 def validate_sampling_rate(value):
     valid_sampling = [
         "32000",
@@ -12,6 +13,7 @@ def validate_sampling_rate(value):
         raise argparse.ArgumentTypeError(
             f"Invalid f0method. Please choose from {valid_sampling}"
         )
+
 
 def validate_f0up_key(value):
     f0up_key = int(value)
