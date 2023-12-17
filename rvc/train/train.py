@@ -233,7 +233,7 @@ def run(
                 )  ##测试不加载优化器
         if hps.pretrainD != "":
             if rank == 0:
-                print("Loaded pretrained_G %s" % (hps.pretrainD))
+                print("Loaded pretrained_D %s" % (hps.pretrainD))
             if hasattr(net_d, "module"):
                 print(
                     net_d.module.load_state_dict(
