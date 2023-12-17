@@ -4,7 +4,6 @@ import utils
 import torch
 import math
 import sys
-import csv
 import os
 
 from utils import get_hparams
