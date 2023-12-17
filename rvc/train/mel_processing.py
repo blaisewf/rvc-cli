@@ -27,14 +27,11 @@ hann_window = {}
 
 
 def spectrogram_torch(y, n_fft, sampling_rate, hop_size, win_size, center=False):
-
-    # Validation
     if torch.min(y) < -1.07:
         print("min value is %s", str(torch.min(y)))
     if torch.max(y) > 1.07:
         print("max value is %s", str(torch.max(y)))
 
-    # Window - Cache if needed
     global hann_window
     dtype_device = str(y.dtype) + "_" + str(y.device)
     wnsize_dtype_device = str(win_size) + "_" + dtype_device
@@ -43,7 +40,6 @@ def spectrogram_torch(y, n_fft, sampling_rate, hop_size, win_size, center=False)
             dtype=y.dtype, device=y.device
         )
 
-    # Padding
     y = torch.nn.functional.pad(
         y.unsqueeze(1),
         (int((n_fft - hop_size) / 2), int((n_fft - hop_size) / 2)),
@@ -51,7 +47,6 @@ def spectrogram_torch(y, n_fft, sampling_rate, hop_size, win_size, center=False)
     )
     y = y.squeeze(1)
 
-    # Complex Spectrogram :: (B, T) -> (B, Freq, Frame, RealComplex=2)
     spec = torch.stft(
         y,
         n_fft,
@@ -62,11 +57,11 @@ def spectrogram_torch(y, n_fft, sampling_rate, hop_size, win_size, center=False)
         pad_mode="reflect",
         normalized=False,
         onesided=True,
-        return_complex=False,
+        return_complex=True,
     )
 
-    # Linear-frequency Linear-amplitude spectrogram :: (B, Freq, Frame, RealComplex=2) -> (B, Freq, Frame)
-    spec = torch.sqrt(spec.pow(2).sum(-1) + 1e-6)
+    spec = torch.sqrt(spec.real.pow(2) + spec.imag.pow(2) + 1e-6)
+
     return spec
 
 
