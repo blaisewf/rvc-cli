@@ -9,7 +9,7 @@ from rvc.tools.validators import (
     validate_f0method,
 )
 
-from rvc.tools.config_generator import config_generator
+from rvc.train.extract.preparing_files import config_generator, filelist_generator
 
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
@@ -71,7 +71,9 @@ def run_extract_script(
     ]
     subprocess.run(command_1)
     subprocess.run(command_2)
+    
     config_generator(rvc_version, sampling_rate, model_path)
+    filelist_generator(f0method, model_path, rvc_version, sampling_rate)
 
 
 def run_train_script(
