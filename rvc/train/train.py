@@ -43,6 +43,7 @@ from mel_processing import mel_spectrogram_torch, spec_to_mel_torch
 from process_ckpt import savee
 
 from rvc.lib.infer_pack import commons
+
 hps = get_hparams()
 if hps.version == "v1":
     from rvc.lib.infer_pack.models import MultiPeriodDiscriminator
@@ -88,76 +89,14 @@ class EpochRecorder:
         return f"[{current_time}] | ({elapsed_time_str})"
 
 
-def create_model(hps, model_f0, model_nof0):
-    filter_length_adjusted = hps.data.filter_length // 2 + 1
-    segment_size_adjusted = hps.train.segment_size // hps.data.hop_length
-    is_half = hps.train.fp16_run
-    sr = hps.sample_rate
-
-    model = model_f0 if hps.if_f0 == 1 else model_nof0
-
-    return model(
-        filter_length_adjusted,
-        segment_size_adjusted,
-        **hps.model,
-        is_half=is_half,
-        sr=sr,
-    )
-
-
-def move_model_to_cuda_if_available(model, rank):
-    if torch.cuda.is_available():
-        return model.cuda(rank)
-    else:
-        return model
-
-
-def create_optimizer(model, hps):
-    return torch.optim.AdamW(
-        model.parameters(),
-        hps.train.learning_rate,
-        betas=hps.train.betas,
-        eps=hps.train.eps,
-    )
-
-
-def create_ddp_model(model, rank):
-    if torch.cuda.is_available():
-        return DDP(model, device_ids=[rank])
-    else:
-        return DDP(model)
-
-
-def create_dataset(hps, if_f0=True):
-    return (
-        TextAudioLoaderMultiNSFsid(hps.data.training_files, hps.data)
-        if if_f0
-        else TextAudioLoader(hps.data.training_files, hps.data)
-    )
-
-
-def create_sampler(dataset, batch_size, n_gpus, rank):
-    return DistributedBucketSampler(
-        dataset,
-        batch_size * n_gpus,
-        [100, 200, 300, 400, 500, 600, 700, 800, 900],  # 16s
-        num_replicas=n_gpus,
-        rank=rank,
-        shuffle=True,
-    )
-
-
-def set_collate_fn(if_f0=True):
-    return TextAudioCollateMultiNSFsid() if if_f0 else TextAudioCollate()
-
-
 def main():
     n_gpus = torch.cuda.device_count()
 
     if torch.cuda.is_available() == False and torch.backends.mps.is_available() == True:
         n_gpus = 1
     if n_gpus < 1:
-        print("NO GPU DETECTED: falling back to CPU, this may take a while...")
+        # patch to unblock people without gpus. there is probably a better way.
+        print("GPU not detected, reverting to CPU (not recommended)")
         n_gpus = 1
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = str(randint(20000, 55555))
@@ -165,11 +104,7 @@ def main():
     for i in range(n_gpus):
         subproc = mp.Process(
             target=run,
-            args=(
-                i,
-                n_gpus,
-                hps,
-            ),
+            args=(i, n_gpus, hps),
         )
         children.append(subproc)
         subproc.start()
@@ -178,10 +113,14 @@ def main():
         children[i].join()
 
 
-def run(rank, n_gpus, hps):
+def run(
+    rank,
+    n_gpus,
+    hps,
+):
     global global_step
     if rank == 0:
-        print(hps)
+        # utils.check_git_hash(hps.model_dir)
         writer = SummaryWriter(log_dir=hps.model_dir)
         writer_eval = SummaryWriter(log_dir=os.path.join(hps.model_dir, "eval"))
 
@@ -199,12 +138,14 @@ def run(rank, n_gpus, hps):
     train_sampler = DistributedBucketSampler(
         train_dataset,
         hps.train.batch_size * n_gpus,
-        [100, 200, 300, 400, 500, 600, 700, 800, 900],
+        # [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200,1400],  # 16s
+        [100, 200, 300, 400, 500, 600, 700, 800, 900],  # 16s
         num_replicas=n_gpus,
         rank=rank,
         shuffle=True,
     )
-
+    # It is possible that dataloader's workers are out of shared memory. Please try to raise your shared memory limit.
+    # num_workers=8 -> num_workers=4
     if hps.if_f0 == 1:
         collate_fn = TextAudioCollateMultiNSFsid()
     else:
@@ -251,7 +192,8 @@ def run(rank, n_gpus, hps):
         betas=hps.train.betas,
         eps=hps.train.eps,
     )
-
+    # net_g = DDP(net_g, device_ids=[rank], find_unused_parameters=True)
+    # net_d = DDP(net_d, device_ids=[rank], find_unused_parameters=True)
     if hasattr(torch, "xpu") and torch.xpu.is_available():
         pass
     elif torch.cuda.is_available():
@@ -261,63 +203,38 @@ def run(rank, n_gpus, hps):
         net_g = DDP(net_g)
         net_d = DDP(net_d)
 
-    try:
+    try:  # 如果能加载自动resume
         _, _, _, epoch_str = utils.load_checkpoint(
             utils.latest_checkpoint_path(hps.model_dir, "D_*.pth"), net_d, optim_d
-        )
-        if rank == 0:
-            print("loaded D")
-
+        )  # D多半加载没事
         _, _, _, epoch_str = utils.load_checkpoint(
             utils.latest_checkpoint_path(hps.model_dir, "G_*.pth"), net_g, optim_g
         )
-        global bestEpochStep, lastValue, lowestValue, continued
-        if hps.if_retrain_collapse:
-            if os.path.exists(f"{hps.model_dir}/col"):
-                with open(f"{hps.model_dir}/col", "r") as f:
-                    bestEpochStep = global_step = int(f.readline().split(",")[0])
-                os.remove(f"{hps.model_dir}/col")
-                continued = True
-            if not os.path.exists(f"{hps.model_dir}/col") and os.path.exists(
-                f"{hps.model_dir}/fitness.csv"
-            ):
-                latest = ""
-                with open(f"{hps.model_dir}/fitness.csv", "r") as f:
-                    for line in f:
-                        if line.strip() != "":
-                            latest = line.split(",")
-                global_step = int(latest[1])
-                lastValue = float(latest[2])
-                lowestValue = {
-                    "step": int(latest[1]),
-                    "value": float(latest[2]),
-                    "epoch": int(latest[0]),
-                }
-                continued = True
-        else:
-            global_step = (epoch_str - 1) * len(train_loader)
-
-    except:
+        global_step = (epoch_str - 1) * len(train_loader)
+        # epoch_str = 1
+        # global_step = 0
+    except:  # 如果首次不能加载，加载pretrain
+        # traceback.print_exc()
         epoch_str = 1
         global_step = 0
         if hps.pretrainG != "":
             if rank == 0:
-                print("Loaded pretrained %s" % (hps.pretrainG))
+                print("Loaded pretrained_G %s" % (hps.pretrainG))
             if hasattr(net_g, "module"):
                 print(
                     net_g.module.load_state_dict(
                         torch.load(hps.pretrainG, map_location="cpu")["model"]
                     )
-                )
+                )  ##测试不加载优化器
             else:
                 print(
                     net_g.load_state_dict(
                         torch.load(hps.pretrainG, map_location="cpu")["model"]
                     )
-                )
+                )  ##测试不加载优化器
         if hps.pretrainD != "":
             if rank == 0:
-                print("Loaded pretrained %s" % (hps.pretrainD))
+                print("Loaded pretrained_G %s" % (hps.pretrainD))
             if hasattr(net_d, "module"):
                 print(
                     net_d.module.load_state_dict(
@@ -352,6 +269,7 @@ def run(rank, n_gpus, hps):
                 [scheduler_g, scheduler_d],
                 scaler,
                 [train_loader, None],
+                None,
                 [writer, writer_eval],
                 cache,
             )
@@ -373,10 +291,12 @@ def run(rank, n_gpus, hps):
         scheduler_d.step()
 
 
-def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
+def train_and_evaluate(
+    rank, epoch, hps, nets, optims, schedulers, scaler, loaders, logger, writers, cache
+):
     net_g, net_d = nets
     optim_g, optim_d = optims
-    train_loader = loaders
+    train_loader, eval_loader = loaders
     if writers is not None:
         writer, writer_eval = writers
 
@@ -386,10 +306,14 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
     net_g.train()
     net_d.train()
 
+    # Prepare data iterator
     if hps.if_cache_data_in_gpu == True:
+        # Use Cache
         data_iterator = cache
         if cache == []:
+            # Make new cache
             for batch_idx, info in enumerate(train_loader):
+                # Unpack
                 if hps.if_f0 == 1:
                     (
                         phone,
@@ -412,6 +336,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                         wave_lengths,
                         sid,
                     ) = info
+                # Load on CUDA
                 if torch.cuda.is_available():
                     phone = phone.cuda(rank, non_blocking=True)
                     phone_lengths = phone_lengths.cuda(rank, non_blocking=True)
@@ -423,6 +348,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     spec_lengths = spec_lengths.cuda(rank, non_blocking=True)
                     wave = wave.cuda(rank, non_blocking=True)
                     wave_lengths = wave_lengths.cuda(rank, non_blocking=True)
+                # Cache on list
                 if hps.if_f0 == 1:
                     cache.append(
                         (
@@ -456,12 +382,17 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                         )
                     )
         else:
+            # Load shuffled cache
             shuffle(cache)
     else:
+        # Loader
         data_iterator = enumerate(train_loader)
 
+    # Run steps
     epoch_recorder = EpochRecorder()
     for batch_idx, info in data_iterator:
+        # Data
+        ## Unpack
         if hps.if_f0 == 1:
             (
                 phone,
@@ -476,6 +407,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             ) = info
         else:
             phone, phone_lengths, spec, spec_lengths, wave, wave_lengths, sid = info
+        ## Load on CUDA
         if (hps.if_cache_data_in_gpu == False) and torch.cuda.is_available():
             phone = phone.cuda(rank, non_blocking=True)
             phone_lengths = phone_lengths.cuda(rank, non_blocking=True)
@@ -486,7 +418,9 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             spec = spec.cuda(rank, non_blocking=True)
             spec_lengths = spec_lengths.cuda(rank, non_blocking=True)
             wave = wave.cuda(rank, non_blocking=True)
+            # wave_lengths = wave_lengths.cuda(rank, non_blocking=True)
 
+        # Calculate
         with autocast(enabled=hps.train.fp16_run):
             if hps.if_f0 == 1:
                 (
@@ -527,10 +461,12 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     hps.data.mel_fmax,
                 )
             if hps.train.fp16_run == True:
-                y_hat_mel = y_hat_mel.float()
+                y_hat_mel = y_hat_mel.half()
             wave = commons.slice_segments(
                 wave, ids_slice * hps.data.hop_length, hps.train.segment_size
-            )
+            )  # slice
+
+            # Discriminator
             y_d_hat_r, y_d_hat_g, _, _ = net_d(wave, y_hat.detach())
             with autocast(enabled=False):
                 loss_disc, losses_disc_r, losses_disc_g = discriminator_loss(
@@ -543,6 +479,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         scaler.step(optim_d)
 
         with autocast(enabled=hps.train.fp16_run):
+            # Generator
             y_d_hat_r, y_d_hat_g, fmap_r, fmap_g = net_d(wave, y_hat)
             with autocast(enabled=False):
                 loss_mel = F.l1_loss(y_mel, y_hat_mel) * hps.train.c_mel
@@ -557,22 +494,23 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         scaler.step(optim_g)
         scaler.update()
 
-        if rank == 0 and not hps.if_stop_on_fit:
+        if rank == 0:
             if global_step % hps.train.log_interval == 0:
                 lr = optim_g.param_groups[0]["lr"]
                 print(
-                    "Train Epoch: {} [{:.0f}%]".format(
+                    "Epoch: {} [{:.0f}%]".format(
                         epoch, 100.0 * batch_idx / len(train_loader)
                     )
                 )
+                # Amor For Tensorboard display
                 if loss_mel > 75:
                     loss_mel = 75
                 if loss_kl > 9:
                     loss_kl = 9
 
-                print([global_step, lr])
+                # print([global_step, lr])
                 print(
-                    f"[loss_disc={loss_disc:.3f}] | [loss_gen={loss_gen:.3f}] | [loss_fm={loss_fm:.3f}] | [loss_mel={loss_mel:.3f}] | [loss_kl={loss_kl:.3f}]"
+                    f"[loss_disc={loss_disc:.3f} | loss_gen={loss_gen:.3f} | loss_fm={loss_fm:.3f} | loss_mel={loss_mel:.3f} | loss_kl={loss_kl:.3f}]"
                 )
                 scalar_dict = {
                     "loss/g/total": loss_gen_all,
@@ -616,28 +554,39 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     scalars=scalar_dict,
                 )
         global_step += 1
+    # /Run steps
 
-    if hps.save_every_epoch != 0 and epoch % hps.save_every_epoch == 0 and rank == 0:
-        utils.save_checkpoint(
-            net_g,
-            optim_g,
-            hps.train.learning_rate,
-            epoch,
-            os.path.join(
-                hps.model_dir,
-                "G_{}.pth".format(global_step if hps.if_latest == 0 else 2333333),
-            ),
-        )
-        utils.save_checkpoint(
-            net_d,
-            optim_d,
-            hps.train.learning_rate,
-            epoch,
-            os.path.join(
-                hps.model_dir,
-                "D_{}.pth".format(global_step if hps.if_latest == 0 else 2333333),
-            ),
-        )
+    if epoch % hps.save_every_epoch == 0 and rank == 0:
+        if hps.if_latest == 0:
+            utils.save_checkpoint(
+                net_g,
+                optim_g,
+                hps.train.learning_rate,
+                epoch,
+                os.path.join(hps.model_dir, "G_{}.pth".format(global_step)),
+            )
+            utils.save_checkpoint(
+                net_d,
+                optim_d,
+                hps.train.learning_rate,
+                epoch,
+                os.path.join(hps.model_dir, "D_{}.pth".format(global_step)),
+            )
+        else:
+            utils.save_checkpoint(
+                net_g,
+                optim_g,
+                hps.train.learning_rate,
+                epoch,
+                os.path.join(hps.model_dir, "G_{}.pth".format(2333333)),
+            )
+            utils.save_checkpoint(
+                net_d,
+                optim_d,
+                hps.train.learning_rate,
+                epoch,
+                os.path.join(hps.model_dir, "D_{}.pth".format(2333333)),
+            )
         if rank == 0 and hps.save_every_weights == "1":
             if hasattr(net_g, "module"):
                 ckpt = net_g.module.state_dict()
@@ -660,160 +609,17 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                 )
             )
 
-    global dirtyTb, dirtySteps, dirtyValues, dirtyEpochs, bestEpochStep, lastValue, continued
-
-    if (
-        rank == 0
-        and hps.if_retrain_collapse
-        and loss_gen_all / lastValue < hps.collapse_threshold
-    ):
-        print(
-            "Mode collapse detected, model quality may be hindered. More information here: https://rentry.org/RVC_making-models#mode-collapse"
-        )
-        print(
-            f"loss_gen_all={loss_gen_all.item()}, last value={lastValue}, drop % {loss_gen_all.item() / lastValue * 100}"
-        )
-        if hps.if_retrain_collapse:
-            print("Restarting training from last fit epoch...")
-            with open(f"{hps.model_dir}/col", "w") as f:
-                f.write(f"{bestEpochStep},{epoch}")
-            os._exit(15)
     if rank == 0:
-        lastValue = loss_gen_all.item()
-
-    if rank == 0 and not hps.if_stop_on_fit:
         print("Epoch: {} {}".format(epoch, epoch_recorder.record()))
-    if rank == 0 and hps.if_stop_on_fit:
-        lr = optim_g.param_groups[0]["lr"]
-        print(
-            f"Epoch: {epoch} Step: {global_step} Learning Rate: {lr:.5} {epoch_recorder.record()}"
-        )
-        if loss_mel > 75:
-            loss_mel = 75
-        if loss_kl > 9:
-            loss_kl = 9
-        # update tensorboard every epoch
-        print(
-            f"loss_gen_all={loss_gen_all:.3f}, loss_disc={loss_disc:.3f}, loss_gen={loss_gen:.3f}, loss_fm={loss_fm:.3f}, loss_mel={loss_mel:.3f}, loss_kl={loss_kl:.3f}"
-        )
-        scalar_dict = {
-            "loss/g/total": loss_gen_all,
-            "loss/d/total": loss_disc,
-            "learning_rate": lr,
-            "grad_norm_d": grad_norm_d,
-            "grad_norm_g": grad_norm_g,
-        }
-        scalar_dict.update(
-            {
-                "loss/g/fm": loss_fm,
-                "loss/g/mel": loss_mel,
-                "loss/g/kl": loss_kl,
-            }
-        )
-        scalar_dict.update({"loss/g/{}".format(i): v for i, v in enumerate(losses_gen)})
-        scalar_dict.update(
-            {"loss/d_r/{}".format(i): v for i, v in enumerate(losses_disc_r)}
-        )
-        scalar_dict.update(
-            {"loss/d_g/{}".format(i): v for i, v in enumerate(losses_disc_g)}
-        )
-        image_dict = {
-            "slice/mel_org": utils.plot_spectrogram_to_numpy(
-                y_mel[0].data.cpu().numpy()
-            ),
-            "slice/mel_gen": utils.plot_spectrogram_to_numpy(
-                y_hat_mel[0].data.cpu().numpy()
-            ),
-            "all/mel": utils.plot_spectrogram_to_numpy(mel[0].data.cpu().numpy()),
-        }
-        utils.summarize(
-            writer=writer_eval,
-            global_step=global_step,
-            images=image_dict,
-            scalars=scalar_dict,
-        )
-        dirtyTb.append(
-            {
-                "global_step": global_step,
-                "images": image_dict,
-                "scalars": scalar_dict,
-            }
-        )
-        dirtySteps.append(global_step)
-        dirtyValues.append(loss_gen_all.item())
-        dirtyEpochs.append(epoch)
-
-        best = getBestValue()
-        if not continued and epoch - best["epoch"] == 0:
-            for i in range(len(dirtyTb)):
-                utils.summarize(
-                    writer=writer,
-                    global_step=dirtyTb[i]["global_step"],
-                    images=dirtyTb[i]["images"],
-                    scalars=dirtyTb[i]["scalars"],
-                )
-                if not os.path.exists(f"{hps.model_dir}/fitness.csv"):
-                    with open(f"{hps.model_dir}/fitness.csv", "w", newline="") as f:
-                        pass
-                with open(f"{hps.model_dir}/fitness.csv", "a", newline="") as f:
-                    csvwriter = csv.writer(f)
-                    csvwriter.writerow([dirtyEpochs[i], dirtySteps[i], dirtyValues[i]])
-
-            dirtyTb.clear()
-            dirtySteps.clear()
-            dirtyValues.clear()
-            dirtyEpochs.clear()
-            if epoch > 10:
-                utils.save_checkpoint(
-                    net_g,
-                    optim_g,
-                    hps.train.learning_rate,
-                    epoch,
-                    os.path.join(hps.model_dir, "G_9999999.pth"),
-                )
-                utils.save_checkpoint(
-                    net_d,
-                    optim_d,
-                    hps.train.learning_rate,
-                    epoch,
-                    os.path.join(hps.model_dir, "D_9999999.pth"),
-                )
-                bestEpochStep = global_step
-                if hasattr(net_g, "module"):
-                    ckpt = net_g.module.state_dict()
-                else:
-                    ckpt = net_g.state_dict()
-                print(
-                    f'Saving current fittest ckpt: {hps.name}_fittest:{savee(ckpt, hps.sample_rate, hps.if_f0, f"{hps.name}_fittest", epoch, hps.version, hps)}'
-                )
-        if epoch < 10:
-            message = f"Overtrain detection begins in {10 - epoch} epochs"
-        elif epoch == 10:
-            message = "Overtrain detection will begin next epoch"
-        elif epoch - best["epoch"] == 0 and not continued:
-            message = f"New best epoch!! [e{epoch}]\n"
-        else:
-            message = f'Last best epoch [e{best["epoch"]}] seen {epoch - best["epoch"]} epochs ago\n'
-        print(message)
-        if epoch - best["epoch"] >= 100:
-            shutil.copy2(
-                f"logs/weights/{hps.name}_fittest.pth",
-                os.path.join(hps.model_dir, f"{hps.name}_{epoch}.pth"),
-            )
-            print(
-                f'No improvement found after epoch: [e{best["epoch"]}]. The program is closed.'
-            )
-            os._exit(2333333)
-
     if epoch >= hps.total_epoch and rank == 0:
-        print("Training successfully completed, closing the program...")
+        print("The training is over, finalizing the program...")
 
         if hasattr(net_g, "module"):
             ckpt = net_g.module.state_dict()
         else:
             ckpt = net_g.state_dict()
         print(
-            "Saving final ckpt... %s"
+            "Saving final model... %s"
             % (
                 savee(
                     ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
@@ -822,44 +628,6 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         )
         sleep(1)
         os._exit(2333333)
-    if continued and rank == 0:
-        continued = False
-
-
-def smooth(scalars, weight):
-    last = 0
-    smoothed = []
-    num_acc = 0
-    for next_val in scalars:
-        last = last * weight + (1 - weight) * next_val
-        num_acc += 1
-        debias_weight = 1
-        if weight != 1:
-            debias_weight = 1 - math.pow(weight, num_acc)
-        smoothed_val = last / debias_weight
-        smoothed.append(smoothed_val)
-    return smoothed
-
-
-def getBestValue():
-    global lowestValue, dirtySteps, dirtyValues, dirtyEpochs
-    steps = []
-    values = []
-    epochs = []
-    if os.path.exists(f"{hps.model_dir}/fitness.csv"):
-        with open(f"{hps.model_dir}/fitness.csv", "r") as f:
-            for line in f:
-                if line.strip() != "":
-                    line = line.split(",")
-                    epochs.append(int(line[0]))
-                    steps.append(line[1])
-                    values.append(float(line[2]))
-    steps += dirtySteps
-    values = smooth([*values, *dirtyValues], hps.smoothness)
-    epochs += dirtyEpochs
-    if lowestValue["value"] >= values[-1] and epochs[-1] > 10:
-        lowestValue = {"step": steps[-1], "value": values[-1], "epoch": epochs[-1]}
-    return lowestValue
 
 
 if __name__ == "__main__":

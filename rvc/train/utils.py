@@ -13,7 +13,6 @@ from scipy.io.wavfile import read
 MATPLOTLIB_FLAG = False
 
 
-
 def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
     assert os.path.isfile(checkpoint_path)
     checkpoint_dict = torch.load(checkpoint_path, map_location="cpu")
@@ -48,7 +47,6 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
 
     go(combd, "combd")
     model = go(sbd, "sbd")
-    print("Loaded model weights")
 
     iteration = checkpoint_dict["iteration"]
     learning_rate = checkpoint_dict["learning_rate"]
@@ -91,7 +89,6 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
         model.module.load_state_dict(new_state_dict, strict=False)
     else:
         model.load_state_dict(new_state_dict, strict=False)
-    print("Loaded model weights")
 
     iteration = checkpoint_dict["iteration"]
     learning_rate = checkpoint_dict["learning_rate"]
@@ -104,11 +101,7 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
 
 
 def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path):
-    print(
-        "Saving model and optimizer state at epoch {} to {}".format(
-            iteration, checkpoint_path
-        )
-    )
+    print("Saving model at {} epochs".format(iteration))
     if hasattr(model, "module"):
         state_dict = model.module.state_dict()
     else:
@@ -125,11 +118,7 @@ def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path)
 
 
 def save_checkpoint_d(combd, sbd, optimizer, learning_rate, iteration, checkpoint_path):
-    print(
-        "Saving model and optimizer state at epoch {} to {}".format(
-            iteration, checkpoint_path
-        )
-    )
+    print("Saving model at {} epochs".format(iteration))
     if hasattr(combd, "module"):
         state_dict_combd = combd.module.state_dict()
     else:
@@ -173,7 +162,6 @@ def latest_checkpoint_path(dir_path, regex="G_*.pth"):
     f_list = glob.glob(os.path.join(dir_path, regex))
     f_list.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
     x = f_list[-1]
-    print(x)
     return x
 
 
@@ -401,6 +389,7 @@ def check_git_hash(model_dir):
             )
     else:
         open(path, "w").write(cur_hash)
+
 
 class HParams:
     def __init__(self, **kwargs):
