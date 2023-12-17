@@ -4,12 +4,9 @@ import faiss
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 from multiprocessing import cpu_count
-from process_ckpt import extract_small_model
 
 rvc_version = sys.argv[1]
 logs_path = sys.argv[2]
-sampling_rate = sys.argv[3]
-model_name = sys.argv[4]
 
 
 def train_index(exp_dir1, version19):
@@ -53,24 +50,5 @@ def train_index(exp_dir1, version19):
             print(error)
 
 
-def find_latest_file(folder_path, prefix):
-    files = [
-        f
-        for f in os.listdir(folder_path)
-        if f.startswith(prefix) and f.endswith(".pth")
-    ]
-    if not files:
-        return None
-
-    numbers = [int(f[len(prefix) : -4]) for f in files]
-    latest_number = max(numbers)
-
-    latest_file = os.path.join(folder_path, f"{prefix}{latest_number}.pth")
-    return latest_file
-
-
-g_path = find_latest_file(logs_path, "G_")
-
 
 train_index(logs_path, rvc_version)
-extract_small_model(g_path, model_name, sampling_rate, 1, "", rvc_version)

@@ -5,7 +5,7 @@ from collections import OrderedDict
 import torch
 
 
-def savee(ckpt, sr, if_f0, name, epoch, version, hps):
+def save_final(ckpt, sr, if_f0, name, epoch, version, hps):
     try:
         opt = OrderedDict()
         opt["weight"] = {}
@@ -37,7 +37,7 @@ def savee(ckpt, sr, if_f0, name, epoch, version, hps):
         opt["sr"] = sr
         opt["f0"] = if_f0
         opt["version"] = version
-        torch.save(opt, "logs/weights/%s.pth" % name)
+        torch.save(opt, f"{name}_{epoch}e.pth")
         return "Success."
     except:
         return traceback.format_exc()

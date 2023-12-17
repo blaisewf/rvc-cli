@@ -39,7 +39,7 @@ from losses import (
     kl_loss,
 )
 from mel_processing import mel_spectrogram_torch, spec_to_mel_torch
-from process_ckpt import savee
+from process_ckpt import save_final
 
 from rvc.lib.infer_pack import commons
 
@@ -596,7 +596,7 @@ def train_and_evaluate(
                 % (
                     hps.name,
                     epoch,
-                    savee(
+                    save_final(
                         ckpt,
                         hps.sample_rate,
                         hps.if_f0,
@@ -620,7 +620,7 @@ def train_and_evaluate(
         print(
             "Saving final model... %s"
             % (
-                savee(
+                save_final(
                     ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
                 )
             )
