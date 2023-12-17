@@ -78,13 +78,13 @@ python main.py train "model_name" rvc_version save_every_epoch total_epoch sampl
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
+- `rvc_version`: Version of the model (v1 or v2)
 - `save_every_epoch`: Number of epochs after which to save the model checkpoint (1 to 50)
 - `total_epoch`: Total number of training epochs (1 to 10000)
 - `batch_size`: Batch size, limited by GPU VRAM
-- `rvc_version`: Version of the model (v1 or v2)
 - `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
 
-#### 5. Generate index file and final pth (NOT WORKING)
+#### 5. Generate index file (NOT WORKING)
 
 ```bash
 python main.py index "model_name" rvc_version
