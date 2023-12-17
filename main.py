@@ -144,12 +144,14 @@ def run_train_script(
     subprocess.run(command)
 
 
-def run_index_script(model_name, rvc_version):
+def run_index_script(model_name, rvc_version, sampling_rate):
     command = [
         "python",
         "rvc/train/index_generator.py",
         rvc_version,
         logs_path + "\\" + str(model_name),
+        sampling_rate,
+        model_name,
     ]
 
     subprocess.run(command)
@@ -292,6 +294,11 @@ def parse_arguments():
         type=str,
         help="Version of the model (v1 or v2)",
     )
+    index_parser.add_argument(
+        "sampling_rate",
+        type=validate_sampling_rate,
+        help="Sampling rate (32000, 40000 or 48000)",
+    )
 
     # Parser for 'tensorboard' mode
     subparsers.add_parser("tensorboard", help="Run tensorboard")
@@ -352,6 +359,7 @@ def main():
             run_index_script(
                 args.model_name,
                 args.rvc_version,
+                args.sampling_rate,
             )
         elif args.mode == "tensorboard":
             run_tensorboard_script()

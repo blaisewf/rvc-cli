@@ -4,66 +4,73 @@ import faiss
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 from multiprocessing import cpu_count
+from process_ckpt import extract_small_model
 
 rvc_version = sys.argv[1]
 logs_path = sys.argv[2]
+sampling_rate = sys.argv[3]
+model_name = sys.argv[4]
 
-feature_dir = (
-    "%s/3_feature256" % (logs_path)
-    if rvc_version == "v1"
-    else "%s/3_feature768" % (logs_path)
-)
-listdir_res = list(os.listdir(feature_dir))
-if len(listdir_res) == 0 or os.path.exists(feature_dir):
-    print("Please perform the feature extraction first.")
-infos = []
-npys = []
-for name in sorted(listdir_res):
-    phone = np.load("%s/%s" % (feature_dir, name))
-    npys.append(phone)
-big_npy = np.concatenate(npys, 0)
-big_npy_idx = np.arange(big_npy.shape[0])
-np.random.shuffle(big_npy_idx)
-big_npy = big_npy[big_npy_idx]
-if big_npy.shape[0] > 2e5:
-    print("Trying doing kmeans %s shape to 10k centers." % big_npy.shape[0])
-    try:
-        big_npy = (
-            MiniBatchKMeans(
-                n_clusters=10000,
-                verbose=True,
-                batch_size=256 * cpu_count,
-                compute_labels=False,
-                init="random",
+
+def train_index(exp_dir1, version19):
+    exp_dir = "logs/%s" % (exp_dir1)
+    os.makedirs(exp_dir, exist_ok=True)
+    feature_dir = (
+        "%s/3_feature256" % (exp_dir)
+        if version19 == "v1"
+        else "%s/3_feature768" % (exp_dir)
+    )
+    if not os.path.exists(feature_dir):
+        return "请先进行特征提取!"
+    listdir_res = list(os.listdir(feature_dir))
+    if len(listdir_res) == 0:
+        return "请先进行特征提取！"
+    infos = []
+    npys = []
+    for name in sorted(listdir_res):
+        phone = np.load("%s/%s" % (feature_dir, name))
+        npys.append(phone)
+    big_npy = np.concatenate(npys, 0)
+    big_npy_idx = np.arange(big_npy.shape[0])
+    np.random.shuffle(big_npy_idx)
+    big_npy = big_npy[big_npy_idx]
+    if big_npy.shape[0] > 2e5:
+        infos.append("Trying doing kmeans %s shape to 10k centers." % big_npy.shape[0])
+        yield "\n".join(infos)
+        try:
+            big_npy = (
+                MiniBatchKMeans(
+                    n_clusters=10000,
+                    verbose=True,
+                    batch_size=256 * cpu_count(),
+                    compute_labels=False,
+                    init="random",
+                )
+                .fit(big_npy)
+                .cluster_centers_
             )
-            .fit(big_npy)
-            .cluster_centers_
-        )
-        print(cpu_count)
-    except Exception as error:
-        print(f"Error: {error}")
+        except Exception as error:
+            print(error)
 
-    np.save("%s/total_fea.npy" % logs_path, big_npy)
-    n_ivf = min(int(16 * np.sqrt(big_npy.shape[0])), big_npy.shape[0] // 39)
 
-    index = faiss.index_factory(
-        256 if rvc_version == "v1" else 768, "IVF%s,Flat" % n_ivf
-    )
-    index_ivf = faiss.extract_index_ivf(index)
-    index_ivf.nprobe = 1
-    index.train(big_npy)
-    faiss.write_index(
-        index,
-        "%s/trained_IVF%s_Flat_nprobe_%s_%s_%s.index"
-        % (logs_path, n_ivf, index_ivf.nprobe, logs_path, rvc_version),
-    )
+def find_latest_file(folder_path, prefix):
+    files = [
+        f
+        for f in os.listdir(folder_path)
+        if f.startswith(prefix) and f.endswith(".pth")
+    ]
+    if not files:
+        return None
 
-    batch_size_add = 8192
-    for i in range(0, big_npy.shape[0], batch_size_add):
-        index.add(big_npy[i : i + batch_size_add])
-    faiss.write_index(
-        index,
-        "%s/added_IVF%s_Flat_nprobe_%s_%s_%s.index"
-        % (logs_path, n_ivf, index_ivf.nprobe, logs_path, rvc_version),
-    )
-    print("Files generated successfully!")
+    numbers = [int(f[len(prefix) : -4]) for f in files]
+    latest_number = max(numbers)
+
+    latest_file = os.path.join(folder_path, f"{prefix}{latest_number}.pth")
+    return latest_file
+
+
+g_path = find_latest_file(logs_path, "G_")
+
+
+train_index(logs_path, rvc_version)
+extract_small_model(g_path, model_name, sampling_rate, 1, "", rvc_version)
