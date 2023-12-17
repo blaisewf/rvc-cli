@@ -1,4 +1,4 @@
-## RVC_CLI: Retrieval based Voice Conversion Command Line Interface
+## RVC_CLI: Retrieval-based Voice Conversion Command Line Interface
 
 ### Installation
 
@@ -38,8 +38,8 @@ python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "in
 
 - `f0up_key`: Value for f0up_key (-12 to +12)
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)
-- `input_path`: Input path (enclosed in double quotes)
-- `output_path`: Output path (enclosed in double quotes)
+- `input_path`: Input audio path (enclosed in double quotes)
+- `output_path`: Output audio path (enclosed in double quotes)
 - `pth_file`: Path to the .pth file (enclosed in double quotes)
 - `index_path`: Path to the .index file (enclosed in double quotes)
 
