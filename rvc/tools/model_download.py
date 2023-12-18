@@ -205,7 +205,6 @@ if verify == "downloaded":
 
             model_name = os.path.basename(zipfile_path)
             extract_folder_path = os.path.join(
-                file_path,
                 "models",
                 os.path.normpath(str(model_name).replace(".zip", "")),
             )
@@ -216,11 +215,8 @@ if verify == "downloaded":
             else:
                 print(f"Error downloading {model_name}")
                 sys.exit()
-        else:
-            print("Unzip error.")
-            sys.exit()
-    if not extract_folder_path:
-        print("No model name")
+    if extract_folder_path == "":
+        print("No zip founded...")
         sys.exit()
     result = search_pth_index(extract_folder_path)
 else:
