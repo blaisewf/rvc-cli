@@ -7,7 +7,7 @@ import soundfile as sf
 from vc_infer_pipeline import VC
 from rvc.lib.utils import load_audio
 from fairseq import checkpoint_utils
-from lib.infer_pack.models import (
+from rvc.lib.infer_pack.models import (
     SynthesizerTrnMs256NSFsid,
     SynthesizerTrnMs256NSFsid_nono,
     SynthesizerTrnMs768NSFsid,
@@ -17,19 +17,10 @@ from lib.infer_pack.models import (
 torch.manual_seed(114514)
 
 from rvc.configs.config import Config
+
 config = Config()
 
 hubert_model = None
-
-def find_folder_parent(search_dir, folder_name):
-    for dirpath, dirnames in os.walk(search_dir):
-        if folder_name in dirnames:
-            return os.path.abspath(dirpath)
-    return None
-
-
-now_dir = os.getcwd()
-file_path = find_folder_parent(now_dir, "models")
 
 
 def load_hubert():
