@@ -11,7 +11,7 @@ def validate_sampling_rate(value):
         return value
     else:
         raise argparse.ArgumentTypeError(
-            f"Invalid f0method. Please choose from {valid_sampling}"
+            f"Invalid sampling_rate. Please choose from {valid_sampling}"
         )
 
 
