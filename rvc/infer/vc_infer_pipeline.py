@@ -210,7 +210,7 @@ class VC(object):
             )
         elif f0_method == "rmvpe":
             if hasattr(self, "model_rmvpe") == False:
-                from rvc.rmvpe import RMVPE
+                from lib.rmvpe import RMVPE
 
                 self.model_rmvpe = RMVPE(
                     "rmvpe.pt", is_half=self.is_half, device=self.device
