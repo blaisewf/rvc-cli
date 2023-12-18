@@ -113,82 +113,6 @@ def vc_single(
         return info, (None, None)
 
 
-def vc_multi(
-    sid,
-    dir_path,
-    opt_root,
-    paths,
-    f0_up_key,
-    f0_method,
-    file_index,
-    file_index2,
-    index_rate,
-    filter_radius,
-    resample_sr,
-    rms_mix_rate,
-    protect,
-    format1,
-    crepe_hop_length,
-):
-    try:
-        dir_path = dir_path.strip(" ").strip('"').strip("\n").strip('"').strip(" ")
-        opt_root = opt_root.strip(" ").strip('"').strip("\n").strip('"').strip(" ")
-        os.makedirs(opt_root, exist_ok=True)
-        try:
-            if dir_path != "":
-                paths = [os.path.join(dir_path, name) for name in os.listdir(dir_path)]
-            else:
-                paths = [path.name for path in paths]
-        except:
-            traceback.print_exc()
-            paths = [path.name for path in paths]
-        infos = []
-        for path in paths:
-            info, opt = vc_single(
-                sid,
-                path,
-                f0_up_key,
-                None,
-                f0_method,
-                file_index,
-                file_index2,
-                index_rate,
-                filter_radius,
-                resample_sr,
-                rms_mix_rate,
-                protect,
-                crepe_hop_length,
-            )
-            if "success" in info:
-                try:
-                    tgt_sr, audio_opt = opt
-                    if format1 in ["wav", "flac"]:
-                        sf.write(
-                            "%s/%s.%s" % (opt_root, os.path.basename(path), format1),
-                            audio_opt,
-                            tgt_sr,
-                        )
-                    else:
-                        path = "%s/%s.wav" % (opt_root, os.path.basename(path))
-                        sf.write(
-                            path,
-                            audio_opt,
-                            tgt_sr,
-                        )
-                        if os.path.exists(path):
-                            os.system(
-                                "ffmpeg -i %s -vn %s -q:a 2 -y"
-                                % (path, path[:-4] + ".%s" % format1)
-                            )
-                except:
-                    info += traceback.format_exc()
-            infos.append("%s->%s" % (os.path.basename(path), info))
-            yield "\n".join(infos)
-        yield "\n".join(infos)
-    except:
-        yield traceback.format_exc()
-
-
 def get_vc(weight_root, sid):
     global n_spk, tgt_sr, net_g, vc, cpt, version
     if sid == "" or sid == []:
@@ -290,8 +214,7 @@ try:
     else:
         message = result
 
-    print("Conversion completed. Output file:", output_file)
+    print(f"Conversion completed. Output file: {output_file}")
 
 except Exception as error:
-    message = "Voice conversion failed:\n", error
-    print(message)
+    print(f"Voice conversion failed: {error}")
