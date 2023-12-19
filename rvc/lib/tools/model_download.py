@@ -17,9 +17,9 @@ def find_folder_parent(search_dir, folder_name):
 
 
 now_dir = os.getcwd()
-file_path = find_folder_parent(now_dir, "models")
+file_path = find_folder_parent(now_dir, "logs")
 
-zips_path = os.getcwd() + "/zips"
+zips_path = os.getcwd() + "/logs/zips"
 
 
 def search_pth_index(folder):

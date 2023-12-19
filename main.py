@@ -3,7 +3,7 @@ import sys
 import argparse
 import subprocess
 from rvc.configs.config import Config
-from rvc.tools.validators import (
+from rvc.lib.tools.validators import (
     validate_sampling_rate,
     validate_f0up_key,
     validate_f0method,
@@ -13,7 +13,7 @@ from rvc.train.extract.preparing_files import config_generator, filelist_generat
 
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
-subprocess.run(["python", "rvc/tools/prerequisites_download.py"])
+subprocess.run(["python", "rvc/lib/tools/prerequisites_download.py"])
 
 
 # Infer
@@ -159,7 +159,7 @@ def run_index_script(model_name, rvc_version, sampling_rate):
 def run_tensorboard_script():
     command = [
         "python",
-        "rvc/tools/launch_tensorboard.py",
+        "rvc/lib/tools/launch_tensorboard.py",
     ]
     subprocess.run(command)
 
@@ -167,7 +167,7 @@ def run_tensorboard_script():
 def run_download_script(model_link):
     command = [
         "python",
-        "rvc/tools/model_download.py",
+        "rvc/lib/tools/model_download.py",
         model_link,
     ]
     subprocess.run(command)
