@@ -24,7 +24,6 @@ from scipy.io import wavfile
 from rvc.lib.utils import load_audio
 from rvc.train.slicer import Slicer
 
-
 class PreProcess:
     def __init__(self, sr, exp_dir, per=3.0):
         self.slicer = Slicer(

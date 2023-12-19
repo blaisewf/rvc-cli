@@ -178,7 +178,7 @@ def extract_and_show_progress(zipfile_path, unzips_path):
         with zipfile.ZipFile(zipfile_path, "r") as zip_ref:
             for file_info in zip_ref.infolist():
                 zip_ref.extract(file_info, unzips_path)
-
+        os.remove(zipfile_path)
         return True
     except Exception as error:
         print(error)
@@ -187,7 +187,7 @@ def extract_and_show_progress(zipfile_path, unzips_path):
 
 def unzip_file(zip_path, zip_file_name):
     zip_file_path = os.path.join(zip_path, zip_file_name + ".zip")
-    extract_path = os.path.join(file_path, "models", zip_file_name)
+    extract_path = os.path.join(file_path, "models", "logs", zip_file_name)
     with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
         zip_ref.extractall(extract_path)
     os.remove(zip_file_path)
@@ -205,6 +205,7 @@ if verify == "downloaded":
 
             model_name = os.path.basename(zipfile_path)
             extract_folder_path = os.path.join(
+                "logs",
                 "models",
                 os.path.normpath(str(model_name).replace(".zip", "")),
             )

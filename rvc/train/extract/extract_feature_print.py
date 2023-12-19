@@ -9,6 +9,7 @@ os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
 device = sys.argv[1]
 n_part = int(sys.argv[2])
 i_part = int(sys.argv[3])
+
 if len(sys.argv) == 7:
     exp_dir = sys.argv[4]
     version = sys.argv[5]
@@ -19,6 +20,7 @@ else:
     os.environ["CUDA_VISIBLE_DEVICES"] = str(i_gpu)
     version = sys.argv[6]
     is_half = sys.argv[7]
+
 import fairseq
 import numpy as np
 import soundfile as sf
@@ -57,13 +59,12 @@ os.makedirs(outPath, exist_ok=True)
 def readwave(wav_path, normalize=False):
     wav, sr = sf.read(wav_path)
     assert sr == 16000
-    # feats = torch.from_numpy(wav).float()
     feats = torch.from_numpy(wav)
     if is_half:
         feats = feats.half()
     else:
         feats = feats.float()
-    if feats.dim() == 2:  # double channels
+    if feats.dim() == 2:
         feats = feats.mean(-1)
     assert feats.dim() == 1, feats.dim()
     if normalize:
@@ -108,7 +109,7 @@ else:
                     inputs = {
                         "source": feats.to(device),
                         "padding_mask": padding_mask.to(device),
-                        "output_layer": 9 if version == "v1" else 12,  # layer 9
+                        "output_layer": 9 if version == "v1" else 12,
                     }
                     with torch.no_grad():
                         logits = model.extract_features(**inputs)
@@ -123,8 +124,6 @@ else:
                         np.save(out_path, feats, allow_pickle=False)
                     else:
                         print("%s-contains nan" % file)
-                    # if idx % n == 0:
-                    #     print("now-%s,all-%s,%s,%s" % (idx, len(todo), file, feats.shape))
                     pbar.set_description(f"Processing %s %s" % (file, feats.shape))
             except:
                 print(traceback.format_exc())

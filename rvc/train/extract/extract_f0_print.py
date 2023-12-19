@@ -72,7 +72,6 @@ class FeatureInput(object):
                 pad=True,
             )
             p_len = p_len or x.shape[0] // crepe_hop_length
-            # Resize the pitch
             source = np.array(pitch.squeeze(0).cpu().float().numpy())
             source[source < 0.001] = np.nan
             target = np.interp(
@@ -88,7 +87,7 @@ class FeatureInput(object):
             f0, pd = torchcrepe.predict(
                 audio,
                 self.fs,
-                160,
+                crepe_hop_length,
                 self.f0_min,
                 self.f0_max,
                 "full",
@@ -229,9 +228,6 @@ class FeatureInput(object):
 
 
 if __name__ == "__main__":
-    # exp_dir=r"E:\codes\py39\dataset\mi-test"
-    # n_p=16
-    # f = open("%s/log_extract_f0.log"%exp_dir, "w")
     featureInput = FeatureInput()
     paths = []
     inp_root = "%s/1_16k_wavs" % (exp_dir)
