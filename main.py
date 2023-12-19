@@ -144,7 +144,7 @@ def run_train_script(
     subprocess.run(command)
 
 
-def run_index_script(model_name, rvc_version, sampling_rate):
+def run_index_script(model_name, rvc_version):
     command = [
         "python",
         "rvc/train/index_generator.py",
