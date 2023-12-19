@@ -5,50 +5,64 @@ import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 from multiprocessing import cpu_count
 
-rvc_version = sys.argv[1]
-logs_path = sys.argv[2]
+exp_dir = sys.argv[1]
+version = sys.argv[2]
 
+try:
+    if version == "v1":
+        feature_dir = os.path.join(exp_dir, "3_feature256")
+    else:
+        feature_dir = os.path.join(exp_dir, "3_feature768")
 
-def train_index(exp_dir1, version19):
-    exp_dir = "logs/%s" % (exp_dir1)
-    os.makedirs(exp_dir, exist_ok=True)
-    feature_dir = (
-        "%s/3_feature256" % (exp_dir)
-        if version19 == "v1"
-        else "%s/3_feature768" % (exp_dir)
-    )
-    if not os.path.exists(feature_dir):
-        return "请先进行特征提取!"
-    listdir_res = list(os.listdir(feature_dir))
-    if len(listdir_res) == 0:
-        return "请先进行特征提取！"
-    infos = []
     npys = []
-    for name in sorted(listdir_res):
-        phone = np.load("%s/%s" % (feature_dir, name))
+    listdir_res = sorted(os.listdir(feature_dir))
+
+    for name in listdir_res:
+        file_path = os.path.join(feature_dir, name)
+        phone = np.load(file_path)
         npys.append(phone)
-    big_npy = np.concatenate(npys, 0)
+
+    big_npy = np.concatenate(npys, axis=0)
+
     big_npy_idx = np.arange(big_npy.shape[0])
     np.random.shuffle(big_npy_idx)
     big_npy = big_npy[big_npy_idx]
+
     if big_npy.shape[0] > 2e5:
-        infos.append("Trying doing kmeans %s shape to 10k centers." % big_npy.shape[0])
-        yield "\n".join(infos)
-        try:
-            big_npy = (
-                MiniBatchKMeans(
-                    n_clusters=10000,
-                    verbose=True,
-                    batch_size=256 * cpu_count(),
-                    compute_labels=False,
-                    init="random",
-                )
-                .fit(big_npy)
-                .cluster_centers_
+        big_npy = (
+            MiniBatchKMeans(
+                n_clusters=10000,
+                verbose=True,
+                batch_size=256 * cpu_count(),
+                compute_labels=False,
+                init="random",
             )
-        except Exception as error:
-            print(error)
+            .fit(big_npy)
+            .cluster_centers_
+        )
 
+    np.save(os.path.join(exp_dir, "total_fea.npy"), big_npy)
 
+    n_ivf = min(int(16 * np.sqrt(big_npy.shape[0])), big_npy.shape[0] // 39)
 
-train_index(logs_path, rvc_version)
+    index = faiss.index_factory(256 if version == "v1" else 768, f"IVF{n_ivf},Flat")
+
+    index_ivf = faiss.extract_index_ivf(index)
+    index_ivf.nprobe = 1
+    index.train(big_npy)
+
+    index_filename = f"trained_IVF{n_ivf}_Flat_nprobe_{index_ivf.nprobe}_{version}.index"
+    index_filepath = os.path.join(exp_dir, index_filename)
+
+    faiss.write_index(index, index_filepath)
+
+    batch_size_add = 8192
+    for i in range(0, big_npy.shape[0], batch_size_add):
+        index.add(big_npy[i : i + batch_size_add])
+
+    faiss.write_index(index, index_filepath)
+
+except Exception as e:
+    print(f"Failed to train index: {e}")
+
+print("Index training finished!")

@@ -148,13 +148,11 @@ def run_index_script(model_name, rvc_version):
     command = [
         "python",
         "rvc/train/index_generator.py",
-        rvc_version,
         logs_path + "\\" + str(model_name),
+        rvc_version
     ]
 
     subprocess.run(command)
-    print(command)
-
 
 def run_tensorboard_script():
     command = [
