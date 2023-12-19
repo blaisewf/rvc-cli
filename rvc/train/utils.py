@@ -94,14 +94,12 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
     learning_rate = checkpoint_dict["learning_rate"]
     if optimizer is not None and load_opt == 1:
         optimizer.load_state_dict(checkpoint_dict["optimizer"])
-    #   except:
-    #     traceback.print_exc()
-    print("Loaded checkpoint '{}' (epoch {})".format(checkpoint_path, iteration))
+    print(f"Loaded checkpoint '{checkpoint_path}' (epochs {iteration})")
     return model, optimizer, learning_rate, iteration
 
 
 def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path):
-    print("Saving model at {} epochs".format(iteration))
+    print(f"Saving model '{checkpoint_path}' (epochs {iteration})")
     if hasattr(model, "module"):
         state_dict = model.module.state_dict()
     else:
@@ -109,28 +107,6 @@ def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path)
     torch.save(
         {
             "model": state_dict,
-            "iteration": iteration,
-            "optimizer": optimizer.state_dict(),
-            "learning_rate": learning_rate,
-        },
-        checkpoint_path,
-    )
-
-
-def save_checkpoint_d(combd, sbd, optimizer, learning_rate, iteration, checkpoint_path):
-    print("Saving model at {} epochs".format(iteration))
-    if hasattr(combd, "module"):
-        state_dict_combd = combd.module.state_dict()
-    else:
-        state_dict_combd = combd.state_dict()
-    if hasattr(sbd, "module"):
-        state_dict_sbd = sbd.module.state_dict()
-    else:
-        state_dict_sbd = sbd.state_dict()
-    torch.save(
-        {
-            "combd": state_dict_combd,
-            "sbd": state_dict_sbd,
             "iteration": iteration,
             "optimizer": optimizer.state_dict(),
             "learning_rate": learning_rate,

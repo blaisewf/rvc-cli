@@ -81,7 +81,7 @@ models, saved_cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task(
 )
 model = models[0]
 model = model.to(device)
-print("Using %s" % device)
+print("Using %s " % device)
 if device not in ["mps", "cpu"]:
     model = model.half()
 model.eval()
