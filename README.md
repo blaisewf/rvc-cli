@@ -93,7 +93,15 @@ python main.py index "model_name" rvc_version
 - `model_name`: Name of the model (enclosed in double quotes)
 - `rvc_version`: Version of the model (v1 or v2)
 
-#### 5. Launch TensorBoard
+#### 6. Model information
+
+```bash
+python main.py model_information "pth_path"
+```
+
+- `pth_path`: Path to the .pth file (enclosed in double quotes)
+
+#### 7. Launch TensorBoard
 
 Launch TensorBoard with the following command:
 
@@ -101,7 +109,7 @@ Launch TensorBoard with the following command:
 python main.py tensorboard
 ```
 
-#### 6. Download models
+#### 8. Download models
 
 Run the download script with the following command:
 

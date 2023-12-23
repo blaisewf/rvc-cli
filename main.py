@@ -154,6 +154,14 @@ def run_index_script(model_name, rvc_version):
 
     subprocess.run(command)
 
+def run_model_information_script(pth_path):
+    command = [
+        "python",
+        "rvc/lib/tools/model_information.py",
+        pth_path,
+    ]
+    subprocess.run(command)
+
 def run_tensorboard_script():
     command = [
         "python",
@@ -291,6 +299,13 @@ def parse_arguments():
         help="Version of the model (v1 or v2)",
     )
 
+    # Parser for 'model_information' mode
+    model_information_parser = subparsers.add_parser("model_information", help="Print model information")
+    model_information_parser.add_argument(
+        "pth_path",
+        type=str,
+        help="Path to the .pth file (enclose in double quotes)",
+    )
 
     # Parser for 'tensorboard' mode
     subparsers.add_parser("tensorboard", help="Run tensorboard")
@@ -351,6 +366,10 @@ def main():
             run_index_script(
                 args.model_name,
                 args.rvc_version,
+            )
+        elif args.mode == "model_information":
+            run_model_information_script(
+                args.pth_path,
             )
         elif args.mode == "tensorboard":
             run_tensorboard_script()
