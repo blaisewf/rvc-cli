@@ -85,7 +85,7 @@ class EpochRecorder:
         self.last_time = now_time
         elapsed_time = round(elapsed_time, 1)
         elapsed_time_str = str(datetime.timedelta(seconds=int(elapsed_time)))
-        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        current_time = datetime.datetime.now().strftime("%H:%M:%S")
         return f"[{current_time}] | ({elapsed_time_str})"
 
 
