@@ -9,7 +9,7 @@ from rvc.lib.tools.validators import (
     validate_f0method,
 )
 
-from rvc.train.extract.preparing_files import config_generator, filelist_generator
+from rvc.train.extract.preparing_files import generate_config, generate_filelist
 
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
@@ -72,8 +72,8 @@ def run_extract_script(
     subprocess.run(command_1)
     subprocess.run(command_2)
 
-    config_generator(rvc_version, sampling_rate, model_path)
-    filelist_generator(f0method, model_path, rvc_version, sampling_rate)
+    generate_config(rvc_version, sampling_rate, model_path)
+    generate_filelist(f0method, model_path, rvc_version, sampling_rate)
 
 
 def run_train_script(
@@ -149,10 +149,11 @@ def run_index_script(model_name, rvc_version):
         "python",
         "rvc/train/index_generator.py",
         logs_path + "\\" + str(model_name),
-        rvc_version
+        rvc_version,
     ]
 
     subprocess.run(command)
+
 
 def run_model_information_script(pth_path):
     command = [
@@ -161,6 +162,7 @@ def run_model_information_script(pth_path):
         pth_path,
     ]
     subprocess.run(command)
+
 
 def run_tensorboard_script():
     command = [
@@ -300,7 +302,9 @@ def parse_arguments():
     )
 
     # Parser for 'model_information' mode
-    model_information_parser = subparsers.add_parser("model_information", help="Print model information")
+    model_information_parser = subparsers.add_parser(
+        "model_information", help="Print model information"
+    )
     model_information_parser.add_argument(
         "pth_path",
         type=str,

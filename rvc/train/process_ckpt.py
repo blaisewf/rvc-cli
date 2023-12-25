@@ -227,7 +227,6 @@ def merge(path1, path2, alpha1, sr, f0, info, name, version):
         opt = OrderedDict()
         opt["weight"] = {}
         for key in ckpt1.keys():
-            # try:
             if key == "emb_g.weight" and ckpt1[key].shape != ckpt2[key].shape:
                 min_shape0 = min(ckpt1[key].shape[0], ckpt2[key].shape[0])
                 opt["weight"][key] = (
@@ -238,8 +237,6 @@ def merge(path1, path2, alpha1, sr, f0, info, name, version):
                 opt["weight"][key] = (
                     alpha1 * (ckpt1[key].float()) + (1 - alpha1) * (ckpt2[key].float())
                 ).half()
-        # except:
-        #     pdb.set_trace()
         opt["config"] = cfg
         opt["sr"] = sr
         opt["f0"] = 1 if f0 == ("Yes") else 0

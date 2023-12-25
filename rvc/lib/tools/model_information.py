@@ -13,5 +13,4 @@ sr = data.get("sr", "None")
 f0 = data.get("f0", "None")
 version = data.get("version", "None")
 
-
 print(f"Epochs: {epochs}\nSampling rate: {sr}\nf0: {f0}\nVersion: {version}")

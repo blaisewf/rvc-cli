@@ -42,9 +42,9 @@ MODELS_DOWNLOAD = [
 INDIVIDUAL_FILES = [
     "hubert_base.pt",
     "rmvpe.pt",
-    "rmvpe.onnx",
     "ffmpeg.exe",
     "ffprobe.exe",
+    # "rmvpe.onnx",
 ]
 
 FOLDER_MAPPING = {

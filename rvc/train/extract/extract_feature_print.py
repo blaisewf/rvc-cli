@@ -2,75 +2,50 @@ import os
 import sys
 import traceback
 import tqdm
+import torch
+import torch.nn.functional as F
+import fairseq
+import soundfile as sf
+import numpy as np
 
-os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
 
 device = sys.argv[1]
-n_part = int(sys.argv[2])
+n_parts = int(sys.argv[2])
 i_part = int(sys.argv[3])
 
 if len(sys.argv) == 7:
-    exp_dir = sys.argv[4]
-    version = sys.argv[5]
-    is_half = sys.argv[6]
+    exp_dir, version, is_half = sys.argv[4], sys.argv[5], sys.argv[6]
 else:
-    i_gpu = sys.argv[4]
-    exp_dir = sys.argv[5]
+    i_gpu, exp_dir = sys.argv[4], sys.argv[5]
     os.environ["CUDA_VISIBLE_DEVICES"] = str(i_gpu)
-    version = sys.argv[6]
-    is_half = sys.argv[7]
+    version, is_half = sys.argv[6], sys.argv[7]
 
-import fairseq
-import numpy as np
-import soundfile as sf
-import torch
-import torch.nn.functional as F
 
-if "privateuseone" not in device:
-    device = "cpu"
-    if torch.cuda.is_available():
-        device = "cuda"
-    elif torch.backends.mps.is_available():
-        device = "mps"
-else:
-    import torch_directml
+def forward_dml(ctx, x, scale):
+    ctx.scale = scale
+    res = x.clone().detach()
+    return res
 
-    device = torch_directml.device(torch_directml.default_device())
 
-    def forward_dml(ctx, x, scale):
-        ctx.scale = scale
-        res = x.clone().detach()
-        return res
-
-    fairseq.modules.grad_multiply.GradMultiply.forward = forward_dml
-
+fairseq.modules.grad_multiply.GradMultiply.forward = forward_dml
 
 model_path = "hubert_base.pt"
 
-wavPath = "%s/1_16k_wavs" % exp_dir
-outPath = (
-    "%s/3_feature256" % exp_dir if version == "v1" else "%s/3_feature768" % exp_dir
-)
-os.makedirs(outPath, exist_ok=True)
+wav_path = f"{exp_dir}/1_16k_wavs"
+out_path = f"{exp_dir}/3_feature256" if version == "v1" else f"{exp_dir}/3_feature768"
+os.makedirs(out_path, exist_ok=True)
 
 
-# wave must be 16k, hop_size=320
-def readwave(wav_path, normalize=False):
+def read_wave(wav_path, normalize=False):
     wav, sr = sf.read(wav_path)
     assert sr == 16000
     feats = torch.from_numpy(wav)
-    if is_half:
-        feats = feats.half()
-    else:
-        feats = feats.float()
-    if feats.dim() == 2:
-        feats = feats.mean(-1)
-    assert feats.dim() == 1, feats.dim()
+    feats = feats.half() if is_half else feats.float()
+    feats = feats.mean(-1) if feats.dim() == 2 else feats
+    feats = feats.view(1, -1)
     if normalize:
         with torch.no_grad():
             feats = F.layer_norm(feats, feats.shape)
-    feats = feats.view(1, -1)
     return feats
 
 
@@ -81,30 +56,30 @@ models, saved_cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task(
 )
 model = models[0]
 model = model.to(device)
-print("Using %s " % device)
 if device not in ["mps", "cpu"]:
     model = model.half()
 model.eval()
 
-todo = sorted(list(os.listdir(wavPath)))[i_part::n_part]
+todo = sorted(os.listdir(wav_path))[i_part::n_parts]
 n = max(1, len(todo) // 10)
+
 if len(todo) == 0:
     print(
         "An error occurred in the feature extraction, make sure you have provided the audios correctly."
     )
 else:
-    print("- %s" % len(todo))
+    print(f"- {len(todo)}")
     with tqdm.tqdm(total=len(todo)) as pbar:
         for idx, file in enumerate(todo):
             try:
                 if file.endswith(".wav"):
-                    wav_path = "%s/%s" % (wavPath, file)
-                    out_path = "%s/%s" % (outPath, file.replace("wav", "npy"))
+                    wav_file_path = os.path.join(wav_path, file)
+                    out_file_path = os.path.join(out_path, file.replace("wav", "npy"))
 
-                    if os.path.exists(out_path):
+                    if os.path.exists(out_file_path):
                         continue
 
-                    feats = readwave(wav_path, normalize=saved_cfg.task.normalize)
+                    feats = read_wave(wav_file_path, normalize=saved_cfg.task.normalize)
                     padding_mask = torch.BoolTensor(feats.shape).fill_(False)
                     inputs = {
                         "source": feats.to(device),
@@ -121,11 +96,12 @@ else:
 
                     feats = feats.squeeze(0).float().cpu().numpy()
                     if np.isnan(feats).sum() == 0:
-                        np.save(out_path, feats, allow_pickle=False)
+                        np.save(out_file_path, feats, allow_pickle=False)
                     else:
-                        print("%s-contains nan" % file)
-                    pbar.set_description(f"Processing %s %s" % (file, feats.shape))
+                        print(f"{file} - contains nan")
+                    pbar.set_description(f"Processing {file} {feats.shape}")
             except:
                 print(traceback.format_exc())
             pbar.update(1)
+
     print("Feature extraction completed successfully!")

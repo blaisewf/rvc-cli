@@ -7,30 +7,32 @@ import torchcrepe
 import torch
 import parselmouth
 import tqdm
+from multiprocessing import Process, cpu_count
 
-now_dir = os.getcwd()
-sys.path.append(now_dir)
+current_directory = os.getcwd()
+sys.path.append(current_directory)
+
 
 from rvc.lib.utils import load_audio
 
-from multiprocessing import Process, cpu_count
 
 exp_dir = sys.argv[1]
-f0method = sys.argv[2]
-n_p = cpu_count()
+f0_method = sys.argv[2]
+num_processes = cpu_count()
 
 try:
     crepe_hop_length = int(sys.argv[3])
-except:
+except ValueError:
     crepe_hop_length = 128
+
 DoFormant = False
 Quefrency = 1.0
 Timbre = 1.0
 
 
-class FeatureInput(object):
-    def __init__(self, samplerate=16000, hop_size=160):
-        self.fs = samplerate
+class FeatureInput:
+    def __init__(self, sample_rate=16000, hop_size=160):
+        self.fs = sample_rate
         self.hop = hop_size
 
         self.f0_method_dict = self.get_f0_method_dict()
@@ -60,7 +62,7 @@ class FeatureInput(object):
         audio = audio.detach()
 
         if method == "mangio-crepe":
-            pitch: torch.Tensor = torchcrepe.predict(
+            pitch = torchcrepe.predict(
                 audio,
                 self.fs,
                 crepe_hop_length,
@@ -147,14 +149,14 @@ class FeatureInput(object):
         return pyworld.stonemask(x.astype(np.double), *f0_spectral, self.fs)
 
     def get_rmvpe(self, x):
-        if hasattr(self, "model_rmvpe") == False:
+        if not hasattr(self, "model_rmvpe"):
             from rvc.lib.rmvpe import RMVPE
 
             self.model_rmvpe = RMVPE("rmvpe.pt", is_half=False, device="cpu")
         return self.model_rmvpe.infer_from_audio(x, thred=0.03)
 
     def get_rmvpe_dml(self, x):
-        ...
+        pass
 
     def get_f0_method_dict(self):
         return {
@@ -194,7 +196,7 @@ class FeatureInput(object):
         )
         return f0_coarse
 
-    def go(self, paths, f0_method, crepe_hop_length, thread_n):
+    def process_paths(self, paths, f0_method, crepe_hop_length, thread_n):
         if len(paths) == 0:
             print("no-f0-todo")
             return
@@ -210,13 +212,13 @@ class FeatureInput(object):
                         pbar.update(1)
                         continue
 
-                    featur_pit = self.compute_f0(inp_path, f0_method, crepe_hop_length)
+                    feature_pit = self.compute_f0(inp_path, f0_method, crepe_hop_length)
                     np.save(
                         opt_path2,
-                        featur_pit,
+                        feature_pit,
                         allow_pickle=False,
                     )  # nsf
-                    coarse_pit = self.coarse_f0(featur_pit)
+                    coarse_pit = self.coarse_f0(feature_pit)
                     np.save(
                         opt_path1,
                         coarse_pit,
@@ -228,30 +230,30 @@ class FeatureInput(object):
 
 
 if __name__ == "__main__":
-    featureInput = FeatureInput()
+    feature_input = FeatureInput()
     paths = []
-    inp_root = "%s/1_16k_wavs" % (exp_dir)
-    opt_root1 = "%s/2a_f0" % (exp_dir)
-    opt_root2 = "%s/2b-f0nsf" % (exp_dir)
+    input_root = f"{exp_dir}/1_16k_wavs"
+    output_root1 = f"{exp_dir}/2a_f0"
+    output_root2 = f"{exp_dir}/2b-f0nsf"
 
-    os.makedirs(opt_root1, exist_ok=True)
-    os.makedirs(opt_root2, exist_ok=True)
-    for name in sorted(list(os.listdir(inp_root))):
-        inp_path = "%s/%s" % (inp_root, name)
-        if "spec" in inp_path:
+    os.makedirs(output_root1, exist_ok=True)
+    os.makedirs(output_root2, exist_ok=True)
+    for name in sorted(list(os.listdir(input_root))):
+        input_path = f"{input_root}/{name}"
+        if "spec" in input_path:
             continue
-        opt_path1 = "%s/%s" % (opt_root1, name)
-        opt_path2 = "%s/%s" % (opt_root2, name)
-        paths.append([inp_path, opt_path1, opt_path2])
+        output_path1 = f"{output_root1}/{name}"
+        output_path2 = f"{output_root2}/{name}"
+        paths.append([input_path, output_path1, output_path2])
 
-    ps = []
-    print("Using f0 method: " + f0method)
-    for i in range(n_p):
+    processes = []
+    print("Using f0 method: " + f0_method)
+    for i in range(num_processes):
         p = Process(
-            target=featureInput.go,
-            args=(paths[i::n_p], f0method, crepe_hop_length, i),
+            target=feature_input.process_paths,
+            args=(paths[i::num_processes], f0_method, crepe_hop_length, i),
         )
-        ps.append(p)
+        processes.append(p)
         p.start()
-    for i in range(n_p):
-        ps[i].join()
+    for i in range(num_processes):
+        processes[i].join()
