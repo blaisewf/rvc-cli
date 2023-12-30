@@ -6,7 +6,14 @@ import math
 import sys
 import os
 
-from utils import get_hparams
+from utils import (
+    get_hparams,
+    plot_spectrogram_to_numpy,
+    summarize,
+    load_checkpoint,
+    save_checkpoint,
+    latest_checkpoint_path,
+)
 from random import randint, shuffle
 from time import sleep
 from time import time as ttime
@@ -50,7 +57,7 @@ if hps.version == "v1":
     from rvc.lib.infer_pack.models import (
         SynthesizerTrnMs256NSFsid_nono as RVC_Model_nof0,
     )
-else:
+elif hps.version == "v2":
     from rvc.lib.infer_pack.models import (
         SynthesizerTrnMs768NSFsid as RVC_Model_f0,
         SynthesizerTrnMs768NSFsid_nono as RVC_Model_nof0,
@@ -198,11 +205,11 @@ def run(
         net_d = DDP(net_d)
 
     try:
-        _, _, _, epoch_str = utils.load_checkpoint(
-            utils.latest_checkpoint_path(hps.model_dir, "D_*.pth"), net_d, optim_d
+        _, _, _, epoch_str = load_checkpoint(
+            latest_checkpoint_path(hps.model_dir, "D_*.pth"), net_d, optim_d
         )
-        _, _, _, epoch_str = utils.load_checkpoint(
-            utils.latest_checkpoint_path(hps.model_dir, "G_*.pth"), net_g, optim_g
+        _, _, _, epoch_str = load_checkpoint(
+            latest_checkpoint_path(hps.model_dir, "G_*.pth"), net_g, optim_g
         )
         global_step = (epoch_str - 1) * len(train_loader)
 
@@ -503,17 +510,15 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     {"loss/d_g/{}".format(i): v for i, v in enumerate(losses_disc_g)}
                 )
                 image_dict = {
-                    "slice/mel_org": utils.plot_spectrogram_to_numpy(
+                    "slice/mel_org": plot_spectrogram_to_numpy(
                         y_mel[0].data.cpu().numpy()
                     ),
-                    "slice/mel_gen": utils.plot_spectrogram_to_numpy(
+                    "slice/mel_gen": plot_spectrogram_to_numpy(
                         y_hat_mel[0].data.cpu().numpy()
                     ),
-                    "all/mel": utils.plot_spectrogram_to_numpy(
-                        mel[0].data.cpu().numpy()
-                    ),
+                    "all/mel": plot_spectrogram_to_numpy(mel[0].data.cpu().numpy()),
                 }
-                utils.summarize(
+                summarize(
                     writer=writer,
                     global_step=global_step,
                     images=image_dict,
@@ -523,14 +528,14 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
     if epoch % hps.save_every_epoch == 0 and rank == 0:
         if hps.if_latest == 0:
-            utils.save_checkpoint(
+            save_checkpoint(
                 net_g,
                 optim_g,
                 hps.train.learning_rate,
                 epoch,
                 os.path.join(hps.model_dir, "G_{}.pth".format(global_step)),
             )
-            utils.save_checkpoint(
+            save_checkpoint(
                 net_d,
                 optim_d,
                 hps.train.learning_rate,
@@ -538,14 +543,14 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                 os.path.join(hps.model_dir, "D_{}.pth".format(global_step)),
             )
         else:
-            utils.save_checkpoint(
+            save_checkpoint(
                 net_g,
                 optim_g,
                 hps.train.learning_rate,
                 epoch,
                 os.path.join(hps.model_dir, "G_{}.pth".format(2333333)),
             )
-            utils.save_checkpoint(
+            save_checkpoint(
                 net_d,
                 optim_d,
                 hps.train.learning_rate,

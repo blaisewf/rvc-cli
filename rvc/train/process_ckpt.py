@@ -1,18 +1,15 @@
 import os
-import traceback
 from collections import OrderedDict
-
 import torch
 
 
 def save_final(ckpt, sr, if_f0, name, epoch, version, hps):
     try:
-        opt = OrderedDict()
-        opt["weight"] = {}
-        for key in ckpt.keys():
-            if "enc_q" in key:
-                continue
-            opt["weight"][key] = ckpt[key].half()
+        opt = OrderedDict(
+            weight={
+                key: value.half() for key, value in ckpt.items() if "enc_q" not in key
+            }
+        )
         opt["config"] = [
             hps.data.filter_length // 2 + 1,
             32,
@@ -33,27 +30,11 @@ def save_final(ckpt, sr, if_f0, name, epoch, version, hps):
             hps.model.gin_channels,
             hps.data.sampling_rate,
         ]
-        opt["info"] = epoch
-        opt["sr"] = sr
-        opt["f0"] = if_f0
-        opt["version"] = version
+        opt["info"], opt["sr"], opt["f0"], opt["version"] = epoch, sr, if_f0, version
         torch.save(opt, f"{name}_{epoch}e.pth")
         return "Success."
-    except:
-        return traceback.format_exc()
-
-
-def show_info(path):
-    try:
-        a = torch.load(path, map_location="cpu")
-        return "模型信息:%s\n采样率:%s\n模型是否输入音高引导:%s\n版本:%s" % (
-            a.get("info", "None"),
-            a.get("sr", "None"),
-            a.get("f0", "None"),
-            a.get("version", "None"),
-        )
-    except:
-        return traceback.format_exc()
+    except Exception as error:
+        print(error)
 
 
 def extract_small_model(path, name, sr, if_f0, info, version):
@@ -61,14 +42,13 @@ def extract_small_model(path, name, sr, if_f0, info, version):
         ckpt = torch.load(path, map_location="cpu")
         if "model" in ckpt:
             ckpt = ckpt["model"]
-        opt = OrderedDict()
-        opt["weight"] = {}
-        for key in ckpt.keys():
-            if "enc_q" in key:
-                continue
-            opt["weight"][key] = ckpt[key].half()
-        if sr == "40000":
-            opt["config"] = [
+        opt = OrderedDict(
+            weight={
+                key: value.half() for key, value in ckpt.items() if "enc_q" not in key
+            }
+        )
+        opt["config"] = {
+            "40000": [
                 1025,
                 32,
                 192,
@@ -87,10 +67,9 @@ def extract_small_model(path, name, sr, if_f0, info, version):
                 109,
                 256,
                 40000,
-            ]
-        elif sr == "48000":
-            if version == "v1":
-                opt["config"] = [
+            ],
+            "48000": {
+                "v1": [
                     1025,
                     32,
                     192,
@@ -109,9 +88,8 @@ def extract_small_model(path, name, sr, if_f0, info, version):
                     109,
                     256,
                     48000,
-                ]
-            else:
-                opt["config"] = [
+                ],
+                "v2": [
                     1025,
                     32,
                     192,
@@ -130,10 +108,10 @@ def extract_small_model(path, name, sr, if_f0, info, version):
                     109,
                     256,
                     48000,
-                ]
-        elif sr == "32000":
-            if version == "v1":
-                opt["config"] = [
+                ],
+            },
+            "32000": {
+                "v1": [
                     513,
                     32,
                     192,
@@ -152,9 +130,8 @@ def extract_small_model(path, name, sr, if_f0, info, version):
                     109,
                     256,
                     32000,
-                ]
-            else:
-                opt["config"] = [
+                ],
+                "v2": [
                     513,
                     32,
                     192,
@@ -173,17 +150,26 @@ def extract_small_model(path, name, sr, if_f0, info, version):
                     109,
                     256,
                     32000,
-                ]
+                ],
+            },
+        }
+        opt["config"] = (
+            opt["config"][sr]
+            if isinstance(opt["config"][sr], list)
+            else opt["config"][sr][version]
+        )
         if info == "":
             info = "Extracted model."
-        opt["info"] = info
-        opt["version"] = version
-        opt["sr"] = sr
-        opt["f0"] = int(if_f0)
-        torch.save(opt, "logs/weights/%s.pth" % name)
+        opt["info"], opt["version"], opt["sr"], opt["f0"] = (
+            info,
+            version,
+            sr,
+            int(if_f0),
+        )
+        torch.save(opt, f"logs/weights/{name}.pth")
         return "Success."
-    except:
-        return traceback.format_exc()
+    except Exception as error:
+        print(error)
 
 
 def change_info(path, info, name):
@@ -192,10 +178,10 @@ def change_info(path, info, name):
         ckpt["info"] = info
         if name == "":
             name = os.path.basename(path)
-        torch.save(ckpt, "logs/weights/%s" % name)
+        torch.save(ckpt, f"logs/weights/{name}")
         return "Success."
-    except:
-        return traceback.format_exc()
+    except Exception as error:
+        print(error)
 
 
 def merge(path1, path2, alpha1, sr, f0, info, name, version):
@@ -204,11 +190,9 @@ def merge(path1, path2, alpha1, sr, f0, info, name, version):
         def extract(ckpt):
             a = ckpt["model"]
             opt = OrderedDict()
-            opt["weight"] = {}
-            for key in a.keys():
-                if "enc_q" in key:
-                    continue
-                opt["weight"][key] = a[key]
+            opt["weight"] = {
+                key: value for key, value in a.items() if "enc_q" not in key
+            }
             return opt
 
         ckpt1 = torch.load(path1, map_location="cpu")
@@ -222,27 +206,22 @@ def merge(path1, path2, alpha1, sr, f0, info, name, version):
             ckpt2 = extract(ckpt2)
         else:
             ckpt2 = ckpt2["weight"]
-        if sorted(list(ckpt1.keys())) != sorted(list(ckpt2.keys())):
+        if sorted(ckpt1.keys()) != sorted(ckpt2.keys()):
             return "Fail to merge the models. The model architectures are not the same."
-        opt = OrderedDict()
-        opt["weight"] = {}
-        for key in ckpt1.keys():
-            if key == "emb_g.weight" and ckpt1[key].shape != ckpt2[key].shape:
-                min_shape0 = min(ckpt1[key].shape[0], ckpt2[key].shape[0])
-                opt["weight"][key] = (
-                    alpha1 * (ckpt1[key][:min_shape0].float())
-                    + (1 - alpha1) * (ckpt2[key][:min_shape0].float())
-                ).half()
-            else:
-                opt["weight"][key] = (
-                    alpha1 * (ckpt1[key].float()) + (1 - alpha1) * (ckpt2[key].float())
-                ).half()
-        opt["config"] = cfg
-        opt["sr"] = sr
-        opt["f0"] = 1 if f0 == ("Yes") else 0
-        opt["version"] = version
-        opt["info"] = info
-        torch.save(opt, "logs/weights/%s.pth" % name)
+        opt = OrderedDict(
+            weight={
+                key: alpha1 * value.float() + (1 - alpha1) * ckpt2[key].float()
+                for key, value in ckpt1.items()
+            }
+        )
+        opt["config"], opt["sr"], opt["f0"], opt["version"], opt["info"] = (
+            cfg,
+            sr,
+            1 if f0 == "Yes" else 0,
+            version,
+            info,
+        )
+        torch.save(opt, f"logs/weights/{name}.pth")
         return "Success."
-    except:
-        return traceback.format_exc()
+    except Exception as error:
+        print(error)

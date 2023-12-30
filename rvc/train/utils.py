@@ -1,23 +1,15 @@
-import argparse
+import os
 import glob
 import json
-
-import os
-import subprocess
-import sys
-
-import numpy as np
 import torch
+import argparse
+import numpy as np
 from scipy.io.wavfile import read
-
-MATPLOTLIB_FLAG = False
-
 
 def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
     assert os.path.isfile(checkpoint_path)
     checkpoint_dict = torch.load(checkpoint_path, map_location="cpu")
 
-    ##################
     def go(model, bkey):
         saved_state_dict = checkpoint_dict[bkey]
         if hasattr(model, "module"):
@@ -25,7 +17,7 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
         else:
             state_dict = model.state_dict()
         new_state_dict = {}
-        for k, v in state_dict.items():  # 模型需要的shape
+        for k, v in state_dict.items():
             try:
                 new_state_dict[k] = saved_state_dict[k]
                 if saved_state_dict[k].shape != state_dict[k].shape:
@@ -50,13 +42,9 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
 
     iteration = checkpoint_dict["iteration"]
     learning_rate = checkpoint_dict["learning_rate"]
-    if (
-        optimizer is not None and load_opt == 1
-    ):  ###加载不了，如果是空的的话，重新初始化，可能还会影响lr时间表的更新，因此在train文件最外围catch
-        #   try:
+    if optimizer is not None and load_opt == 1:
         optimizer.load_state_dict(checkpoint_dict["optimizer"])
-    #   except:
-    #     traceback.print_exc()
+
     print("Loaded checkpoint '{}' (epoch {})".format(checkpoint_path, iteration))
     return model, optimizer, learning_rate, iteration
 
@@ -80,7 +68,7 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
                     k,
                     state_dict[k].shape,
                     saved_state_dict[k].shape,
-                )  #
+                )
                 raise KeyError
         except:
             print("%s is not in the checkpoint", k)
@@ -142,12 +130,6 @@ def latest_checkpoint_path(dir_path, regex="G_*.pth"):
 
 
 def plot_spectrogram_to_numpy(spectrogram):
-    global MATPLOTLIB_FLAG
-    if not MATPLOTLIB_FLAG:
-        import matplotlib
-
-        matplotlib.use("Agg")
-        MATPLOTLIB_FLAG = True
     import matplotlib.pylab as plt
     import numpy as np
 
@@ -165,34 +147,6 @@ def plot_spectrogram_to_numpy(spectrogram):
     return data
 
 
-def plot_alignment_to_numpy(alignment, info=None):
-    global MATPLOTLIB_FLAG
-    if not MATPLOTLIB_FLAG:
-        import matplotlib
-
-        matplotlib.use("Agg")
-        MATPLOTLIB_FLAG = True
-    import matplotlib.pylab as plt
-    import numpy as np
-
-    fig, ax = plt.subplots(figsize=(6, 4))
-    im = ax.imshow(
-        alignment.transpose(), aspect="auto", origin="lower", interpolation="none"
-    )
-    fig.colorbar(im, ax=ax)
-    xlabel = "Decoder timestep"
-    if info is not None:
-        xlabel += "\n\n" + info
-    plt.xlabel(xlabel)
-    plt.ylabel("Encoder timestep")
-    plt.tight_layout()
-
-    fig.canvas.draw()
-    data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep="")
-    data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    plt.close()
-    return data
-
 
 def load_wav_to_torch(full_path):
     sampling_rate, data = read(full_path)
@@ -205,7 +159,7 @@ def load_filepaths_and_text(filename, split="|"):
     return filepaths_and_text
 
 
-def get_hparams(init=True):
+def get_hparams():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-se",
@@ -320,51 +274,6 @@ def get_hparams(init=True):
         hparams.collapse_threshold = args.collapse_threshold * 0.01
     hparams.data.training_files = "%s/filelist.txt" % experiment_dir
     return hparams
-
-
-def get_hparams_from_dir(model_dir):
-    config_save_path = os.path.join(model_dir, "config.json")
-    with open(config_save_path, "r") as f:
-        data = f.read()
-    config = json.loads(data)
-
-    hparams = HParams(**config)
-    hparams.model_dir = model_dir
-    return hparams
-
-
-def get_hparams_from_file(config_path):
-    with open(config_path, "r") as f:
-        data = f.read()
-    config = json.loads(data)
-
-    hparams = HParams(**config)
-    return hparams
-
-
-def check_git_hash(model_dir):
-    source_dir = os.path.dirname(os.path.realpath(__file__))
-    if not os.path.exists(os.path.join(source_dir, ".git")):
-        print(
-            "{} is not a git repository, therefore hash value comparison will be ignored.".format(
-                source_dir
-            )
-        )
-        return
-
-    cur_hash = subprocess.getoutput("git rev-parse HEAD")
-
-    path = os.path.join(model_dir, "githash")
-    if os.path.exists(path):
-        saved_hash = open(path).read()
-        if saved_hash != cur_hash:
-            print(
-                "git hash values are different. {}(saved) != {}(current)".format(
-                    saved_hash[:8], cur_hash[:8]
-                )
-            )
-    else:
-        open(path, "w").write(cur_hash)
 
 
 class HParams:

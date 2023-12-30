@@ -11,7 +11,7 @@ version = sys.argv[2]
 try:
     if version == "v1":
         feature_dir = os.path.join(exp_dir, "3_feature256")
-    else:
+    elif version == "v2":
         feature_dir = os.path.join(exp_dir, "3_feature768")
 
     npys = []
@@ -62,7 +62,7 @@ try:
 
     faiss.write_index(index, index_filepath)
 
-except Exception as e:
-    print(f"Failed to train index: {e}")
+except Exception as error:
+    print(f"Failed to train index: {error}")
 
 print("Index training finished!")
