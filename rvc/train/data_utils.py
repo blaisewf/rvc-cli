@@ -36,7 +36,6 @@ class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
         return sid
 
     def get_audio_text_pair(self, audiopath_and_text):
-        # separate filename and text
         file = audiopath_and_text[0]
         phone = audiopath_and_text[1]
         pitch = audiopath_and_text[2]
@@ -51,7 +50,6 @@ class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
         len_spec = spec.size()[-1]
         if len_phone != len_spec:
             len_min = min(len_phone, len_spec)
-            # amor
             len_wav = len_min * self.hop_length
 
             spec = spec[:, :len_min]
@@ -96,7 +94,6 @@ class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
                 spec = spectrogram_torch(
                     audio_norm,
                     self.filter_length,
-                    self.sampling_rate,
                     self.hop_length,
                     self.win_length,
                     center=False,
@@ -107,7 +104,6 @@ class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
             spec = spectrogram_torch(
                 audio_norm,
                 self.filter_length,
-                self.sampling_rate,
                 self.hop_length,
                 self.win_length,
                 center=False,
@@ -264,7 +260,6 @@ class TextAudioLoader(torch.utils.data.Dataset):
                 spec = spectrogram_torch(
                     audio_norm,
                     self.filter_length,
-                    self.sampling_rate,
                     self.hop_length,
                     self.win_length,
                     center=False,
@@ -275,7 +270,6 @@ class TextAudioLoader(torch.utils.data.Dataset):
             spec = spectrogram_torch(
                 audio_norm,
                 self.filter_length,
-                self.sampling_rate,
                 self.hop_length,
                 self.win_length,
                 center=False,

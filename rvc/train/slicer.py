@@ -4,7 +4,6 @@ import librosa
 import soundfile
 import numpy as np
 
-
 class Slicer:
     def __init__(
         self,
@@ -30,12 +29,12 @@ class Slicer:
 
     def _apply_slice(self, waveform, begin, end):
         start_idx = begin * self.hop_size
-        end_idx = min(waveform.shape[1], end * self.hop_size)
-        return (
-            waveform[:, start_idx:end_idx]
-            if len(waveform.shape) > 1
-            else waveform[start_idx:end_idx]
-        )
+        if len(waveform.shape) > 1:
+            end_idx = min(waveform.shape[1], end * self.hop_size)
+            return waveform[:, start_idx:end_idx]
+        else:
+            end_idx = min(waveform.shape[0], end * self.hop_size)
+            return waveform[start_idx:end_idx]
 
     def slice(self, waveform):
         samples = waveform.mean(axis=0) if len(waveform.shape) > 1 else waveform

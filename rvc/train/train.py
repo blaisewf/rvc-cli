@@ -1,10 +1,7 @@
-import datetime
-import shutil
-import utils
 import torch
-import math
 import sys
 import os
+import datetime
 
 from utils import (
     get_hparams,

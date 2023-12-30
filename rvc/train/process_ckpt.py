@@ -1,6 +1,6 @@
 import os
-from collections import OrderedDict
 import torch
+from collections import OrderedDict
 
 
 def save_final(ckpt, sr, if_f0, name, epoch, version, hps):
