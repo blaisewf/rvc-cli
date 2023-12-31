@@ -51,7 +51,9 @@ try:
     index_ivf.nprobe = 1
     index.train(big_npy)
 
-    index_filename = f"trained_IVF{n_ivf}_Flat_nprobe_{index_ivf.nprobe}_{version}.index"
+    index_filename = (
+        f"trained_IVF{n_ivf}_Flat_nprobe_{index_ivf.nprobe}_{version}.index"
+    )
     index_filepath = os.path.join(exp_dir, index_filename)
 
     faiss.write_index(index, index_filepath)

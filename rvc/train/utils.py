@@ -6,6 +6,7 @@ import argparse
 import numpy as np
 from scipy.io.wavfile import read
 
+
 def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
     assert os.path.isfile(checkpoint_path)
     checkpoint_dict = torch.load(checkpoint_path, map_location="cpu")
@@ -26,7 +27,7 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
                         k,
                         state_dict[k].shape,
                         saved_state_dict[k].shape,
-                    )  #
+                    )
                     raise KeyError
             except:
                 print("%s is not in the checkpoint", k)
@@ -147,7 +148,6 @@ def plot_spectrogram_to_numpy(spectrogram):
     return data
 
 
-
 def load_wav_to_torch(full_path):
     sampling_rate, data = read(full_path)
     return torch.FloatTensor(data.astype(np.float32)), sampling_rate
@@ -183,7 +183,7 @@ def get_hparams():
     )
     parser.add_argument(
         "-e", "--experiment_dir", type=str, required=True, help="experiment dir"
-    )  # -m
+    )
     parser.add_argument(
         "-sr", "--sample_rate", type=str, required=True, help="sample rate, 32k/40k/48k"
     )

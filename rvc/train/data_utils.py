@@ -169,7 +169,6 @@ class TextAudioCollateMultiNSFsid:
             pitchf = row[4]
             pitchf_padded[i, : pitchf.size(0)] = pitchf
 
-            # dv[i] = row[5]
             sid[i] = row[5]
 
         return (
@@ -181,7 +180,6 @@ class TextAudioCollateMultiNSFsid:
             spec_lengths,
             wave_padded,
             wave_lengths,
-            # dv
             sid,
         )
 
@@ -214,7 +212,6 @@ class TextAudioLoader(torch.utils.data.Dataset):
         return sid
 
     def get_audio_text_pair(self, audiopath_and_text):
-        # separate filename and text
         file = audiopath_and_text[0]
         phone = audiopath_and_text[1]
         dv = audiopath_and_text[2]
@@ -236,7 +233,7 @@ class TextAudioLoader(torch.utils.data.Dataset):
     def get_labels(self, phone):
         phone = np.load(phone)
         phone = np.repeat(phone, 2, axis=0)
-        n_num = min(phone.shape[0], 900)  # DistributedBucketSampler
+        n_num = min(phone.shape[0], 900)
         phone = phone[:n_num, :]
         phone = torch.FloatTensor(phone)
         return phone

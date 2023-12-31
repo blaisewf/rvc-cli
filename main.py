@@ -31,7 +31,7 @@ def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, inde
     subprocess.run(command)
 
 
-# Train
+# Preprocess
 def run_preprocess_script(model_name, dataset_path, sampling_rate):
     per = 3.0 if config.is_half else 3.7
     command = [
@@ -47,6 +47,7 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
     subprocess.run(command)
 
 
+# Extract
 def run_extract_script(
     model_name, rvc_version, f0method, crepe_hop_length, sampling_rate
 ):
@@ -76,6 +77,7 @@ def run_extract_script(
     generate_filelist(f0method, model_path, rvc_version, sampling_rate)
 
 
+# Train
 def run_train_script(
     model_name, rvc_version, save_every_epoch, total_epoch, sampling_rate, batch_size
 ):
@@ -144,6 +146,7 @@ def run_train_script(
     subprocess.run(command)
 
 
+# Index
 def run_index_script(model_name, rvc_version):
     command = [
         "python",
@@ -155,6 +158,7 @@ def run_index_script(model_name, rvc_version):
     subprocess.run(command)
 
 
+# Model information
 def run_model_information_script(pth_path):
     command = [
         "python",
@@ -164,6 +168,7 @@ def run_model_information_script(pth_path):
     subprocess.run(command)
 
 
+# Tensorboard
 def run_tensorboard_script():
     command = [
         "python",
@@ -172,6 +177,7 @@ def run_tensorboard_script():
     subprocess.run(command)
 
 
+# Download
 def run_download_script(model_link):
     command = [
         "python",
@@ -181,6 +187,7 @@ def run_download_script(model_link):
     subprocess.run(command)
 
 
+# Parse arguments
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Run the main.py script with specific parameters."
