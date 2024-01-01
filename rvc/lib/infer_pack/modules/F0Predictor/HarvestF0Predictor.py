@@ -39,7 +39,7 @@ class HarvestF0Predictor(F0Predictor):
                     for k in range(i, frame_number):
                         ip_data[k] = last_value
             else:
-                ip_data[i] = data[i]  # 这里可能存在一个没有必要的拷贝
+                ip_data[i] = data[i]
                 last_value = data[i]
 
         return ip_data[:, 0], vuv_vector[:, 0]
@@ -60,7 +60,7 @@ class HarvestF0Predictor(F0Predictor):
             p_len = wav.shape[0] // self.hop_length
         f0, t = pyworld.harvest(
             wav.astype(np.double),
-            fs=self.hop_length,
+            fs=self.sampling_rate,
             f0_ceil=self.f0_max,
             f0_floor=self.f0_min,
             frame_period=1000 * self.hop_length / self.sampling_rate,
