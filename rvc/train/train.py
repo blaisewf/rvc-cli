@@ -101,8 +101,6 @@ def main():
     if n_gpus < 1:
         print("GPU not detected, reverting to CPU (not recommended)")
         n_gpus = 1
-    os.environ["MASTER_ADDR"] = "localhost"
-    os.environ["MASTER_PORT"] = str(randint(20000, 55555))
     children = []
     for i in range(n_gpus):
         subproc = mp.Process(
@@ -126,6 +124,8 @@ def run(
         writer = SummaryWriter(log_dir=hps.model_dir)
         writer_eval = SummaryWriter(log_dir=os.path.join(hps.model_dir, "eval"))
 
+    os.environ["MASTER_ADDR"] = "localhost"
+    os.environ["MASTER_PORT"] = str(randint(20000, 55555))
     dist.init_process_group(
         backend="gloo", init_method="env://", world_size=n_gpus, rank=rank
     )
@@ -192,9 +192,7 @@ def run(
         betas=hps.train.betas,
         eps=hps.train.eps,
     )
-    if hasattr(torch, "xpu") and torch.xpu.is_available():
-        pass
-    elif torch.cuda.is_available():
+    if torch.cuda.is_available():
         net_g = DDP(net_g, device_ids=[rank])
         net_d = DDP(net_d, device_ids=[rank])
     else:

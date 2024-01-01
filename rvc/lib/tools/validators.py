@@ -22,6 +22,17 @@ def validate_f0up_key(value):
     else:
         raise argparse.ArgumentTypeError(f"f0up_key must be in the range of -12 to +12")
 
+def validate_true_false(value):
+    valid_tf = [
+        "True",
+        "False",
+    ]
+    if value in valid_tf:
+        return value
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Invalid true_false. Please choose from {valid_tf} not {value}"
+        )
 
 def validate_f0method(value):
     valid_f0methods = [

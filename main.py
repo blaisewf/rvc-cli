@@ -7,6 +7,7 @@ from rvc.lib.tools.validators import (
     validate_sampling_rate,
     validate_f0up_key,
     validate_f0method,
+    validate_true_false
 )
 
 from rvc.train.extract.preparing_files import generate_config, generate_filelist
@@ -79,7 +80,13 @@ def run_extract_script(
 
 # Train
 def run_train_script(
-    model_name, rvc_version, save_every_epoch, total_epoch, sampling_rate, batch_size
+    model_name,
+    rvc_version,
+    save_every_epoch,
+    total_epoch,
+    sampling_rate,
+    batch_size,
+    pretrained,
 ):
     pretrained_path = {
         "v1": {
@@ -112,8 +119,10 @@ def run_train_script(
         },
     }
 
-    pg, pd = pretrained_path[rvc_version][sampling_rate]
-
+    if pretrained == "True":
+        pg, pd = pretrained_path[rvc_version][sampling_rate]
+    else:
+        pg, pd = "", ""
     command = [
         "python",
         "rvc/train/train.py",
@@ -294,6 +303,11 @@ def parse_arguments():
         type=str,
         help="Batch size",
     )
+    train_parser.add_argument(
+        "pretrained",
+        type=validate_true_false,
+        help="Pretrained (True or False)",
+    )
 
     # Parser for 'index' mode
     index_parser = subparsers.add_parser("index", help="Generate index file")
@@ -372,6 +386,7 @@ def main():
                 args.total_epoch,
                 args.sampling_rate,
                 args.batch_size,
+                args.pretrained,
             )
         elif args.mode == "index":
             run_index_script(

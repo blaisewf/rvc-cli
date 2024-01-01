@@ -75,7 +75,7 @@ python main.py extract "model_name" rvc_version f0method crepe_hop_length sampli
 Run the train script with the following command:
 
 ```bash
-python main.py train "model_name" rvc_version save_every_epoch total_epoch sampling_rate batch_size
+python main.py train "model_name" rvc_version save_every_epoch total_epoch sampling_rate batch_size pretrained
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
@@ -84,6 +84,7 @@ python main.py train "model_name" rvc_version save_every_epoch total_epoch sampl
 - `total_epoch`: Total number of training epochs (1 to 10000)
 - `batch_size`: Batch size, limited by GPU VRAM
 - `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
+- `pretrained`: Train with or without pretrained models (True or False)
 
 #### 5. Generate index file
 
