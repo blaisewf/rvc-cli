@@ -10,10 +10,11 @@ import re
 
 
 def find_folder_parent(search_dir, folder_name):
-    for dirpath, dirnames in os.walk(search_dir):
+    for dirpath, dirnames, _ in os.walk(search_dir):
         if folder_name in dirnames:
             return os.path.abspath(dirpath)
     return None
+
 
 
 now_dir = os.getcwd()
