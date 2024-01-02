@@ -15,6 +15,7 @@ from rvc.lib.tools.pretrained_selector import pretrained_selector
 
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
+
 subprocess.run(["python", "rvc/lib/tools/prerequisites_download.py"])
 
 

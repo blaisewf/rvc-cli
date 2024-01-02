@@ -1,10 +1,10 @@
 import os
 import wget
 
-URL_BASE = "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main"
-MODELS_DOWNLOAD = [
+url_base = "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main"
+models_download = [
     (
-        "pretrained/",
+        "pretrained_v1/",
         [
             "D32k.pth",
             "D40k.pth",
@@ -39,7 +39,7 @@ MODELS_DOWNLOAD = [
     ),
 ]
 
-INDIVIDUAL_FILES = [
+individual_files = [
     "hubert_base.pt",
     "rmvpe.pt",
     "ffmpeg.exe",
@@ -47,24 +47,24 @@ INDIVIDUAL_FILES = [
     # "rmvpe.onnx",
 ]
 
-FOLDER_MAPPING = {
-    "pretrained/": "rvc/pretraineds/pretrained/",
+folders = {
+    "pretrained_v1/": "rvc/pretraineds/pretrained_v1/",
     "pretrained_v2/": "rvc/pretraineds/pretrained_v2/",
 }
 
-for file_name in INDIVIDUAL_FILES:
+for file_name in individual_files:
     destination_path = os.path.join(file_name)
-    url = f"{URL_BASE}/{file_name}"
+    url = f"{url_base}/{file_name}"
     if not os.path.exists(destination_path):
         os.makedirs(os.path.dirname(destination_path) or ".", exist_ok=True)
         print(f"\nDownloading {url} to {destination_path}...")
         wget.download(url, out=destination_path)
 
-for remote_folder, file_list in MODELS_DOWNLOAD:
-    local_folder = FOLDER_MAPPING.get(remote_folder, "")
+for remote_folder, file_list in models_download:
+    local_folder = folders.get(remote_folder, "")
     for file in file_list:
         destination_path = os.path.join(local_folder, file)
-        url = f"{URL_BASE}/{remote_folder}{file}"
+        url = f"{url_base}/{remote_folder}{file}"
         if not os.path.exists(destination_path):
             os.makedirs(os.path.dirname(destination_path) or ".", exist_ok=True)
             print(f"\nDownloading {url} to {destination_path}...")
