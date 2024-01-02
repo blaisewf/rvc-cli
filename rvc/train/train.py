@@ -134,9 +134,10 @@ def run(
         torch.cuda.set_device(rank)
 
     if hps.if_f0 == 1:
-        train_dataset = TextAudioLoaderMultiNSFsid(hps.data.training_files, hps.data)
+        train_dataset = TextAudioLoaderMultiNSFsid(hps.data)
     else:
-        train_dataset = TextAudioLoader(hps.data.training_files, hps.data)
+        train_dataset = TextAudioLoader(hps.data)
+
     train_sampler = DistributedBucketSampler(
         train_dataset,
         hps.train.batch_size * n_gpus,

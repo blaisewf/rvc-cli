@@ -9,8 +9,8 @@ from utils import load_filepaths_and_text, load_wav_to_torch
 
 
 class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
-    def __init__(self, audiopaths_and_text, hparams):
-        self.audiopaths_and_text = load_filepaths_and_text(audiopaths_and_text)
+    def __init__(self, hparams):
+        self.audiopaths_and_text = load_filepaths_and_text(hparams.training_files)
         self.max_wav_value = hparams.max_wav_value
         self.sampling_rate = hparams.sampling_rate
         self.filter_length = hparams.filter_length
@@ -185,8 +185,8 @@ class TextAudioCollateMultiNSFsid:
 
 
 class TextAudioLoader(torch.utils.data.Dataset):
-    def __init__(self, audiopaths_and_text, hparams):
-        self.audiopaths_and_text = load_filepaths_and_text(audiopaths_and_text)
+    def __init__(self, hparams):
+        self.audiopaths_and_text = load_filepaths_and_text(hparams.training_files)
         self.max_wav_value = hparams.max_wav_value
         self.sampling_rate = hparams.sampling_rate
         self.filter_length = hparams.filter_length
@@ -200,15 +200,25 @@ class TextAudioLoader(torch.utils.data.Dataset):
     def _filter(self):
         audiopaths_and_text_new = []
         lengths = []
-        for audiopath, text, dv in self.audiopaths_and_text:
-            if self.min_text_len <= len(text) and len(text) <= self.max_text_len:
-                audiopaths_and_text_new.append([audiopath, text, dv])
-                lengths.append(os.path.getsize(audiopath) // (3 * self.hop_length))
+        for entry in self.audiopaths_and_text:
+            if len(entry) >= 3:
+                audiopath, text, dv = entry[:3]
+                if self.min_text_len <= len(text) and len(text) <= self.max_text_len:
+                    audiopaths_and_text_new.append([audiopath, text, dv])
+                    lengths.append(os.path.getsize(audiopath) // (3 * self.hop_length))
+
         self.audiopaths_and_text = audiopaths_and_text_new
         self.lengths = lengths
 
     def get_sid(self, sid):
-        sid = torch.LongTensor([int(sid)])
+        sid = os.path.basename(os.path.dirname(sid))
+
+        try:
+            sid = torch.LongTensor([int("".join(filter(str.isdigit, sid)))])
+        except ValueError as error:
+            print(f"Error converting speaker ID '{sid}' to integer. Exception: {error}")
+            sid = torch.LongTensor([0])
+
         return sid
 
     def get_audio_text_pair(self, audiopath_and_text):

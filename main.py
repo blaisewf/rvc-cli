@@ -7,10 +7,11 @@ from rvc.lib.tools.validators import (
     validate_sampling_rate,
     validate_f0up_key,
     validate_f0method,
-    validate_true_false
+    validate_true_false,
 )
 
 from rvc.train.extract.preparing_files import generate_config, generate_filelist
+from rvc.lib.tools.pretrained_selector import pretrained_selector
 
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
@@ -87,42 +88,15 @@ def run_train_script(
     sampling_rate,
     batch_size,
     pretrained,
+    pitch_guidance,
 ):
-    pretrained_path = {
-        "v1": {
-            "32000": (
-                "rvc/pretraineds/pretrained/f0G32k.pth",
-                "rvc/pretraineds/pretrained/f0D32k.pth",
-            ),
-            "40000": (
-                "rvc/pretraineds/pretrained/f0G40k.pth",
-                "rvc/pretraineds/pretrained/f0D40k.pth",
-            ),
-            "48000": (
-                "rvc/pretraineds/pretrained/f0G48k.pth",
-                "rvc/pretraineds/pretrained/f0D48k.pth",
-            ),
-        },
-        "v2": {
-            "32000": (
-                "rvc/pretraineds/pretrained_v2/f0G32k.pth",
-                "rvc/pretraineds/pretrained_v2/f0D32k.pth",
-            ),
-            "40000": (
-                "rvc/pretraineds/pretrained_v2/f0G40k.pth",
-                "rvc/pretraineds/pretrained_v2/f0D40k.pth",
-            ),
-            "48000": (
-                "rvc/pretraineds/pretrained_v2/f0G48k.pth",
-                "rvc/pretraineds/pretrained_v2/f0D48k.pth",
-            ),
-        },
-    }
+    f0 = 1 if pitch_guidance == "True" else 0
 
     if pretrained == "True":
-        pg, pd = pretrained_path[rvc_version][sampling_rate]
+        pg, pd = pretrained_selector(f0)[rvc_version][sampling_rate]
     else:
         pg, pd = "", ""
+
     command = [
         "python",
         "rvc/train/train.py",
@@ -149,7 +123,7 @@ def run_train_script(
         "-sw",
         "0",
         "-f0",
-        "1",
+        str(f0),
     ]
 
     subprocess.run(command)
@@ -308,6 +282,11 @@ def parse_arguments():
         type=validate_true_false,
         help="Pretrained (True or False)",
     )
+    train_parser.add_argument(
+        "pitch_guidance",
+        type=validate_true_false,
+        help="Pitch guidance (True or False)",
+    )
 
     # Parser for 'index' mode
     index_parser = subparsers.add_parser("index", help="Generate index file")
@@ -387,6 +366,7 @@ def main():
                 args.sampling_rate,
                 args.batch_size,
                 args.pretrained,
+                args.pitch_guidance,
             )
         elif args.mode == "index":
             run_index_script(
