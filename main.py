@@ -15,7 +15,6 @@ from rvc.lib.tools.pretrained_selector import pretrained_selector
 
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
-
 subprocess.run(["python", "rvc/lib/tools/prerequisites_download.py"])
 
 
@@ -54,7 +53,7 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
 def run_extract_script(
     model_name, rvc_version, f0method, crepe_hop_length, sampling_rate
 ):
-    model_path = logs_path + "\\" + str(model_name)
+    model_path = os.path.join(logs_path, str(model_name))
     command_1 = [
         "python",
         "rvc/train/extract/extract_f0_print.py",
@@ -135,7 +134,7 @@ def run_index_script(model_name, rvc_version):
     command = [
         "python",
         "rvc/train/index_generator.py",
-        logs_path + "\\" + str(model_name),
+        os.path.join(logs_path, str(model_name)),
         rvc_version,
     ]
 
