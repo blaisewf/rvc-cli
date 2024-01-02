@@ -39,13 +39,13 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
     command = [
         "python",
         "rvc/train/preprocess/preprocess.py",
-        logs_path + "\\" + str(model_name),
+        os.path.join(logs_path, str(model_name)),
         dataset_path,
         str(sampling_rate),
         str(per),
     ]
 
-    os.mkdir(logs_path + "\\" + str(model_name))
+    os.mkdir(os.path.join(logs_path, str(model_name)))
     subprocess.run(command)
 
 
