@@ -4,7 +4,7 @@ import wget
 url_base = "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main"
 models_download = [
     (
-        "pretrained_v1/",
+        "pretrained/",
         [
             "D32k.pth",
             "D40k.pth",
@@ -47,8 +47,8 @@ individual_files = [
     # "rmvpe.onnx",
 ]
 
-folders = {
-    "pretrained_v1/": "rvc/pretraineds/pretrained_v1/",
+folder_mapping = {
+    "pretrained/": "rvc/pretraineds/pretrained_v1/",
     "pretrained_v2/": "rvc/pretraineds/pretrained_v2/",
 }
 
@@ -61,7 +61,7 @@ for file_name in individual_files:
         wget.download(url, out=destination_path)
 
 for remote_folder, file_list in models_download:
-    local_folder = folders.get(remote_folder, "")
+    local_folder = folder_mapping.get(remote_folder, "")
     for file in file_list:
         destination_path = os.path.join(local_folder, file)
         url = f"{url_base}/{remote_folder}{file}"
