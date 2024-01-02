@@ -1,5 +1,6 @@
 import os
 import wget
+import sys
 
 url_base = "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main"
 models_download = [
@@ -39,12 +40,15 @@ models_download = [
     ),
 ]
 
-individual_files = [
+models_file = [
     "hubert_base.pt",
     "rmvpe.pt",
+    # "rmvpe.onnx",
+]
+
+executables_file = [
     "ffmpeg.exe",
     "ffprobe.exe",
-    # "rmvpe.onnx",
 ]
 
 folder_mapping = {
@@ -52,13 +56,22 @@ folder_mapping = {
     "pretrained_v2/": "rvc/pretraineds/pretrained_v2/",
 }
 
-for file_name in individual_files:
+for file_name in models_file:
     destination_path = os.path.join(file_name)
     url = f"{url_base}/{file_name}"
     if not os.path.exists(destination_path):
         os.makedirs(os.path.dirname(destination_path) or ".", exist_ok=True)
         print(f"\nDownloading {url} to {destination_path}...")
         wget.download(url, out=destination_path)
+
+for file_name in executables_file:
+    if sys.platform == "win32":
+        destination_path = os.path.join(file_name)
+        url = f"{url_base}/{file_name}"
+        if not os.path.exists(destination_path):
+            os.makedirs(os.path.dirname(destination_path) or ".", exist_ok=True)
+            print(f"\nDownloading {url} to {destination_path}...")
+            wget.download(url, out=destination_path)
 
 for remote_folder, file_list in models_download:
     local_folder = folder_mapping.get(remote_folder, "")
