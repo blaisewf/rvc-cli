@@ -167,7 +167,7 @@ class FeatureInput:
         }
 
     def compute_f0(self, path, f0_method, crepe_hop_length):
-        x = load_audio(path, self.fs, DoFormant, Quefrency, Timbre)
+        x = load_audio(path, self.fs)
         p_len = x.shape[0] // self.hop
 
         if f0_method in self.f0_method_dict:
