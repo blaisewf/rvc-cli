@@ -2,9 +2,31 @@ import os
 import torch
 from collections import OrderedDict
 
+logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
+
+
+def replace_keys_in_dict(d, old_key_part, new_key_part):
+    # Use OrderedDict if the original is an OrderedDict
+    if isinstance(d, OrderedDict):
+        updated_dict = OrderedDict()
+    else:
+        updated_dict = {}
+    for key, value in d.items():
+        # Replace the key part if found
+        new_key = key.replace(old_key_part, new_key_part)
+        # If the value is a dictionary, apply the function recursively
+        if isinstance(value, dict):
+            value = replace_keys_in_dict(value, old_key_part, new_key_part)
+        updated_dict[new_key] = value
+    return updated_dict
+
 
 def save_final(ckpt, sr, if_f0, name, epoch, version, hps):
     try:
+        pth_file = f"{name}_{epoch}e.pth"
+        pth_file_path = os.path.join("logs", pth_file)
+        pth_file_old_version_path = os.path.join("logs", f"{pth_file}_old_version.pth")
+
         opt = OrderedDict(
             weight={
                 key: value.half() for key, value in ckpt.items() if "enc_q" not in key
@@ -31,8 +53,23 @@ def save_final(ckpt, sr, if_f0, name, epoch, version, hps):
             hps.data.sampling_rate,
         ]
         opt["info"], opt["sr"], opt["f0"], opt["version"] = epoch, sr, if_f0, version
-        torch.save(opt, f"{name}_{epoch}e.pth")
-        return "Success."
+        torch.save(opt, pth_file_path)
+
+        model = torch.load(pth_file_path, map_location=torch.device("cpu"))
+        torch.save(
+            replace_keys_in_dict(
+                replace_keys_in_dict(
+                    model, ".parametrizations.weight.original1", ".weight_v"
+                ),
+                ".parametrizations.weight.original0",
+                ".weight_g",
+            ),
+            pth_file_old_version_path,
+        )
+        os.remove(pth_file_path)
+        os.rename(pth_file_old_version_path, pth_file_path)
+
+        return "Success!"
     except Exception as error:
         print(error)
 
