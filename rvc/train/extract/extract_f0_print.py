@@ -61,7 +61,7 @@ class FeatureInput:
             audio = torch.mean(audio, dim=0, keepdim=True).detach()
         audio = audio.detach()
 
-        if method == "mangio-crepe":
+        if method == "crepe":
             pitch = torchcrepe.predict(
                 audio,
                 self.fs,
@@ -82,26 +82,6 @@ class FeatureInput:
                 source,
             )
             f0 = np.nan_to_num(target)
-
-        elif method == "crepe":
-            batch_size = 512
-            audio = torch.tensor(np.copy(x))[None].float()
-            f0, pd = torchcrepe.predict(
-                audio,
-                self.fs,
-                crepe_hop_length,
-                self.f0_min,
-                self.f0_max,
-                "full",
-                batch_size=batch_size,
-                device=torch_device,
-                return_periodicity=True,
-            )
-            pd = torchcrepe.filter.median(pd, 3)
-            f0 = torchcrepe.filter.mean(f0, 3)
-            f0[pd < 0.1] = 0
-            f0 = f0[0].cpu().numpy()
-            f0 = f0[1:]  # Get rid of extra first frame
 
         return f0
 
@@ -176,7 +156,7 @@ class FeatureInput:
                 if f0_method == "pm"
                 else self.f0_method_dict[f0_method](x)
             )
-        elif f0_method in ["crepe", "mangio-crepe"]:
+        elif f0_method == "crepe":
             f0 = self.mncrepe(f0_method, x, p_len, crepe_hop_length)
         return f0
 

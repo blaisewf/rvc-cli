@@ -40,8 +40,6 @@ def validate_f0method(value):
         "dio",
         "crepe",
         "crepe-tiny",
-        "mangio-crepe",
-        "mangio-crepe-tiny",
         "harvest",
         "rmvpe",
     ]

@@ -38,7 +38,7 @@ python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "in
 ```
 
 - `f0up_key`: Value for f0up_key (-12 to +12)
-- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)
+- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
 - `input_path`: Input audio path (enclosed in double quotes)
 - `output_path`: Output audio path (enclosed in double quotes)
 - `pth_file`: Path to the .pth file (enclosed in double quotes)
@@ -66,7 +66,7 @@ python main.py extract "model_name" rvc_version f0method crepe_hop_length sampli
 
 - `model_name`: Name of the model (enclosed in double quotes)
 - `rvc_version`: Version of the model (v1 or v2)
-- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)
+- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
 - `crepe_hop_length`: Value for crepe_hop_length (1 to 512)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 

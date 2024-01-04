@@ -187,7 +187,7 @@ def parse_arguments():
     infer_parser.add_argument(
         "f0method",
         type=validate_f0method,
-        help="Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)",
+        help="Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)",
     )
     infer_parser.add_argument(
         "input_path", type=str, help="Input path (enclose in double quotes)"
