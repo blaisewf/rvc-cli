@@ -1,5 +1,4 @@
 import os
-import traceback
 import numpy as np
 import torch
 import torch.utils.data
@@ -89,8 +88,8 @@ class TextAudioLoaderMultiNSFsid(torch.utils.data.Dataset):
         if os.path.exists(spec_filename):
             try:
                 spec = torch.load(spec_filename)
-            except:
-                print("%s %s", spec_filename, traceback.format_exc())
+            except Exception as error:
+                print(f"{spec_filename}: {error}")
                 spec = spectrogram_torch(
                     audio_norm,
                     self.filter_length,
@@ -262,8 +261,8 @@ class TextAudioLoader(torch.utils.data.Dataset):
         if os.path.exists(spec_filename):
             try:
                 spec = torch.load(spec_filename)
-            except:
-                print("%s %s", spec_filename, traceback.format_exc())
+            except Exception as error:
+                print(f"{spec_filename}: {error}")
                 spec = spectrogram_torch(
                     audio_norm,
                     self.filter_length,

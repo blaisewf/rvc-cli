@@ -1,6 +1,5 @@
 import os
 import sys
-import traceback
 import numpy as np
 import pyworld
 import torchcrepe
@@ -135,9 +134,6 @@ class FeatureInput:
             self.model_rmvpe = RMVPE("rmvpe.pt", is_half=False, device="cpu")
         return self.model_rmvpe.infer_from_audio(x, thred=0.03)
 
-    def get_rmvpe_dml(self, x):
-        pass
-
     def get_f0_method_dict(self):
         return {
             "pm": self.get_pm,
@@ -178,7 +174,7 @@ class FeatureInput:
 
     def process_paths(self, paths, f0_method, crepe_hop_length, thread_n):
         if len(paths) == 0:
-            print("no-f0-todo")
+            print("There are no paths to process.")
             return
         with tqdm.tqdm(total=len(paths), leave=True, position=thread_n) as pbar:
             description = f"Thread {thread_n} | Hop-Length {crepe_hop_length}"
@@ -206,7 +202,7 @@ class FeatureInput:
                     )  # ori
                     pbar.update(1)
                 except Exception as error:
-                    print(f"f0fail-{idx}-{inp_path}-{traceback.format_exc()}")
+                    print(f"f0fail-{idx}-{inp_path}-{error}")
 
 
 if __name__ == "__main__":

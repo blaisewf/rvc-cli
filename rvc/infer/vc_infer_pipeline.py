@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torchcrepe
 from torch import Tensor
 import scipy.signal as signal
-import pyworld, os, traceback, faiss, librosa, torchcrepe
+import pyworld, os, faiss, librosa, torchcrepe
 from scipy import signal
 from functools import lru_cache
 
@@ -358,8 +358,8 @@ class VC(object):
             try:
                 index = faiss.read_index(file_index)
                 big_npy = index.reconstruct_n(0, index.ntotal)
-            except:
-                traceback.print_exc()
+            except Exception as error:
+                print(error)
                 index = big_npy = None
         else:
             index = big_npy = None
@@ -394,8 +394,8 @@ class VC(object):
                 for line in lines:
                     inp_f0.append([float(i) for i in line.split(",")])
                 inp_f0 = np.array(inp_f0, dtype="float32")
-            except:
-                traceback.print_exc()
+            except Exception as error:
+                print(error)
         sid = torch.tensor(sid, device=self.device).unsqueeze(0).long()
         pitch, pitchf = None, None
         if if_f0 == 1:

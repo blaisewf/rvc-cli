@@ -1,6 +1,5 @@
 import os
 import sys
-import traceback
 import tqdm
 import torch
 import torch.nn.functional as F
@@ -100,8 +99,8 @@ else:
                     else:
                         print(f"{file} - contains nan")
                     pbar.set_description(f"Processing {file} {feats.shape}")
-            except:
-                print(traceback.format_exc())
+            except Exception as error:
+                print(error)
             pbar.update(1)
 
     print("Feature extraction completed successfully!")

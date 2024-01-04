@@ -1,7 +1,6 @@
 from multiprocessing import cpu_count
 import os
 import sys
-import traceback
 
 from scipy import signal
 from scipy.io import wavfile
@@ -92,8 +91,8 @@ class PreProcess:
                         idx1 += 1
                         break
                 self.normalize_and_write(tmp_audio, idx0, idx1)
-        except:
-            print("%s->%s" % (path, traceback.format_exc()))
+        except Exception as error:
+            print(f"{path}: {error}")
 
     def process_audio_multiprocessing(self, infos):
         for path, idx0 in infos:
@@ -119,8 +118,8 @@ class PreProcess:
                     p.start()
                 for i in range(num_processes):
                     processes[i].join()
-        except:
-            print("Fail. %s" % traceback.format_exc())
+        except Exception as error:
+            print(error)
 
 
 def preprocess_training_set(input_root, sr, num_processes, exp_dir, per):

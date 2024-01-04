@@ -1,7 +1,6 @@
 import os
 import sys
 import torch
-import traceback
 import numpy as np
 import soundfile as sf
 from vc_infer_pipeline import VC
@@ -107,9 +106,8 @@ def vc_single(
 
         return (tgt_sr, audio_opt)
 
-    except:
-        info = traceback.format_exc()
-        print(info)
+    except Exception as error:
+        print(error)
         return info, (None, None)
 
 
