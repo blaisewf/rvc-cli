@@ -1,4 +1,5 @@
 ## RVC_CLI: Retrieval-based Voice Conversion Command Line Interface
+
 [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blaise-tk/rvc_cli/blob/master/RVC_CLI.ipynb)
 
 ### Installation
@@ -25,13 +26,9 @@ python main.py -h
 
 This will display the available modes and their corresponding parameters, helping you understand how to use the RVC CLI effectively.
 
-### Examples
+### Inference
 
-_Make sure to adjust the parameters according to your specific use case._
-
-#### 1. Run Inference
-
-Run the inference script with the following command:
+#### Run Inference
 
 ```bash
 python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "index_path"
@@ -44,9 +41,9 @@ python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "in
 - `pth_file`: Path to the .pth file (enclosed in double quotes)
 - `index_path`: Path to the .index file (enclosed in double quotes)
 
-#### 2. Preprocess Dataset
+### Train
 
-Run the preprocessing script with the following command:
+#### Preprocess Dataset
 
 ```bash
 python main.py preprocess "model_name" "dataset_path" sampling_rate
@@ -56,9 +53,7 @@ python main.py preprocess "model_name" "dataset_path" sampling_rate
 - `dataset_path`: Path to the dataset (enclosed in double quotes)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 
-#### 3. Extract Features
-
-Run the extract script with the following command:
+#### Extract Features
 
 ```bash
 python main.py extract "model_name" rvc_version f0method crepe_hop_length sampling_rate
@@ -70,9 +65,7 @@ python main.py extract "model_name" rvc_version f0method crepe_hop_length sampli
 - `crepe_hop_length`: Value for crepe_hop_length (1 to 512)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 
-#### 4. Train
-
-Run the train script with the following command:
+#### Start Train
 
 ```bash
 python main.py train "model_name" rvc_version save_every_epoch total_epoch sampling_rate batch_size pretrained pitch_guidance
@@ -87,7 +80,7 @@ python main.py train "model_name" rvc_version save_every_epoch total_epoch sampl
 - `pretrained`: Train with or without pretrained models (True or False)
 - `pitch_guidance` Train with or without pitch guidance (True or False)
 
-#### 5. Generate index file
+#### Generate index file
 
 ```bash
 python main.py index "model_name" rvc_version
@@ -96,7 +89,9 @@ python main.py index "model_name" rvc_version
 - `model_name`: Name of the model (enclosed in double quotes)
 - `rvc_version`: Version of the model (v1 or v2)
 
-#### 6. Model information
+### Extra
+
+#### Model Information
 
 ```bash
 python main.py model_information "pth_path"
@@ -104,15 +99,23 @@ python main.py model_information "pth_path"
 
 - `pth_path`: Path to the .pth file (enclosed in double quotes)
 
-#### 7. Launch TensorBoard
+#### Model Fusion
 
-Launch TensorBoard with the following command:
+```bash
+python main.py model_fusion "model_name" "pth_path_1" "pth_path_2"
+```
+
+- `model_name`: Name of the model (enclosed in double quotes)
+- `pth_path_1`: Path to the first .pth file (enclosed in double quotes)
+- `pth_path_2`: Path to the second .pth file (enclosed in double quotes)
+
+#### Launch TensorBoard
 
 ```bash
 python main.py tensorboard
 ```
 
-#### 8. Download models
+#### Download models
 
 Run the download script with the following command:
 

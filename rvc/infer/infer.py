@@ -108,7 +108,6 @@ def vc_single(
 
     except Exception as error:
         print(error)
-        return info, (None, None)
 
 
 def get_vc(weight_root, sid):

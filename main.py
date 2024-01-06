@@ -13,16 +13,18 @@ from rvc.lib.tools.validators import (
 from rvc.train.extract.preparing_files import generate_config, generate_filelist
 from rvc.lib.tools.pretrained_selector import pretrained_selector
 
+from rvc.lib.process.model_fusion import model_fusion
+from rvc.lib.process.model_information import model_information
+
 config = Config()
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
 subprocess.run(["python", "rvc/lib/tools/prerequisites_download.py"])
-
 
 # Infer
 def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, index_path):
     command = [
         "python",
-        "rvc/infer/infer.py",
+        "rvc/infer/infer.py", # replace this with os path
         str(f0up_key),
         f0method,
         input_path,
@@ -31,7 +33,6 @@ def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, inde
         index_path,
     ]
     subprocess.run(command)
-
 
 # Preprocess
 def run_preprocess_script(model_name, dataset_path, sampling_rate):
@@ -47,7 +48,6 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
 
     os.mkdir(os.path.join(logs_path, str(model_name)))
     subprocess.run(command)
-
 
 # Extract
 def run_extract_script(
@@ -77,7 +77,6 @@ def run_extract_script(
 
     generate_config(rvc_version, sampling_rate, model_path)
     generate_filelist(f0method, model_path, rvc_version, sampling_rate)
-
 
 # Train
 def run_train_script(
@@ -128,7 +127,6 @@ def run_train_script(
 
     subprocess.run(command)
 
-
 # Index
 def run_index_script(model_name, rvc_version):
     command = [
@@ -140,16 +138,13 @@ def run_index_script(model_name, rvc_version):
 
     subprocess.run(command)
 
-
 # Model information
 def run_model_information_script(pth_path):
-    command = [
-        "python",
-        "rvc/lib/tools/model_information.py",
-        pth_path,
-    ]
-    subprocess.run(command)
+    model_information(pth_path)
 
+# Model fusion
+def run_model_fusion_script(model_name, pth_path_1, pth_path_2):
+    model_fusion(model_name, pth_path_1, pth_path_2)
 
 # Tensorboard
 def run_tensorboard_script():
@@ -158,7 +153,6 @@ def run_tensorboard_script():
         "rvc/lib/tools/launch_tensorboard.py",
     ]
     subprocess.run(command)
-
 
 # Download
 def run_download_script(model_link):
@@ -311,6 +305,27 @@ def parse_arguments():
         help="Path to the .pth file (enclose in double quotes)",
     )
 
+    # Parser for 'model_fusion' mode
+    model_fusion_parser = subparsers.add_parser(
+        "model_fusion", help="Fuse two models"
+    )
+    model_fusion_parser.add_argument(
+        "model_name",
+        type=str,
+        help="Name of the model (enclose in double quotes)",
+    )
+    model_fusion_parser.add_argument(
+        "pth_path_1",
+        type=str,
+        help="Path to the first .pth file (enclose in double quotes)",
+    )
+    model_fusion_parser.add_argument(
+        "pth_path_2",
+        type=str,
+        help="Path to the second .pth file (enclose in double quotes)",
+    )
+
+
     # Parser for 'tensorboard' mode
     subparsers.add_parser("tensorboard", help="Run tensorboard")
 
@@ -376,6 +391,12 @@ def main():
         elif args.mode == "model_information":
             run_model_information_script(
                 args.pth_path,
+            )
+        elif args.mode == "model_fusion":
+            run_model_fusion_script(
+                args.model_name,
+                args.pth_path_1,
+                args.pth_path_2,
             )
         elif args.mode == "tensorboard":
             run_tensorboard_script()
