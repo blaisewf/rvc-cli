@@ -17,7 +17,7 @@ Ensure you have the required Python packages installed by running (Python 3.9 is
 
 #### Windows
 
-Execute the install.bat file to activate a Conda environment. Subsequently, launch the application using `env/python main.py` instead of the conventional `python main.py` command.
+Execute the [install.bat](./install.bat) file to activate a Conda environment. Subsequently, launch the application using `env/python main.py` instead of the conventional `python main.py` command.
 
 #### Linux
 
