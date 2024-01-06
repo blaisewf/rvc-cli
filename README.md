@@ -2,8 +2,17 @@
 
 [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blaise-tk/rvc_cli/blob/master/RVC_CLI.ipynb)
 
-### Installation
+### Table of Contents
+1. [Installation](#installation)
+    - [Windows](#windows)
+    - [Linux](#linux)
+2. [Getting Started](#getting-started)
+    - [Inference](#inference)
+    - [Train](#train)
+    - [Extra](#extra)
+3. [Credits](#credits)
 
+### Installation
 Ensure you have the required Python packages installed by running (Python 3.9 is recommended):
 
 #### Windows
@@ -17,7 +26,6 @@ pip install -r requirements.txt
 ```
 
 ### Getting Started
-
 For additional information and command-line options, refer to the help command:
 
 ```bash
@@ -27,7 +35,6 @@ python main.py -h
 This will display the available modes and their corresponding parameters, helping you understand how to use the RVC CLI effectively.
 
 ### Inference
-
 #### Run Inference
 
 ```bash
@@ -42,7 +49,6 @@ python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "in
 - `index_path`: Path to the .index file (enclosed in double quotes)
 
 ### Train
-
 #### Preprocess Dataset
 
 ```bash
@@ -90,7 +96,6 @@ python main.py index "model_name" rvc_version
 - `rvc_version`: Version of the model (v1 or v2)
 
 ### Extra
-
 #### Model Information
 
 ```bash
@@ -126,7 +131,6 @@ python main.py download "model_link"
 - `model_link`: Link of the model (enclosed in double quotes; Google Drive, Hugging Face, or MediaFire)
 
 ### Credits
-
 The RVC CLI is built on the foundations of the following projects:
 
 - [Mangio-RVC-Fork](https://github.com/Mangio621/Mangio-RVC-Fork)
