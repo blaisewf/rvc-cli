@@ -82,6 +82,3 @@ for remote_folder, file_list in models_download:
             os.makedirs(os.path.dirname(destination_path) or ".", exist_ok=True)
             print(f"\nDownloading {url} to {destination_path}...")
             wget.download(url, out=destination_path)
-
-
-print("All the files needed to use this program are downloaded.")

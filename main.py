@@ -17,14 +17,19 @@ from rvc.lib.process.model_fusion import model_fusion
 from rvc.lib.process.model_information import model_information
 
 config = Config()
-logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
-subprocess.run(["python", "rvc/lib/tools/prerequisites_download.py"])
+current_script_directory = os.path.dirname(os.path.realpath(__file__))
+logs_path = os.path.join(current_script_directory, "logs")
+subprocess.run(
+    ["python", os.path.join("rvc", "lib", "tools", "prerequisites_download.py")]
+)
+
 
 # Infer
 def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, index_path):
+    infer_script_path = os.path.join("rvc", "infer", "infer.py")
     command = [
         "python",
-        "rvc/infer/infer.py", # replace this with os path
+        infer_script_path,
         str(f0up_key),
         f0method,
         input_path,
@@ -33,13 +38,16 @@ def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, inde
         index_path,
     ]
     subprocess.run(command)
+    return f"File {input_path} infered successfully."
+
 
 # Preprocess
 def run_preprocess_script(model_name, dataset_path, sampling_rate):
     per = 3.0 if config.is_half else 3.7
+    preprocess_script_path = os.path.join("rvc", "train", "preprocess", "preprocess.py")
     command = [
         "python",
-        "rvc/train/preprocess/preprocess.py",
+        preprocess_script_path,
         os.path.join(logs_path, str(model_name)),
         dataset_path,
         str(sampling_rate),
@@ -48,22 +56,29 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
 
     os.mkdir(os.path.join(logs_path, str(model_name)))
     subprocess.run(command)
+    return f"Model {model_name} preprocessed successfully."
+
 
 # Extract
-def run_extract_script(
-    model_name, rvc_version, f0method, hop_length, sampling_rate
-):
+def run_extract_script(model_name, rvc_version, f0method, hop_length, sampling_rate):
     model_path = os.path.join(logs_path, str(model_name))
+    extract_f0_script_path = os.path.join(
+        "rvc", "train", "extract", "extract_f0_print.py"
+    )
+    extract_feature_script_path = os.path.join(
+        "rvc", "train", "extract", "extract_feature_print.py"
+    )
+
     command_1 = [
         "python",
-        "rvc/train/extract/extract_f0_print.py",
+        extract_f0_script_path,
         model_path,
         f0method,
         hop_length,
     ]
     command_2 = [
         "python",
-        "rvc/train/extract/extract_feature_print.py",
+        extract_feature_script_path,
         config.device,
         "1",
         "0",
@@ -77,6 +92,8 @@ def run_extract_script(
 
     generate_config(rvc_version, sampling_rate, model_path)
     generate_filelist(f0method, model_path, rvc_version, sampling_rate)
+    return f"Model {model_name} extracted successfully."
+
 
 # Train
 def run_train_script(
@@ -96,9 +113,10 @@ def run_train_script(
     else:
         pg, pd = "", ""
 
+    train_script_path = os.path.join("rvc", "train", "train.py")
     command = [
         "python",
-        "rvc/train/train.py",
+        train_script_path,
         "-se",
         str(save_every_epoch),
         "-te",
@@ -126,39 +144,51 @@ def run_train_script(
     ]
 
     subprocess.run(command)
+    return f"Model {model_name} trained successfully."
+
 
 # Index
 def run_index_script(model_name, rvc_version):
+    index_script_path = os.path.join("rvc", "train", "index_generator.py")
     command = [
         "python",
-        "rvc/train/index_generator.py",
+        index_script_path,
         os.path.join(logs_path, str(model_name)),
         rvc_version,
     ]
 
     subprocess.run(command)
+    return f"Index file for {model_name} generated successfully."
+
 
 # Model information
 def run_model_information_script(pth_path):
     model_information(pth_path)
 
+
 # Model fusion
 def run_model_fusion_script(model_name, pth_path_1, pth_path_2):
     model_fusion(model_name, pth_path_1, pth_path_2)
 
+
 # Tensorboard
 def run_tensorboard_script():
+    tensorboard_script_path = os.path.join(
+        "rvc", "lib", "tools", "launch_tensorboard.py"
+    )
     command = [
         "python",
-        "rvc/lib/tools/launch_tensorboard.py",
+        tensorboard_script_path,
     ]
     subprocess.run(command)
 
+
 # Download
 def run_download_script(model_link):
+    download_script_path = os.path.join("rvc", "lib", "tools", "model_download.py")
     command = [
         "python",
-        "rvc/lib/tools/model_download.py",
+        download_script_path,
         model_link,
     ]
     subprocess.run(command)
@@ -306,9 +336,7 @@ def parse_arguments():
     )
 
     # Parser for 'model_fusion' mode
-    model_fusion_parser = subparsers.add_parser(
-        "model_fusion", help="Fuse two models"
-    )
+    model_fusion_parser = subparsers.add_parser("model_fusion", help="Fuse two models")
     model_fusion_parser.add_argument(
         "model_name",
         type=str,
@@ -324,7 +352,6 @@ def parse_arguments():
         type=str,
         help="Path to the second .pth file (enclose in double quotes)",
     )
-
 
     # Parser for 'tensorboard' mode
     subparsers.add_parser("tensorboard", help="Run tensorboard")
