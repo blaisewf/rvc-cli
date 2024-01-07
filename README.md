@@ -62,13 +62,13 @@ python main.py preprocess "model_name" "dataset_path" sampling_rate
 #### Extract Features
 
 ```bash
-python main.py extract "model_name" rvc_version f0method crepe_hop_length sampling_rate
+python main.py extract "model_name" rvc_version f0method hop_length sampling_rate
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
 - `rvc_version`: Version of the model (v1 or v2)
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
-- `crepe_hop_length`: Value for crepe_hop_length (1 to 512)
+- `hop_length`: Value for hop_length (1 to 512)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 
 #### Start Train

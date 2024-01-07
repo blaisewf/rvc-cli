@@ -48,7 +48,7 @@ def vc_single(
     resample_sr=0,
     rms_mix_rate=1,
     protect=0.33,
-    crepe_hop_length=None,
+    hop_length=None,
     output_path=None,
 ):
     global tgt_sr, net_g, vc, hubert_model, version
@@ -97,7 +97,7 @@ def vc_single(
             rms_mix_rate,
             version,
             protect,
-            crepe_hop_length,
+            hop_length,
             f0_file=f0_file,
         )
 
@@ -184,7 +184,7 @@ index_rate = float(0.66)
 sid = f0up_key
 input_audio = audio_input_path
 f0_pitch = f0up_key
-crepe_hop_length = 64
+hop_length = 64
 f0_file = None
 f0_method = f0method
 file_index = index_path
@@ -202,7 +202,7 @@ try:
         f0_method=f0_method,
         file_index=file_index,
         index_rate=index_rate,
-        crepe_hop_length=crepe_hop_length,
+        hop_length=hop_length,
         output_path=output_file,
     )
 

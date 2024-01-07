@@ -51,7 +51,7 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
 
 # Extract
 def run_extract_script(
-    model_name, rvc_version, f0method, crepe_hop_length, sampling_rate
+    model_name, rvc_version, f0method, hop_length, sampling_rate
 ):
     model_path = os.path.join(logs_path, str(model_name))
     command_1 = [
@@ -59,7 +59,7 @@ def run_extract_script(
         "rvc/train/extract/extract_f0_print.py",
         model_path,
         f0method,
-        crepe_hop_length,
+        hop_length,
     ]
     command_2 = [
         "python",
@@ -232,7 +232,7 @@ def parse_arguments():
         help="Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)",
     )
     extract_parser.add_argument(
-        "crepe_hop_length", type=str, help="Value for crepe_hop_length (1 to 512)"
+        "hop_length", type=str, help="Value for hop_length (1 to 512)"
     )
     extract_parser.add_argument(
         "sampling_rate",
@@ -369,7 +369,7 @@ def main():
                 args.model_name,
                 args.rvc_version,
                 args.f0method,
-                args.crepe_hop_length,
+                args.hop_length,
                 args.sampling_rate,
             )
         elif args.mode == "train":

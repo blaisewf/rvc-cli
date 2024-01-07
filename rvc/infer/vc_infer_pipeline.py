@@ -92,7 +92,7 @@ class VC(object):
         if audio.ndim == 2 and audio.shape[0] > 1:
             audio = torch.mean(audio, dim=0, keepdim=True).detach()
         audio = audio.detach()
-        print("Initiating prediction with a crepe_hop_length of: " + str(hop_length))
+        print("Initiating prediction with a hop_length of: " + str(hop_length))
         pitch: Tensor = torchcrepe.predict(
             audio,
             self.sr,
@@ -156,7 +156,7 @@ class VC(object):
         f0_up_key,
         f0_method,
         filter_radius,
-        crepe_hop_length,
+        hop_length,
         inp_f0=None,
     ):
         global input_audio_path2wav
@@ -198,11 +198,11 @@ class VC(object):
             f0 = signal.medfilt(f0, 3)
         elif f0_method == "crepe":
             f0 = self.get_f0_crepe_computation(
-                x, f0_min, f0_max, p_len, crepe_hop_length
+                x, f0_min, f0_max, p_len, hop_length
             )
         elif f0_method == "crepe-tiny":
             f0 = self.get_f0_crepe_computation(
-                x, f0_min, f0_max, p_len, crepe_hop_length, "tiny"
+                x, f0_min, f0_max, p_len, hop_length, "tiny"
             )
         elif f0_method == "rmvpe":
             if hasattr(self, "model_rmvpe") == False:
@@ -351,7 +351,7 @@ class VC(object):
         rms_mix_rate,
         version,
         protect,
-        crepe_hop_length,
+        hop_length,
         f0_file=None,
     ):
         if file_index != "" and os.path.exists(file_index) == True and index_rate != 0:
@@ -406,7 +406,7 @@ class VC(object):
                 f0_up_key,
                 f0_method,
                 filter_radius,
-                crepe_hop_length,
+                hop_length,
                 inp_f0,
             )
             pitch = pitch[:p_len]

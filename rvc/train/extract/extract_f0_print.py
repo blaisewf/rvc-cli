@@ -20,9 +20,9 @@ f0_method = sys.argv[2]
 num_processes = cpu_count()
 
 try:
-    crepe_hop_length = int(sys.argv[3])
+    hop_length = int(sys.argv[3])
 except ValueError:
-    crepe_hop_length = 128
+    hop_length = 128
 
 DoFormant = False
 Quefrency = 1.0
@@ -42,7 +42,7 @@ class FeatureInput:
         self.f0_mel_min = 1127 * np.log(1 + self.f0_min / 700)
         self.f0_mel_max = 1127 * np.log(1 + self.f0_max / 700)
 
-    def mncrepe(self, method, x, p_len, crepe_hop_length):
+    def mncrepe(self, method, x, p_len, hop_length):
         f0 = None
         torch_device_index = 0
         torch_device = (
@@ -64,15 +64,15 @@ class FeatureInput:
             pitch = torchcrepe.predict(
                 audio,
                 self.fs,
-                crepe_hop_length,
+                hop_length,
                 self.f0_min,
                 self.f0_max,
                 "full",
-                batch_size=crepe_hop_length * 2,
+                batch_size=hop_length * 2,
                 device=torch_device,
                 pad=True,
             )
-            p_len = p_len or x.shape[0] // crepe_hop_length
+            p_len = p_len or x.shape[0] // hop_length
             source = np.array(pitch.squeeze(0).cpu().float().numpy())
             source[source < 0.001] = np.nan
             target = np.interp(
@@ -142,7 +142,7 @@ class FeatureInput:
             "rmvpe": self.get_rmvpe,
         }
 
-    def compute_f0(self, path, f0_method, crepe_hop_length):
+    def compute_f0(self, path, f0_method, hop_length):
         x = load_audio(path, self.fs)
         p_len = x.shape[0] // self.hop
 
@@ -153,7 +153,7 @@ class FeatureInput:
                 else self.f0_method_dict[f0_method](x)
             )
         elif f0_method == "crepe":
-            f0 = self.mncrepe(f0_method, x, p_len, crepe_hop_length)
+            f0 = self.mncrepe(f0_method, x, p_len, hop_length)
         return f0
 
     def coarse_f0(self, f0):
@@ -172,12 +172,12 @@ class FeatureInput:
         )
         return f0_coarse
 
-    def process_paths(self, paths, f0_method, crepe_hop_length, thread_n):
+    def process_paths(self, paths, f0_method, hop_length, thread_n):
         if len(paths) == 0:
             print("There are no paths to process.")
             return
         with tqdm.tqdm(total=len(paths), leave=True, position=thread_n) as pbar:
-            description = f"Thread {thread_n} | Hop-Length {crepe_hop_length}"
+            description = f"Thread {thread_n} | Hop-Length {hop_length}"
             pbar.set_description(description)
 
             for idx, (inp_path, opt_path1, opt_path2) in enumerate(paths):
@@ -188,7 +188,7 @@ class FeatureInput:
                         pbar.update(1)
                         continue
 
-                    feature_pit = self.compute_f0(inp_path, f0_method, crepe_hop_length)
+                    feature_pit = self.compute_f0(inp_path, f0_method, hop_length)
                     np.save(
                         opt_path2,
                         feature_pit,
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     for i in range(num_processes):
         p = Process(
             target=feature_input.process_paths,
-            args=(paths[i::num_processes], f0_method, crepe_hop_length, i),
+            args=(paths[i::num_processes], f0_method, hop_length, i),
         )
         processes.append(p)
         p.start()
