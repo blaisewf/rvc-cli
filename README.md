@@ -8,8 +8,8 @@
     - [Linux](#linux)
 2. [Getting Started](#getting-started)
     - [Inference](#inference)
-    - [Train](#train)
-    - [Extra](#extra)
+    - [Training](#training)
+    - [Additional Features](#additional-features)
 3. [Credits](#credits)
 
 ### Installation
@@ -48,7 +48,7 @@ python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "in
 - `pth_file`: Path to the .pth file (enclosed in double quotes)
 - `index_path`: Path to the .index file (enclosed in double quotes)
 
-### Train
+### Training
 #### Preprocess Dataset
 
 ```bash
@@ -71,22 +71,25 @@ python main.py extract "model_name" rvc_version f0method hop_length sampling_rat
 - `hop_length`: Value for hop_length (1 to 512)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 
-#### Start Train
+#### Start Training
 
 ```bash
-python main.py train "model_name" rvc_version save_every_epoch total_epoch sampling_rate batch_size pretrained pitch_guidance
+python main.py train "model_name" rvc_version save_every_epoch total_epoch sampling_rate batch_size pitch_guidance pretrained custom_pretrained g_pretrained d_pretrained
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
 - `rvc_version`: Version of the model (v1 or v2)
 - `save_every_epoch`: Number of epochs after which to save the model checkpoint (1 to 50)
 - `total_epoch`: Total number of training epochs (1 to 10000)
-- `batch_size`: Batch size, limited by GPU VRAM
 - `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
+- `batch_size`: Batch size, limited by GPU VRAM
+- `pitch_guidance`: Train with or without pitch guidance (True or False)
 - `pretrained`: Train with or without pretrained models (True or False)
-- `pitch_guidance` Train with or without pitch guidance (True or False)
+- `custom_pretrained`: Use custom pretrained models, you must use the parameters g_/d_pretrained (True or False).
+- `g_pretrained_path`: Path to pretrained file G, optional, only if you have used custom_pretrained (enclosed in double quotes)
+- `d_pretrained_path`: Path to pretrained file D, optional, only if you have used custom_pretrained (enclosed in double quotes)
 
-#### Generate index file
+#### Generate Index File
 
 ```bash
 python main.py index "model_name" rvc_version
@@ -95,7 +98,7 @@ python main.py index "model_name" rvc_version
 - `model_name`: Name of the model (enclosed in double quotes)
 - `rvc_version`: Version of the model (v1 or v2)
 
-### Extra
+### Additional Features
 #### Model Information
 
 ```bash
@@ -120,7 +123,7 @@ python main.py model_fusion "model_name" "pth_path_1" "pth_path_2"
 python main.py tensorboard
 ```
 
-#### Download models
+#### Download Models
 
 Run the download script with the following command:
 

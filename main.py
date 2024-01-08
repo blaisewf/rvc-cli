@@ -103,13 +103,23 @@ def run_train_script(
     total_epoch,
     sampling_rate,
     batch_size,
-    pretrained,
     pitch_guidance,
+    pretrained,
+    custom_pretrained,
+    g_pretrained_path=None,
+    d_pretrained_path=None,
 ):
     f0 = 1 if pitch_guidance == "True" else 0
 
     if pretrained == "True":
-        pg, pd = pretrained_selector(f0)[rvc_version][sampling_rate]
+        if custom_pretrained == "False":
+            pg, pd = pretrained_selector(f0)[rvc_version][sampling_rate]
+        else:
+            if g_pretrained_path is None or d_pretrained_path is None:
+                raise ValueError(
+                    "Please provide the path to the pretrained G and D models."
+                )
+            pg, pd = g_pretrained_path, d_pretrained_path
     else:
         pg, pd = "", ""
 
@@ -294,7 +304,7 @@ def parse_arguments():
     train_parser.add_argument(
         "sampling_rate",
         type=validate_sampling_rate,
-        help="Sampling rate (32000, 40000 or 48000)",
+        help="Sampling rate (32000, 40000, or 48000)",
     )
     train_parser.add_argument(
         "batch_size",
@@ -302,14 +312,34 @@ def parse_arguments():
         help="Batch size",
     )
     train_parser.add_argument(
+        "pitch_guidance",
+        type=validate_true_false,
+        help="Pitch guidance (True or False)",
+    )
+    train_parser.add_argument(
         "pretrained",
         type=validate_true_false,
         help="Pretrained (True or False)",
     )
     train_parser.add_argument(
-        "pitch_guidance",
+        "custom_pretrained",
         type=validate_true_false,
-        help="Pitch guidance (True or False)",
+        help="Custom pretrained (True or False)",
+    )
+
+    train_parser.add_argument(
+        "g_pretrained_path",
+        type=str,
+        nargs="?",
+        default=None,
+        help="Path to the pretrained G file (enclose in double quotes)",
+    )
+    train_parser.add_argument(
+        "d_pretrained_path",
+        type=str,
+        nargs="?",
+        default=None,
+        help="Path to the pretrained D file (enclose in double quotes)",
     )
 
     # Parser for 'index' mode
@@ -407,8 +437,11 @@ def main():
                 args.total_epoch,
                 args.sampling_rate,
                 args.batch_size,
-                args.pretrained,
                 args.pitch_guidance,
+                args.pretrained,
+                args.custom_pretrained,
+                args.g_pretrained_path,
+                args.d_pretrained_path,
             )
         elif args.mode == "index":
             run_index_script(
