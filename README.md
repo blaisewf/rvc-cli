@@ -42,6 +42,8 @@ python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "in
 ```
 
 - `f0up_key`: Value for f0up_key (-12 to +12)
+- `filter_radius`: Value for filter_radius (0 to 10)
+- `index_rate`: Value for index_rate (0.0 to 1.0)
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
 - `input_path`: Input audio path (enclosed in double quotes)
 - `output_path`: Output audio path (enclosed in double quotes)

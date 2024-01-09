@@ -13,14 +13,11 @@ from rvc.lib.infer_pack.models import (
     SynthesizerTrnMs768NSFsid_nono,
 )
 
-torch.manual_seed(114514)
-
 from rvc.configs.config import Config
-
 config = Config()
 
+torch.manual_seed(114514)
 hubert_model = None
-
 
 def load_hubert():
     global hubert_model
@@ -53,7 +50,7 @@ def vc_single(
 ):
     global tgt_sr, net_g, vc, hubert_model, version
 
-    filter_radius = 3
+    
     if input_audio_path is None:
         return "Please, load an audio!", None
 
@@ -171,15 +168,17 @@ def get_vc(weight_root, sid):
 
 
 f0up_key = sys.argv[1]
-f0method = sys.argv[2]
+filter_radius = sys.argv[2] # Default 3, 0 to 10
+index_rate = float(sys.argv[3])
+f0method = sys.argv[4]
 
-audio_input_path = sys.argv[3]
-audio_output_path = sys.argv[4]
+audio_input_path = sys.argv[5]
+audio_output_path = sys.argv[6]
 
-model_path = sys.argv[5]
-index_path = sys.argv[6]
+model_path = sys.argv[7]
+index_path = sys.argv[8]
 
-index_rate = float(0.66)
+
 
 sid = f0up_key
 input_audio = audio_input_path
@@ -211,7 +210,7 @@ try:
     else:
         message = result
 
-    print(f"Conversion completed. Output file: {output_file}")
+    print(f"Conversion completed. Output file: '{output_file}'")
 
 except Exception as error:
     print(f"Voice conversion failed: {error}")

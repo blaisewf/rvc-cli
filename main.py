@@ -25,12 +25,23 @@ subprocess.run(
 
 
 # Infer
-def run_infer_script(f0up_key, f0method, input_path, output_path, pth_file, index_path):
+def run_infer_script(
+    f0up_key,
+    filter_radius,
+    index_rate,
+    f0method,
+    input_path,
+    output_path,
+    pth_file,
+    index_path,
+):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
     command = [
         "python",
         infer_script_path,
         str(f0up_key),
+        str(filter_radius),
+        str(index_rate),
         f0method,
         input_path,
         output_path,
@@ -216,7 +227,22 @@ def parse_arguments():
     # Parser for 'infer' mode
     infer_parser = subparsers.add_parser("infer", help="Run inference")
     infer_parser.add_argument(
-        "f0up_key", type=validate_f0up_key, help="Value for f0up_key (-12 to +12)"
+        "f0up_key",
+        type=validate_f0up_key,
+        default=0,
+        help="Value for f0up_key (-12 to +12)",
+    )
+    infer_parser.add_argument(
+        "filter_radius",
+        type=str,
+        default=3,
+        help="Value for filter_radius (0 to 10)",
+    )
+    infer_parser.add_argument(
+        "index_rate",
+        type=str,
+        default=0.75,
+        help="Value for index_rate (0.0 to 1)",
     )
     infer_parser.add_argument(
         "f0method",
@@ -408,6 +434,8 @@ def main():
         if args.mode == "infer":
             run_infer_script(
                 args.f0up_key,
+                args.filter_radius,
+                args.index_rate,
                 args.f0method,
                 args.input_path,
                 args.output_path,
