@@ -3,7 +3,7 @@ import torch
 def model_information(path):
     model_data = torch.load(path, map_location="cpu")
 
-    print("Loaded model from %s" % path)
+    print(f"Loaded model from {path}")
 
     data = model_data
 

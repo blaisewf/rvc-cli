@@ -272,7 +272,7 @@ def get_hparams():
     hparams.if_retrain_collapse = args.retrain_collapse
     if args.collapse_threshold != None:
         hparams.collapse_threshold = args.collapse_threshold * 0.01
-    hparams.data.training_files = "%s/filelist.txt" % experiment_dir
+    hparams.data.training_files = f"{experiment_dir}/filelist.txt"
     return hparams
 
 

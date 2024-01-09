@@ -41,8 +41,8 @@ class PreProcess:
         self.max_amplitude = 0.9
         self.alpha = 0.75
         self.exp_dir = exp_dir
-        self.gt_wavs_dir = "%s/0_gt_wavs" % exp_dir
-        self.wavs16k_dir = "%s/1_16k_wavs" % exp_dir
+        self.gt_wavs_dir = f"{exp_dir}/0_gt_wavs"
+        self.wavs16k_dir = f"{exp_dir}/1_16k_wavs"
         os.makedirs(self.exp_dir, exist_ok=True)
         os.makedirs(self.gt_wavs_dir, exist_ok=True)
         os.makedirs(self.wavs16k_dir, exist_ok=True)
@@ -50,13 +50,13 @@ class PreProcess:
     def normalize_and_write(self, tmp_audio, idx0, idx1):
         tmp_max = np.abs(tmp_audio).max()
         if tmp_max > 2.5:
-            print("%s-%s-%s-filtered" % (idx0, idx1, tmp_max))
+            print(f"{idx0}-{idx1}-{tmp_max}-filtered")
             return
         tmp_audio = (tmp_audio / tmp_max * (self.max_amplitude * self.alpha)) + (
             1 - self.alpha
         ) * tmp_audio
         wavfile.write(
-            "%s/%s_%s.wav" % (self.gt_wavs_dir, idx0, idx1),
+            f"{self.gt_wavs_dir}/{idx0}_{idx1}.wav",
             self.sr,
             tmp_audio.astype(np.float32),
         )
@@ -64,7 +64,7 @@ class PreProcess:
             tmp_audio, orig_sr=self.sr, target_sr=16000
         )  # , res_type="soxr_vhq"
         wavfile.write(
-            "%s/%s_%s.wav" % (self.wavs16k_dir, idx0, idx1),
+            f"{self.wavs16k_dir}/{idx0}_{idx1}.wav",
             16000,
             tmp_audio.astype(np.float32),
         )
@@ -101,7 +101,7 @@ class PreProcess:
     def process_audio_multiprocessing_input_directory(self, input_root, num_processes):
         try:
             infos = [
-                ("%s/%s" % (input_root, name), idx)
+                (f"{input_root}/{name}", idx)
                 for idx, name in enumerate(sorted(list(os.listdir(input_root))))
             ]
             if no_parallel:

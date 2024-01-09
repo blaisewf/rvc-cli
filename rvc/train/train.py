@@ -214,7 +214,7 @@ def run(
         global_step = 0
         if hps.pretrainG != "":
             if rank == 0:
-                print("Loaded pretrained_G %s" % (hps.pretrainG))
+                print(f"Loaded pretrained_G {hps.pretrainG}")
             if hasattr(net_g, "module"):
                 print(
                     net_g.module.load_state_dict(
@@ -229,7 +229,7 @@ def run(
                 )
         if hps.pretrainD != "":
             if rank == 0:
-                print("Loaded pretrained_D %s" % (hps.pretrainD))
+                print(f"Loaded pretrained_D {hps.pretrainD}")
             if hasattr(net_d, "module"):
                 print(
                     net_d.module.load_state_dict(
@@ -559,7 +559,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             else:
                 ckpt = net_g.state_dict()
             print(
-                "saving ckpt %s_e%s:%s"
+                "Saving small model... %s_e%s:%s"
                 % (
                     hps.name,
                     epoch,
@@ -567,7 +567,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                         ckpt,
                         hps.sample_rate,
                         hps.if_f0,
-                        hps.name + "_e%s_s%s" % (epoch, global_step),
+                        hps.name + f"_e{epoch}_s{global_step}",
                         epoch,
                         hps.version,
                         hps,
