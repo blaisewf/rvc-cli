@@ -38,7 +38,7 @@ This will display the available modes and their corresponding parameters, helpin
 #### Run Inference
 
 ```bash
-python main.py infer f0up_key f0method "input_path" "output_path" "pth_file" "index_path"
+python main.py infer f0up_key filter_radius index_rate f0method "input_path" "output_path" "pth_file" "index_path"
 ```
 
 - `f0up_key`: Value for f0up_key (-12 to +12)
