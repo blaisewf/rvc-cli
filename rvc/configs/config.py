@@ -90,11 +90,8 @@ class Config:
                 or "1070" in self.gpu_name
                 or "1080" in self.gpu_name
             ):
-                print("Found GPU %s, force to fp32", self.gpu_name)
                 self.is_half = False
                 self.use_fp32_config()
-            else:
-                print("Found GPU", self.gpu_name)
             self.gpu_mem = int(
                 torch.cuda.get_device_properties(i_device).total_memory
                 / 1024
