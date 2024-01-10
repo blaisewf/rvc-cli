@@ -3,16 +3,18 @@
 [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blaise-tk/rvc_cli/blob/master/RVC_CLI.ipynb)
 
 ### Table of Contents
+
 1. [Installation](#installation)
-    - [Windows](#windows)
-    - [Linux](#linux)
+   - [Windows](#windows)
+   - [Linux](#linux)
 2. [Getting Started](#getting-started)
-    - [Inference](#inference)
-    - [Training](#training)
-    - [Additional Features](#additional-features)
+   - [Inference](#inference)
+   - [Training](#training)
+   - [Additional Features](#additional-features)
 3. [Credits](#credits)
 
 ### Installation
+
 Ensure you have the required Python packages installed by running (Python 3.9 is recommended):
 
 #### Windows
@@ -26,31 +28,34 @@ pip install -r requirements.txt
 ```
 
 ### Getting Started
+
 For additional information and command-line options, refer to the help command:
 
 ```bash
 python main.py -h
 ```
 
-This will display the available modes and their corresponding parameters, helping you understand how to use the RVC CLI effectively.
+This command displays the available modes and their corresponding parameters, providing clarity on how to effectively use the RVC CLI.
 
 ### Inference
+
 #### Run Inference
 
 ```bash
 python main.py infer [f0up_key] [filter_radius] [index_rate] [f0method] "input_path" "output_path" "pth_file" "index_path"
 ```
 
-- `f0up_key`: Value for f0up_key (-12 to +12) : Optional, default `0`
-- `filter_radius`: Value for filter_radius (0 to 10) : Optional, default `3`
-- `index_rate`: Value for index_rate (0.0 to 1.0) : Optional, default `0.75`
-- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe) : Optional, default `rmvpe`
+- `f0up_key`: Value for f0up_key (-12 to +12): Optional, default `0`
+- `filter_radius`: Value for filter_radius (0 to 10): Optional, default `3`
+- `index_rate`: Value for index_rate (0.0 to 1.0): Optional, default `0.75`
+- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe): Optional, default `rmvpe`
 - `input_path`: Input audio path (enclosed in double quotes)
 - `output_path`: Output audio path (enclosed in double quotes)
 - `pth_file`: Path to the .pth file (enclosed in double quotes)
 - `index_path`: Path to the .index file (enclosed in double quotes)
 
 ### Training
+
 #### Preprocess Dataset
 
 ```bash
@@ -59,7 +64,7 @@ python main.py preprocess "model_name" "dataset_path" [sampling_rate]
 
 - `model_name`: Name of the model (enclosed in double quotes)
 - `dataset_path`: Path to the dataset (enclosed in double quotes)
-- `sampling_rate`: Sampling rate (32000, 40000, or 48000) : Optional, default `40000`
+- `sampling_rate`: Sampling rate (32000, 40000, or 48000): Optional, default `40000`
 
 #### Extract Features
 
@@ -68,10 +73,10 @@ python main.py extract "model_name" [rvc_version] [f0method] [hop_length] [sampl
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
-- `rvc_version`: Version of the model (v1 or v2) : Optional, default `v2`
-- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe) : Optional, default `rmvpe`
-- `hop_length`: Value for hop_length (1 to 512) : Optional, default `128`
-- `sampling_rate`: Sampling rate (32000, 40000, or 48000) : Optional, default `40000`
+- `rvc_version`: Version of the model (v1 or v2): Optional, default `v2`
+- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe): Optional, default `rmvpe`
+- `hop_length`: Value for hop_length (1 to 512): Optional, default `128`
+- `sampling_rate`: Sampling rate (32000, 40000, or 48000): Optional, default `40000`
 
 #### Start Training
 
@@ -80,16 +85,16 @@ python main.py train "model_name" [rvc_version] save_every_epoch total_epoch [sa
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
-- `rvc_version`: Version of the model (v1 or v2) : Optional, default `v2`
+- `rvc_version`: Version of the model (v1 or v2): Optional, default `v2`
 - `save_every_epoch`: Number of epochs after which to save the model checkpoint (1 to 50)
 - `total_epoch`: Total number of training epochs (1 to 10000)
-- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000) : Optional, default `40000`
+- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000): Optional, default `40000`
 - `batch_size`: Batch size, limited by GPU VRAM
-- `pitch_guidance`: Train with or without pitch guidance (True or False) : Optional, default `True`
-- `pretrained`: Train with or without pretrained models (True or False) : Optional, default `True`
-- `custom_pretrained`: Use custom pretrained models, you must use the parameters g_/d_pretrained (True or False) : Optional, default `False`
-- `g_pretrained_path`: Path to pretrained file G, only if you have used custom_pretrained (enclosed in double quotes) : Optional, default `None`
-- `d_pretrained_path`: Path to pretrained file D, only if you have used custom_pretrained (enclosed in double quotes) : Optional, default `None`
+- `pitch_guidance`: Train with or without pitch guidance (True or False): Optional, default `True`
+- `pretrained`: Train with or without pretrained models (True or False): Optional, default `True`
+- `custom_pretrained`: Use custom pretrained models; use parameters g\_/d_pretrained (True or False): Optional, default `False`
+- `g_pretrained_path`: Path to pretrained file G, only if you have used custom_pretrained (enclosed in double quotes): Optional, default `None`
+- `d_pretrained_path`: Path to pretrained file D, only if you have used custom_pretrained (enclosed in double quotes): Optional, default `None`
 
 #### Generate Index File
 
@@ -101,6 +106,7 @@ python main.py index "model_name" rvc_version
 - `rvc_version`: Version of the model (v1 or v2)
 
 ### Additional Features
+
 #### Model Information
 
 ```bash
@@ -133,9 +139,10 @@ Run the download script with the following command:
 python main.py download "model_link"
 ```
 
-- `model_link`: Link of the model (enclosed in double quotes; Google Drive, Hugging Face, or MediaFire)
+- `model_link`: Link of the model (enclosed in double quotes; Google Drive or Hugging Face)
 
 ### Credits
+
 The RVC CLI is built on the foundations of the following projects:
 
 - [Mangio-RVC-Fork](https://github.com/Mangio621/Mangio-RVC-Fork)
