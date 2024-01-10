@@ -578,20 +578,19 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
     if rank == 0:
         print(f"Epoch {epoch}: {epoch_recorder.record()}")
     if epoch >= hps.total_epoch and rank == 0:
-        print("The training is over, finalizing the program...")
+        print(
+            f"Training has been successfully completed with {epoch} epochs and {global_step} steps."
+        )
 
         if hasattr(net_g, "module"):
             ckpt = net_g.module.state_dict()
         else:
             ckpt = net_g.state_dict()
-        print(
-            "Saving final model... %s"
-            % (
-                save_final(
-                    ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
-                )
+
+            save_final(
+                ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
             )
-        )
+
         sleep(1)
         os._exit(2333333)
 

@@ -165,6 +165,7 @@ def run_train_script(
     ]
 
     subprocess.run(command)
+    run_index_script(model_name, rvc_version)
     return f"Model {model_name} trained successfully."
 
 

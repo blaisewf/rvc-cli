@@ -141,13 +141,6 @@ class VC(object):
         f0 = f0[0].cpu().numpy()
         return f0
 
-    def get_f0_pyin_computation(self, x, f0_min, f0_max):
-        y, sr = librosa.load("saudio/Sidney.wav", self.sr, mono=True)
-        f0, _, _ = librosa.pyin(y, sr=self.sr, fmin=f0_min, fmax=f0_max)
-        f0 = f0[1:]
-        return f0
-
-
     def get_f0(
         self,
         input_audio_path,

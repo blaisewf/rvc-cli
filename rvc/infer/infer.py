@@ -14,10 +14,12 @@ from rvc.lib.infer_pack.models import (
 )
 
 from rvc.configs.config import Config
+
 config = Config()
 
 torch.manual_seed(114514)
 hubert_model = None
+
 
 def load_hubert():
     global hubert_model
@@ -50,7 +52,6 @@ def vc_single(
 ):
     global tgt_sr, net_g, vc, hubert_model, version
 
-    
     if input_audio_path is None:
         return "Please, load an audio!", None
 
@@ -168,7 +169,7 @@ def get_vc(weight_root, sid):
 
 
 f0up_key = sys.argv[1]
-filter_radius = sys.argv[2] # Default 3, 0 to 10
+filter_radius = sys.argv[2]  # Default 3, 0 to 10
 index_rate = float(sys.argv[3])
 f0method = sys.argv[4]
 
@@ -177,8 +178,6 @@ audio_output_path = sys.argv[6]
 
 model_path = sys.argv[7]
 index_path = sys.argv[8]
-
-
 
 sid = f0up_key
 input_audio = audio_input_path
