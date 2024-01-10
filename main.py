@@ -230,23 +230,28 @@ def parse_arguments():
     infer_parser.add_argument(
         "f0up_key",
         type=validate_f0up_key,
+        nargs="?",
         default=0,
         help="Value for f0up_key (-12 to +12)",
     )
     infer_parser.add_argument(
         "filter_radius",
         type=str,
+        nargs="?",
         default=3,
         help="Value for filter_radius (0 to 10)",
     )
     infer_parser.add_argument(
         "index_rate",
         type=str,
+        nargs="?",
         default=0.75,
         help="Value for index_rate (0.0 to 1)",
     )
     infer_parser.add_argument(
         "f0method",
+        nargs="?",
+        default="rmvpe",
         type=validate_f0method,
         help="Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)",
     )
@@ -278,6 +283,8 @@ def parse_arguments():
     preprocess_parser.add_argument(
         "sampling_rate",
         type=validate_sampling_rate,
+        nargs="?",
+        default="40000",
         help="Sampling rate (32000, 40000 or 48000)",
     )
 
@@ -291,19 +298,29 @@ def parse_arguments():
     extract_parser.add_argument(
         "rvc_version",
         type=str,
+        nargs="?",
+        default="v2",
         help="Version of the model (v1 or v2)",
     )
     extract_parser.add_argument(
         "f0method",
         type=validate_f0method,
+        nargs="?",
+        default="rmvpe",
         help="Value for f0method (pm, dio, crepe, crepe-tiny, mangio-crepe, mangio-crepe-tiny, harvest, rmvpe)",
     )
     extract_parser.add_argument(
-        "hop_length", type=str, help="Value for hop_length (1 to 512)"
+        "hop_length",
+        type=str,
+        nargs="?",
+        default=128,
+        help="Value for hop_length (1 to 512)",
     )
     extract_parser.add_argument(
         "sampling_rate",
         type=validate_sampling_rate,
+        nargs="?",
+        default="40000",
         help="Sampling rate (32000, 40000 or 48000)",
     )
     # Parser for 'train' mode
@@ -316,6 +333,8 @@ def parse_arguments():
     train_parser.add_argument(
         "rvc_version",
         type=str,
+        nargs="?",
+        default="v2",
         help="Version of the model (v1 or v2)",
     )
     train_parser.add_argument(
@@ -331,6 +350,8 @@ def parse_arguments():
     train_parser.add_argument(
         "sampling_rate",
         type=validate_sampling_rate,
+        nargs="?",
+        default="40000",
         help="Sampling rate (32000, 40000, or 48000)",
     )
     train_parser.add_argument(
@@ -341,16 +362,22 @@ def parse_arguments():
     train_parser.add_argument(
         "pitch_guidance",
         type=validate_true_false,
+        nargs="?",
+        default="True",
         help="Pitch guidance (True or False)",
     )
     train_parser.add_argument(
         "pretrained",
         type=validate_true_false,
+        nargs="?",
+        default="True",
         help="Pretrained (True or False)",
     )
     train_parser.add_argument(
         "custom_pretrained",
         type=validate_true_false,
+        nargs="?",
+        default="False",
         help="Custom pretrained (True or False)",
     )
 

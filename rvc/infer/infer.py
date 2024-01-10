@@ -139,7 +139,6 @@ def get_vc(weight_root, sid):
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
             cpt = None
-        return {"visible": False, "__type__": "update"}
     person = weight_root
     cpt = torch.load(person, map_location="cpu")
     tgt_sr = cpt["config"][-1]
@@ -169,7 +168,7 @@ def get_vc(weight_root, sid):
 
 
 f0up_key = sys.argv[1]
-filter_radius = sys.argv[2]  # Default 3, 0 to 10
+filter_radius = sys.argv[2]
 index_rate = float(sys.argv[3])
 f0method = sys.argv[4]
 
@@ -182,7 +181,7 @@ index_path = sys.argv[8]
 sid = f0up_key
 input_audio = audio_input_path
 f0_pitch = f0up_key
-hop_length = 64
+hop_length = 1
 f0_file = None
 f0_method = f0method
 file_index = index_path
