@@ -170,18 +170,18 @@ def get_vc(weight_root, sid):
 f0up_key = sys.argv[1]
 filter_radius = sys.argv[2]
 index_rate = float(sys.argv[3])
-f0method = sys.argv[4]
+hop_length = sys.argv[4]
+f0method = sys.argv[5]
 
-audio_input_path = sys.argv[5]
-audio_output_path = sys.argv[6]
+audio_input_path = sys.argv[6]
+audio_output_path = sys.argv[7]
 
-model_path = sys.argv[7]
-index_path = sys.argv[8]
+model_path = sys.argv[8]
+index_path = sys.argv[9]
 
 sid = f0up_key
 input_audio = audio_input_path
 f0_pitch = f0up_key
-hop_length = 1
 f0_file = None
 f0_method = f0method
 file_index = index_path

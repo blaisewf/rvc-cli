@@ -29,6 +29,7 @@ def run_infer_script(
     f0up_key,
     filter_radius,
     index_rate,
+    hop_length,
     f0method,
     input_path,
     output_path,
@@ -42,6 +43,7 @@ def run_infer_script(
         str(f0up_key),
         str(filter_radius),
         str(index_rate),
+        str(hop_length),
         f0method,
         input_path,
         output_path,
@@ -247,6 +249,13 @@ def parse_arguments():
         nargs="?",
         default=0.75,
         help="Value for index_rate (0.0 to 1)",
+    )
+    infer_parser.add_argument(
+        "hop_length",
+        type=str,
+        nargs="?",
+        default=128,
+        help="Value for hop_length (1 to 512)",
     )
     infer_parser.add_argument(
         "f0method",
@@ -464,6 +473,7 @@ def main():
                 args.f0up_key,
                 args.filter_radius,
                 args.index_rate,
+                args.hop_length,
                 args.f0method,
                 args.input_path,
                 args.output_path,

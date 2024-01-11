@@ -2,6 +2,10 @@
 
 [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blaise-tk/rvc_cli/blob/master/RVC_CLI.ipynb)
 
+### Todo
+- Use this style for commands `python your_script.py infer --hop_length 128 --f0method rmvpe --input_path "input.wav" --output_path "output.wav" --pth_file "model.pth" --index_path "index_file.index"`
+- Add Audio Split in infer
+
 ### Table of Contents
 
 1. [Installation](#installation)
@@ -43,12 +47,13 @@ This command displays the available modes and their corresponding parameters, pr
 #### Run Inference
 
 ```bash
-python main.py infer [f0up_key] [filter_radius] [index_rate] [f0method] "input_path" "output_path" "pth_file" "index_path"
+python main.py infer [f0up_key] [filter_radius] [index_rate] [hop_length] [f0method] "input_path" "output_path" "pth_file" "index_path"
 ```
 
 - `f0up_key`: Value for f0up_key (-12 to +12): Optional, default `0`
 - `filter_radius`: Value for filter_radius (0 to 10): Optional, default `3`
 - `index_rate`: Value for index_rate (0.0 to 1.0): Optional, default `0.75`
+- `hop_length`: Value for hop_length (1 to 512): Optional, default `128`
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe): Optional, default `rmvpe`
 - `input_path`: Input audio path (enclosed in double quotes)
 - `output_path`: Output audio path (enclosed in double quotes)
