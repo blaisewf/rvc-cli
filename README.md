@@ -24,7 +24,8 @@ Execute the [install.bat](./install.bat) file to activate a Conda environment. S
 #### Linux
 
 ```bash
-pip install -r requirements.txt
+chmod +x install.sh
+./install.sh
 ```
 
 ### Getting Started
