@@ -1,7 +1,7 @@
 import os
 import sys
 import wget
-import .gdown as gdown
+import gdown
 import zipfile
 from bs4 import BeautifulSoup
 import requests
