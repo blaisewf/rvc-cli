@@ -88,7 +88,7 @@ python main.py extract "model_name" rvc_version f0method hop_length sampling_rat
 #### Start Training
 
 ```bash
-python main.py train "model_name" rvc_version save_every_epoch total_epoch sampling_rate batch_size pitch_guidance pretrained custom_pretrained [g_pretrained] [d_pretrained]
+python main.py train "model_name" rvc_version save_every_epoch save_only_latest save_every_weights total_epoch sampling_rate batch_size gpu pitch_guidance pretrained custom_pretrained [g_pretrained] [d_pretrained]
 ```
 
 - `model_name`: Name of the model (enclosed in double quotes)
