@@ -118,6 +118,7 @@ def run_train_script(
     total_epoch,
     sampling_rate,
     batch_size,
+    gpu,
     pitch_guidance,
     pretrained,
     custom_pretrained,
@@ -156,16 +157,18 @@ def run_train_script(
         str(sampling_rate),
         "-bs",
         str(batch_size),
+        "-g",
+        gpu,
         "-e",
         os.path.join(logs_path, str(model_name)),
         "-v",
         rvc_version,
         "-l",
-        latest,
+        str(latest),
         "-c",
         "0",
         "-sw",
-        save_every,
+        str(save_every),
         "-f0",
         str(f0),
     ]
@@ -359,6 +362,11 @@ def parse_arguments():
         help="Batch size",
     )
     train_parser.add_argument(
+        "gpu",
+        type=str,
+        help="GPU number (0 to 10 separated by -)",
+    )
+    train_parser.add_argument(
         "pitch_guidance",
         type=validate_true_false,
         help="Pitch guidance (True or False)",
@@ -489,6 +497,7 @@ def main():
                 args.total_epoch,
                 args.sampling_rate,
                 args.batch_size,
+                args.gpu,
                 args.pitch_guidance,
                 args.pretrained,
                 args.custom_pretrained,

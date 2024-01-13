@@ -98,7 +98,8 @@ python main.py train "model_name" rvc_version save_every_epoch total_epoch sampl
 - `save_every_weights`: Save a weight every training save (True or False)
 - `total_epoch`: Total number of training epochs (1 to 10000)
 - `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000): Optional, default `40000`
-- `batch_size`: Batch size, limited by GPU VRAM
+- `batch_size`: Batch size, limited by GPU VRAM (4 to ∞)
+- `gpu`: GPU number (0 to ∞ separated by -)
 - `pitch_guidance`: Train with or without pitch guidance (True or False)
 - `pretrained`: Train with or without pretrained models (True or False)
 - `custom_pretrained`: Use custom pretrained models; use parameters g\_/d_pretrained (True or False)
