@@ -87,7 +87,7 @@ def run_extract_script(model_name, rvc_version, f0method, hop_length, sampling_r
         extract_f0_script_path,
         model_path,
         f0method,
-        hop_length,
+        str(hop_length),
     ]
     command_2 = [
         "python",
