@@ -139,9 +139,7 @@ class Config:
 
 def max_vram_gpu(gpu):
     if torch.cuda.is_available():
-        # Obtén las propiedades de la GPU número 0
         gpu_properties = torch.cuda.get_device_properties(gpu)
-        # Calcula la memoria total en GB
         total_memory_gb = round(gpu_properties.total_memory / 1024 / 1024 / 1024)
         return total_memory_gb
     else:
