@@ -51,7 +51,52 @@ def run_infer_script(
         index_path,
     ]
     subprocess.run(command)
-    return f"File {input_path} infered successfully."
+    return f"File {input_path} inferred successfully."
+
+
+# Batch infer
+def run_batch_infer_script(
+    f0up_key,
+    filter_radius,
+    index_rate,
+    hop_length,
+    f0method,
+    input_folder,
+    output_folder,
+    pth_file,
+    index_path,
+):
+    infer_script_path = os.path.join("rvc", "infer", "infer.py")
+
+    audio_files = [
+        f for f in os.listdir(input_folder) if f.endswith((".mp3", ".wav", ".flac"))
+    ]
+    print(f"Detected {len(audio_files)} audio files for inference.")
+
+    for audio_file in audio_files:
+        input_path = os.path.join(input_folder, audio_file)
+        output_file_name = os.path.splitext(os.path.basename(audio_file))[0]
+        output_path = os.path.join(
+            output_folder, f"{output_file_name}_output{os.path.splitext(audio_file)[1]}"
+        )
+        print(f"Inferring {input_path}...")
+
+        command = [
+            "python",
+            infer_script_path,
+            str(f0up_key),
+            str(filter_radius),
+            str(index_rate),
+            str(hop_length),
+            f0method,
+            input_path,
+            output_path,
+            pth_file,
+            index_path,
+        ]
+        subprocess.run(command)
+
+    return f"Files from {input_folder} inferred successfully."
 
 
 # Preprocess
@@ -276,6 +321,50 @@ def parse_arguments():
         help="Path to the .index file (enclose in double quotes)",
     )
 
+    # Parser for 'batch_infer' mode
+    batch_infer_parser = subparsers.add_parser(
+        "batch_infer", help="Run batch inference"
+    )
+    batch_infer_parser.add_argument(
+        "f0up_key",
+        type=validate_f0up_key,
+        help="Value for f0up_key (-12 to +12)",
+    )
+    batch_infer_parser.add_argument(
+        "filter_radius",
+        type=str,
+        help="Value for filter_radius (0 to 10)",
+    )
+    batch_infer_parser.add_argument(
+        "index_rate",
+        type=str,
+        help="Value for index_rate (0.0 to 1)",
+    )
+    batch_infer_parser.add_argument(
+        "hop_length",
+        type=str,
+        help="Value for hop_length (1 to 512)",
+    )
+    batch_infer_parser.add_argument(
+        "f0method",
+        type=validate_f0method,
+        help="Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)",
+    )
+    batch_infer_parser.add_argument(
+        "input_folder", type=str, help="Input folder (enclose in double quotes)"
+    )
+    batch_infer_parser.add_argument(
+        "output_folder", type=str, help="Output folder (enclose in double quotes)"
+    )
+    batch_infer_parser.add_argument(
+        "pth_file", type=str, help="Path to the .pth file (enclose in double quotes)"
+    )
+    batch_infer_parser.add_argument(
+        "index_path",
+        type=str,
+        help="Path to the .index file (enclose in double quotes)",
+    )
+
     # Parser for 'preprocess' mode
     preprocess_parser = subparsers.add_parser("preprocess", help="Run preprocessing")
     preprocess_parser.add_argument(
@@ -469,6 +558,18 @@ def main():
                 args.f0method,
                 args.input_path,
                 args.output_path,
+                args.pth_file,
+                args.index_path,
+            )
+        elif args.mode == "batch_infer":
+            run_batch_infer_script(
+                args.f0up_key,
+                args.filter_radius,
+                args.index_rate,
+                args.hop_length,
+                args.f0method,
+                args.input_folder,
+                args.output_folder,
                 args.pth_file,
                 args.index_path,
             )

@@ -45,7 +45,7 @@ This command displays the available modes and their corresponding parameters, pr
 
 ### Inference
 
-#### Run Inference
+#### Single Inference
 
 ```bash
 python main.py infer f0up_key filter_radius index_rate hop_length f0method "input_path" "output_path" "pth_file" "index_path"
@@ -58,6 +58,22 @@ python main.py infer f0up_key filter_radius index_rate hop_length f0method "inpu
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
 - `input_path`: Input audio path (enclosed in double quotes)
 - `output_path`: Output audio path (enclosed in double quotes)
+- `pth_file`: Path to the .pth file (enclosed in double quotes)
+- `index_path`: Path to the .index file (enclosed in double quotes)
+
+#### Batch Inference
+
+```bash
+python main.py batch_infer f0up_key filter_radius index_rate hop_length f0method "input_folder_path" "output_folder_path" "pth_file" "index_path"
+```
+
+- `f0up_key`: Value for f0up_key (-12 to +12)
+- `filter_radius`: Value for filter_radius (0 to 10)
+- `index_rate`: Value for index_rate (0.0 to 1.0)
+- `hop_length`: Value for hop_length (1 to 512)
+- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
+- `input_folder_path`: Input folder path (enclosed in double quotes)
+- `output_folder_path`: Output folder path (enclosed in double quotes)
 - `pth_file`: Path to the .pth file (enclosed in double quotes)
 - `index_path`: Path to the .index file (enclosed in double quotes)
 
