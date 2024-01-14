@@ -194,7 +194,7 @@ def run_index_script(model_name, rvc_version):
 
 # Model information
 def run_model_information_script(pth_path):
-    model_information(pth_path)
+    print(model_information(pth_path))
 
 
 # Model fusion

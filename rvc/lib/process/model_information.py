@@ -12,4 +12,4 @@ def model_information(path):
     f0 = data.get("f0", "None")
     version = data.get("version", "None")
 
-    print(f"Epochs: {epochs}\nSampling rate: {sr}\nPitch guidance: {f0}\nVersion: {version}")
+    return(f"Epochs: {epochs}\nSampling rate: {sr}\nPitch guidance: {f0}\nVersion: {version}")
