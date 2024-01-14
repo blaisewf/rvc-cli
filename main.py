@@ -74,12 +74,15 @@ def run_batch_infer_script(
     print(f"Detected {len(audio_files)} audio files for inference.")
 
     for audio_file in audio_files:
-        input_path = os.path.join(input_folder, audio_file)
-        output_file_name = os.path.splitext(os.path.basename(audio_file))[0]
-        output_path = os.path.join(
-            output_folder, f"{output_file_name}_output{os.path.splitext(audio_file)[1]}"
-        )
-        print(f"Inferring {input_path}...")
+        if "_output" in audio_file:
+            pass
+        else:
+            input_path = os.path.join(input_folder, audio_file)
+            output_file_name = os.path.splitext(os.path.basename(audio_file))[0]
+            output_path = os.path.join(
+                output_folder, f"{output_file_name}_output{os.path.splitext(audio_file)[1]}"
+            )
+            print(f"Inferring {input_path}...")
 
         command = [
             "python",
