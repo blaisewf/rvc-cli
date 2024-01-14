@@ -136,3 +136,32 @@ class Config:
             x_max = 32
 
         return x_pad, x_query, x_center, x_max
+
+def max_vram_gpu(gpu):
+    if torch.cuda.is_available():
+        # Obtén las propiedades de la GPU número 0
+        gpu_properties = torch.cuda.get_device_properties(gpu)
+        # Calcula la memoria total en GB
+        total_memory_gb = round(gpu_properties.total_memory / 1024 / 1024 / 1024)
+        return total_memory_gb
+    else:
+        return "0"
+    
+def get_gpu_info():
+    ngpu = torch.cuda.device_count()
+    gpu_infos = []
+    if torch.cuda.is_available() or ngpu != 0:
+        for i in range(ngpu):
+            gpu_name = torch.cuda.get_device_name(i)
+            mem = int(
+                torch.cuda.get_device_properties(i).total_memory / 1024 / 1024 / 1024
+                + 0.4
+            )
+            gpu_infos.append("%s: %s %s GB" % (i, gpu_name, mem))
+    if len(gpu_infos) > 0:
+        gpu_info = "\n".join(gpu_infos)
+    else:
+        gpu_info = (
+            "Unfortunately, there is no compatible GPU available to support your training."
+        )
+    return gpu_info
