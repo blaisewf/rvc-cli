@@ -17,6 +17,7 @@ scipy==1.11.1
 sounddevice==0.4.6
 soundfile==0.12.1
 torchaudio==2.1.1
+praat-parselmouth
 
 # Machine learning
 fairseq==0.12.2
