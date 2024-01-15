@@ -8,6 +8,7 @@ from rvc.lib.tools.validators import (
     validate_f0up_key,
     validate_f0method,
     validate_true_false,
+    validate_tts_voices,
 )
 
 from rvc.train.extract.preparing_files import generate_config, generate_filelist
@@ -80,7 +81,8 @@ def run_batch_infer_script(
             input_path = os.path.join(input_folder, audio_file)
             output_file_name = os.path.splitext(os.path.basename(audio_file))[0]
             output_path = os.path.join(
-                output_folder, f"{output_file_name}_output{os.path.splitext(audio_file)[1]}"
+                output_folder,
+                f"{output_file_name}_output{os.path.splitext(audio_file)[1]}",
             )
             print(f"Inferring {input_path}...")
 
@@ -100,6 +102,51 @@ def run_batch_infer_script(
         subprocess.run(command)
 
     return f"Files from {input_folder} inferred successfully."
+
+
+# TTS
+def run_tts_script(
+    tts_text,
+    tts_voice,
+    f0up_key,
+    filter_radius,
+    index_rate,
+    hop_length,
+    f0method,
+    output_tts_path,
+    output_rvc_path,
+    pth_file,
+    index_path,
+):
+    tts_script_path = os.path.join("rvc", "lib", "tools", "tts.py")
+    infer_script_path = os.path.join("rvc", "infer", "infer.py")
+
+    if os.path.exists(output_tts_path):
+        os.remove(output_tts_path)
+
+    command_tts = [
+        "python",
+        tts_script_path,
+        tts_text,
+        tts_voice,
+        output_tts_path,
+    ]
+
+    command_infer = [
+        "python",
+        infer_script_path,
+        str(f0up_key),
+        str(filter_radius),
+        str(index_rate),
+        str(hop_length),
+        f0method,
+        output_tts_path,
+        output_rvc_path,
+        pth_file,
+        index_path,
+    ]
+    subprocess.run(command_tts)
+    subprocess.run(command_infer)
 
 
 # Preprocess
@@ -368,6 +415,58 @@ def parse_arguments():
         help="Path to the .index file (enclose in double quotes)",
     )
 
+    # Parser for 'tts' mode
+    tts_parser = subparsers.add_parser("tts", help="Run TTS")
+    tts_parser.add_argument(
+        "tts_text",
+        type=str,
+        help="Text to be synthesized (enclose in double quotes)",
+    )
+    tts_parser.add_argument(
+        "tts_voice",
+        type=validate_tts_voices,
+        help="Voice to be used (enclose in double quotes)",
+    )
+    tts_parser.add_argument(
+        "f0up_key",
+        type=validate_f0up_key,
+        help="Value for f0up_key (-12 to +12)",
+    )
+    tts_parser.add_argument(
+        "filter_radius",
+        type=str,
+        help="Value for filter_radius (0 to 10)",
+    )
+    tts_parser.add_argument(
+        "index_rate",
+        type=str,
+        help="Value for index_rate (0.0 to 1)",
+    )
+    tts_parser.add_argument(
+        "hop_length",
+        type=str,
+        help="Value for hop_length (1 to 512)",
+    )
+    tts_parser.add_argument(
+        "f0method",
+        type=validate_f0method,
+        help="Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)",
+    )
+    tts_parser.add_argument(
+        "output_tts_path", type=str, help="Output tts path (enclose in double quotes)"
+    )
+    tts_parser.add_argument(
+        "output_rvc_path", type=str, help="Output rvc path (enclose in double quotes)"
+    )
+    tts_parser.add_argument(
+        "pth_file", type=str, help="Path to the .pth file (enclose in double quotes)"
+    )
+    tts_parser.add_argument(
+        "index_path",
+        type=str,
+        help="Path to the .index file (enclose in double quotes)",
+    )
+
     # Parser for 'preprocess' mode
     preprocess_parser = subparsers.add_parser("preprocess", help="Run preprocessing")
     preprocess_parser.add_argument(
@@ -411,6 +510,7 @@ def parse_arguments():
         type=validate_sampling_rate,
         help="Sampling rate (32000, 40000 or 48000)",
     )
+
     # Parser for 'train' mode
     train_parser = subparsers.add_parser("train", help="Run training")
     train_parser.add_argument(
@@ -473,7 +573,6 @@ def parse_arguments():
         type=validate_true_false,
         help="Custom pretrained (True or False)",
     )
-
     train_parser.add_argument(
         "g_pretrained_path",
         type=str,
@@ -573,6 +672,20 @@ def main():
                 args.f0method,
                 args.input_folder,
                 args.output_folder,
+                args.pth_file,
+                args.index_path,
+            )
+        elif args.mode == "tts":
+            run_tts_script(
+                args.tts_text,
+                args.tts_voice,
+                args.f0up_key,
+                args.filter_radius,
+                args.index_rate,
+                args.hop_length,
+                args.f0method,
+                args.output_tts_path,
+                args.output_rvc_path,
                 args.pth_file,
                 args.index_path,
             )

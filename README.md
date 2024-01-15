@@ -77,6 +77,24 @@ python main.py batch_infer f0up_key filter_radius index_rate hop_length f0method
 - `pth_file`: Path to the .pth file (enclosed in double quotes)
 - `index_path`: Path to the .index file (enclosed in double quotes)
 
+#### TTS Inference
+
+```bash
+python main.py tts_infer "tts_text" "tts_voice" f0up_key filter_radius index_rate hop_length f0method "output_tts_path" "output_rvc_path" "pth_file" "index_path"
+```
+
+- `tts_text`: Text for TTS synthesis (enclosed in double quotes)
+- `tts_voice`: Voice for TTS synthesis (enclosed in double quotes)
+- `f0up_key`: Value for f0up_key (-12 to +12)
+- `filter_radius`: Value for filter_radius (0 to 10)
+- `index_rate`: Value for index_rate (0.0 to 1.0)
+- `hop_length`: Value for hop_length (1 to 512)
+- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
+- `output_tts_path`: Output TTS audio path (enclosed in double quotes)
+- `output_rvc_path`: Output RVC audio path (enclosed in double quotes)
+- `pth_file`: Path to the .pth file (enclosed in double quotes)
+- `index_path`: Path to the .index file (enclosed in double quotes)
+
 ### Training
 
 #### Preprocess Dataset

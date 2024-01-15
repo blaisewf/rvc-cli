@@ -1,4 +1,6 @@
 import argparse
+import os 
+import json
 
 
 def validate_sampling_rate(value):
@@ -48,4 +50,18 @@ def validate_f0method(value):
     else:
         raise argparse.ArgumentTypeError(
             f"Invalid f0method. Please choose from {valid_f0methods} not {value}"
+        )
+
+def validate_tts_voices(value):
+    json_path = os.path.join("rvc", "lib", "tools", "tts_voices.json")
+    with open(json_path, 'r') as file:
+        tts_voices_data = json.load(file)
+
+    # Extrae los valores de "ShortName" del JSON
+    short_names = [voice.get("ShortName", "") for voice in tts_voices_data]
+    if value in short_names:
+        return value
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Invalid voice. Please choose from {short_names} not {value}"
         )
