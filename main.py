@@ -318,7 +318,7 @@ def run_download_script(model_link):
         model_link,
     ]
     subprocess.run(command)
-
+    return f"Model downloaded successfully."
 
 # Parse arguments
 def parse_arguments():
