@@ -147,6 +147,7 @@ def run_tts_script(
     ]
     subprocess.run(command_tts)
     subprocess.run(command_infer)
+    return f"Text {tts_text} synthesized successfully.", output_rvc_path
 
 
 # Preprocess
