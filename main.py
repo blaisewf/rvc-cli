@@ -36,6 +36,7 @@ def run_infer_script(
     output_path,
     pth_file,
     index_path,
+    split_audio
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
     command = [
@@ -50,6 +51,7 @@ def run_infer_script(
         output_path,
         pth_file,
         index_path,
+        split_audio
     ]
     subprocess.run(command)
     return f"File {input_path} inferred successfully."
@@ -371,6 +373,11 @@ def parse_arguments():
         type=str,
         help="Path to the .index file (enclose in double quotes)",
     )
+    infer_parser.add_argument(
+        "split_audio",
+        type=str,
+        help="Enable split audio ( better results )",
+    )
 
     # Parser for 'batch_infer' mode
     batch_infer_parser = subparsers.add_parser(
@@ -663,6 +670,7 @@ def main():
                 args.output_path,
                 args.pth_file,
                 args.index_path,
+                args.split_audio
             )
         elif args.mode == "batch_infer":
             run_batch_infer_script(

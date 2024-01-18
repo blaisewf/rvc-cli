@@ -5,6 +5,7 @@ import numpy as np
 import soundfile as sf
 from vc_infer_pipeline import VC
 from rvc.lib.utils import load_audio
+from rvc.lib.tools.split_audio import process_audio, merge_audio
 from fairseq import checkpoint_utils
 from rvc.lib.infer_pack.models import (
     SynthesizerTrnMs256NSFsid,
@@ -49,6 +50,7 @@ def vc_single(
     protect=0.33,
     hop_length=None,
     output_path=None,
+    split_audio=False,
 ):
     global tgt_sr, net_g, vc, hubert_model, version
 
@@ -77,27 +79,65 @@ def vc_single(
         )
         if tgt_sr != resample_sr >= 16000:
             tgt_sr = resample_sr
-
-        audio_opt = vc.pipeline(
-            hubert_model,
-            net_g,
-            sid,
-            audio,
-            input_audio_path,
-            f0_up_key,
-            f0_method,
-            file_index,
-            index_rate,
-            if_f0,
-            filter_radius,
-            tgt_sr,
-            resample_sr,
-            rms_mix_rate,
-            version,
-            protect,
-            hop_length,
-            f0_file=f0_file,
-        )
+        if split_audio:
+            result, new_dir_path = process_audio(input_audio_path)
+            if result == "Error":
+                return "Error with Split Audio", None
+            dir_path = new_dir_path.strip(" ").strip('"').strip("\n").strip('"').strip(" ")
+            if dir_path != "":
+                paths = [
+                    os.path.join(root, name)
+                    for root, _, files in os.walk(dir_path, topdown=False)
+                    for name in files
+                    if name.endswith(".wav") and root == dir_path
+                ]
+            try:
+                for path in paths:
+                    info, opt = vc_single(
+                        sid,
+                        path,
+                        f0_up_key,
+                        None,
+                        f0_method,
+                        file_index,
+                        index_rate,
+                        resample_sr,
+                        rms_mix_rate,
+                        protect,
+                        hop_length,
+                        path,
+                        False,
+                    )
+                    #new_dir_path
+            except Exception as error:
+                print(error)
+                return "Error", None
+            print("Finished processing segmented audio, now merging audio...")
+            merge_timestamps_file = os.path.join(os.path.dirname(new_dir_path), f"{os.path.basename(input_audio_path).split('.')[0]}_timestamps.txt")
+            tgt_sr, audio_opt  = merge_audio(merge_timestamps_file)
+      
+        else:
+            audio_opt = vc.pipeline(
+                hubert_model,
+                net_g,
+                sid,
+                audio,
+                input_audio_path,
+                f0_up_key,
+                f0_method,
+                file_index,
+                index_rate,
+                if_f0,
+                filter_radius,
+                tgt_sr,
+                resample_sr,
+                rms_mix_rate,
+                version,
+                protect,
+                hop_length,
+                f0_file=f0_file,
+            )
+        
 
         if output_path is not None:
             sf.write(output_path, audio_opt, tgt_sr, format="WAV")
@@ -178,6 +218,7 @@ audio_output_path = sys.argv[7]
 
 model_path = sys.argv[8]
 index_path = sys.argv[9]
+split_audio = sys.argv[10]
 
 sid = f0up_key
 input_audio = audio_input_path
@@ -187,6 +228,7 @@ f0_method = f0method
 file_index = index_path
 index_rate = index_rate
 output_file = audio_output_path
+split_audio = split_audio
 
 get_vc(model_path, 0)
 
@@ -201,6 +243,7 @@ try:
         index_rate=index_rate,
         hop_length=hop_length,
         output_path=output_file,
+        split_audio=split_audio
     )
 
     if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
