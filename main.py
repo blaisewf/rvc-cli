@@ -54,7 +54,7 @@ def run_infer_script(
         split_audio
     ]
     subprocess.run(command)
-    return f"File {input_path} inferred successfully."
+    return f"File {input_path} inferred successfully.", output_path
 
 
 # Batch infer
