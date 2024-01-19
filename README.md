@@ -48,7 +48,7 @@ This command displays the available modes and their corresponding parameters, pr
 #### Single Inference
 
 ```bash
-python main.py infer f0up_key filter_radius index_rate hop_length f0method "input_path" "output_path" "pth_file" "index_path"
+python main.py infer f0up_key filter_radius index_rate hop_length f0method "input_path" "output_path" "pth_file" "index_path" split_audio
 ```
 
 - `f0up_key`: Value for f0up_key (-12 to +12)
@@ -60,6 +60,7 @@ python main.py infer f0up_key filter_radius index_rate hop_length f0method "inpu
 - `output_path`: Output audio path (enclosed in double quotes)
 - `pth_file`: Path to the .pth file (enclosed in double quotes)
 - `index_path`: Path to the .index file (enclosed in double quotes)
+- `split_audio`: Value for split_audio (True or False)
 
 #### Batch Inference
 
