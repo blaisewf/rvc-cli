@@ -1,13 +1,11 @@
 import os
 import sys
 import wget
-import gdown
 import zipfile
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import unquote
 import re
-
 
 def find_folder_parent(search_dir, folder_name):
     for dirpath, dirnames, _ in os.walk(search_dir):
@@ -15,9 +13,11 @@ def find_folder_parent(search_dir, folder_name):
             return os.path.abspath(dirpath)
     return None
 
-
-
 now_dir = os.getcwd()
+sys.path.append(now_dir)
+
+import rvc.lib.tools.gdown as gdown
+
 file_path = find_folder_parent(now_dir, "logs")
 
 zips_path = os.getcwd() + "/logs/zips"

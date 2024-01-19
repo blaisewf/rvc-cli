@@ -38,6 +38,5 @@ tensorboard
 # Miscellaneous
 ffmpy==0.3.1
 git+https://github.com/lanpa/tensorboardX
-git+https://github.com/wkentaro/gdown.git
 requests==2.31.0
 edge-tts==6.1.9

@@ -51,7 +51,7 @@ def run_infer_script(
         output_path,
         pth_file,
         index_path,
-        split_audio
+        str(split_audio)
     ]
     subprocess.run(command)
     return f"File {input_path} inferred successfully.", output_path
