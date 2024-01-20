@@ -25,7 +25,6 @@ def save_final(ckpt, sr, if_f0, name, epoch, version, hps):
     try:
         pth_file = f"{name}_{epoch}e.pth"
         pth_file_path = os.path.join("logs", pth_file)
-        pth_file_old_version_path = os.path.join("logs", f"{pth_file}_old_version.pth")
 
         opt = OrderedDict(
             weight={
@@ -54,20 +53,6 @@ def save_final(ckpt, sr, if_f0, name, epoch, version, hps):
         ]
         opt["info"], opt["sr"], opt["f0"], opt["version"] = epoch, sr, if_f0, version
         torch.save(opt, pth_file_path)
-
-        model = torch.load(pth_file_path, map_location=torch.device("cpu"))
-        torch.save(
-            replace_keys_in_dict(
-                replace_keys_in_dict(
-                    model, ".parametrizations.weight.original1", ".weight_v"
-                ),
-                ".parametrizations.weight.original0",
-                ".weight_g",
-            ),
-            pth_file_old_version_path,
-        )
-        os.remove(pth_file_path)
-        os.rename(pth_file_old_version_path, pth_file_path)
 
         return "Success!"
     except Exception as error:
