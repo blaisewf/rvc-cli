@@ -51,7 +51,7 @@ This command displays the available modes and their corresponding parameters, pr
 python main.py infer f0up_key filter_radius index_rate hop_length f0method "input_path" "output_path" "pth_file" "index_path" split_audio
 ```
 
-- `f0up_key`: Value for f0up_key (-12 to +12)
+- `f0up_key`: Value for f0up_key (-24 to +24)
 - `filter_radius`: Value for filter_radius (0 to 10)
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
@@ -68,7 +68,7 @@ python main.py infer f0up_key filter_radius index_rate hop_length f0method "inpu
 python main.py batch_infer f0up_key filter_radius index_rate hop_length f0method "input_folder_path" "output_folder_path" "pth_file" "index_path"
 ```
 
-- `f0up_key`: Value for f0up_key (-12 to +12)
+- `f0up_key`: Value for f0up_key (-24 to +24)
 - `filter_radius`: Value for filter_radius (0 to 10)
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
@@ -86,7 +86,7 @@ python main.py tts_infer "tts_text" "tts_voice" f0up_key filter_radius index_rat
 
 - `tts_text`: Text for TTS synthesis (enclosed in double quotes)
 - `tts_voice`: Voice for TTS synthesis (enclosed in double quotes)
-- `f0up_key`: Value for f0up_key (-12 to +12)
+- `f0up_key`: Value for f0up_key (-24 to +24)
 - `filter_radius`: Value for filter_radius (0 to 10)
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
