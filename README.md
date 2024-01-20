@@ -5,7 +5,6 @@
 ### Todo
 
 - Use this style for commands `python your_script.py infer --hop_length 128 --f0method rmvpe --input_path "input.wav" --output_path "output.wav" --pth_file "model.pth" --index_path "index_file.index"`
-- Add Audio Split in infer
 
 ### Table of Contents
 
