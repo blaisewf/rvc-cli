@@ -43,7 +43,7 @@ from losses import (
     kl_loss,
 )
 from mel_processing import mel_spectrogram_torch, spec_to_mel_torch
-from process_ckpt import save_final
+from process_ckpt import save_final, extract_small_model
 
 from rvc.lib.infer_pack import commons
 
@@ -556,15 +556,15 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             else:
                 ckpt = net_g.state_dict()
             print(
-                "Saving small model... %s_e%s:%s"
+                "saving ckpt %s_e%s:%s"
                 % (
                     hps.name,
                     epoch,
-                    save_final(
+                    extract_small_model(
                         ckpt,
                         hps.sample_rate,
                         hps.if_f0,
-                        hps.name + f"_e{epoch}_s{global_step}",
+                        hps.name + "_e%s_s%s" % (epoch, global_step),
                         epoch,
                         hps.version,
                         hps,
@@ -573,7 +573,9 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             )
 
     if rank == 0:
-        print(f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | loss_disc={loss_disc:.3f} | loss_gen={loss_gen:.3f} | loss_fm={loss_fm:.3f} | loss_mel={loss_mel:.3f} | loss_kl={loss_kl:.3f}")
+        print(
+            f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | loss_disc={loss_disc:.3f} | loss_gen={loss_gen:.3f} | loss_fm={loss_fm:.3f} | loss_mel={loss_mel:.3f} | loss_kl={loss_kl:.3f}"
+        )
     if epoch >= hps.total_epoch and rank == 0:
         print(
             f"Training has been successfully completed with {epoch} epoch and {global_step} steps."
@@ -583,11 +585,14 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             ckpt = net_g.module.state_dict()
         else:
             ckpt = net_g.state_dict()
-
-            save_final(
-                ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
+        print(
+            "Saving final checkpoint: %s"
+            % (
+                save_final(
+                    ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
+                )
             )
-
+        )
         sleep(1)
         os._exit(2333333)
 
