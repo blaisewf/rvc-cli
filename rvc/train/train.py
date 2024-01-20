@@ -562,12 +562,11 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     epoch,
                     extract_small_model(
                         ckpt,
+                        hps.name + "_e%s_s%s" % (epoch, global_step),
                         hps.sample_rate,
                         hps.if_f0,
-                        hps.name + "_e%s_s%s" % (epoch, global_step),
                         epoch,
                         hps.version,
-                        hps,
                     ),
                 )
             )

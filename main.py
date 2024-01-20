@@ -2,6 +2,10 @@ import os
 import sys
 import argparse
 import subprocess
+
+now_dir = os.getcwd()
+sys.path.append(now_dir)
+
 from rvc.configs.config import Config
 from rvc.lib.tools.validators import (
     validate_sampling_rate,
@@ -36,7 +40,7 @@ def run_infer_script(
     output_path,
     pth_file,
     index_path,
-    split_audio
+    split_audio,
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
     command = [
@@ -51,7 +55,7 @@ def run_infer_script(
         output_path,
         pth_file,
         index_path,
-        str(split_audio)
+        str(split_audio),
     ]
     subprocess.run(command)
     return f"File {input_path} inferred successfully.", output_path
@@ -164,8 +168,8 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
         str(sampling_rate),
         str(per),
     ]
-
     os.makedirs(os.path.join(logs_path, str(model_name)), exist_ok=True)
+
     subprocess.run(command)
     return f"Model {model_name} preprocessed successfully."
 
@@ -243,34 +247,33 @@ def run_train_script(
     command = [
         "python",
         train_script_path,
+        "--experiment_dir",
+        os.path.join(logs_path, str(model_name)),
+        "-v",
+        rvc_version,
         "-se",
         str(save_every_epoch),
+        "-l",
+        str(latest),
         "-te",
         str(total_epoch),
-        "-pg",
-        pg,
-        "-pd",
-        pd,
         "-sr",
         str(sampling_rate),
         "-bs",
         str(batch_size),
         "-g",
-        gpu,
-        "-e",
-        os.path.join(logs_path, str(model_name)),
-        "-v",
-        rvc_version,
-        "-l",
-        str(latest),
-        "-c",
-        "0",
+        str(gpu),
         "-sw",
         str(save_every),
         "-f0",
         str(f0),
+        "-pg",
+        pg,
+        "-pd",
+        pd,
+        "-c",
+        "0",
     ]
-
     subprocess.run(command)
     run_index_script(model_name, rvc_version)
     return f"Model {model_name} trained successfully."
@@ -323,6 +326,7 @@ def run_download_script(model_link):
     subprocess.run(command)
     return f"Model downloaded successfully."
 
+
 # Parse arguments
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -337,7 +341,7 @@ def parse_arguments():
     infer_parser.add_argument(
         "f0up_key",
         type=validate_f0up_key,
-        help="Value for f0up_key (-24 to +24)",
+        help="Value for f0up_key (-12 to +12)",
     )
     infer_parser.add_argument(
         "filter_radius",
@@ -386,7 +390,7 @@ def parse_arguments():
     batch_infer_parser.add_argument(
         "f0up_key",
         type=validate_f0up_key,
-        help="Value for f0up_key (-24 to +24)",
+        help="Value for f0up_key (-12 to +12)",
     )
     batch_infer_parser.add_argument(
         "filter_radius",
@@ -438,7 +442,7 @@ def parse_arguments():
     tts_parser.add_argument(
         "f0up_key",
         type=validate_f0up_key,
-        help="Value for f0up_key (-24 to +24)",
+        help="Value for f0up_key (-12 to +12)",
     )
     tts_parser.add_argument(
         "filter_radius",
@@ -532,23 +536,23 @@ def parse_arguments():
         help="Version of the model (v1 or v2)",
     )
     train_parser.add_argument(
+        "save_every_epoch",
+        type=int,  # Convert to int
+        help="Save every epoch",
+    )
+    train_parser.add_argument(
         "save_only_latest",
-        type=str,
+        type=validate_true_false,
         help="Save weight only at last epoch",
     )
     train_parser.add_argument(
         "save_every_weights",
-        type=str,
+        type=validate_true_false,
         help="Save weight every epoch",
     )
     train_parser.add_argument(
-        "save_every_epoch",
-        type=str,
-        help="Save every epoch",
-    )
-    train_parser.add_argument(
         "total_epoch",
-        type=str,
+        type=int,  # Convert to int
         help="Total epoch",
     )
     train_parser.add_argument(
@@ -558,7 +562,7 @@ def parse_arguments():
     )
     train_parser.add_argument(
         "batch_size",
-        type=str,
+        type=int,  # Convert to int
         help="Batch size",
     )
     train_parser.add_argument(
@@ -670,7 +674,7 @@ def main():
                 args.output_path,
                 args.pth_file,
                 args.index_path,
-                args.split_audio
+                args.split_audio,
             )
         elif args.mode == "batch_infer":
             run_batch_infer_script(
