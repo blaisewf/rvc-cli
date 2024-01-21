@@ -168,8 +168,8 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
         str(sampling_rate),
         str(per),
     ]
-    os.makedirs(os.path.join(logs_path, str(model_name)), exist_ok=True)
 
+    os.makedirs(os.path.join(logs_path, str(model_name)), exist_ok=True)
     subprocess.run(command)
     return f"Model {model_name} preprocessed successfully."
 
@@ -247,33 +247,34 @@ def run_train_script(
     command = [
         "python",
         train_script_path,
-        "--experiment_dir",
-        os.path.join(logs_path, str(model_name)),
-        "-v",
-        rvc_version,
         "-se",
         str(save_every_epoch),
-        "-l",
-        str(latest),
         "-te",
         str(total_epoch),
+        "-pg",
+        pg,
+        "-pd",
+        pd,
         "-sr",
         str(sampling_rate),
         "-bs",
         str(batch_size),
         "-g",
-        str(gpu),
+        gpu,
+        "-e",
+        os.path.join(logs_path, str(model_name)),
+        "-v",
+        rvc_version,
+        "-l",
+        str(latest),
+        "-c",
+        "0",
         "-sw",
         str(save_every),
         "-f0",
         str(f0),
-        "-pg",
-        pg,
-        "-pd",
-        pd,
-        "-c",
-        "0",
     ]
+
     subprocess.run(command)
     run_index_script(model_name, rvc_version)
     return f"Model {model_name} trained successfully."
@@ -341,7 +342,7 @@ def parse_arguments():
     infer_parser.add_argument(
         "f0up_key",
         type=validate_f0up_key,
-        help="Value for f0up_key (-24 to +24)",
+        help="Value for f0up_key (-12 to +12)",
     )
     infer_parser.add_argument(
         "filter_radius",
@@ -390,7 +391,7 @@ def parse_arguments():
     batch_infer_parser.add_argument(
         "f0up_key",
         type=validate_f0up_key,
-        help="Value for f0up_key (-24 to +24)",
+        help="Value for f0up_key (-12 to +12)",
     )
     batch_infer_parser.add_argument(
         "filter_radius",
@@ -442,7 +443,7 @@ def parse_arguments():
     tts_parser.add_argument(
         "f0up_key",
         type=validate_f0up_key,
-        help="Value for f0up_key (-24 to +24)",
+        help="Value for f0up_key (-12 to +12)",
     )
     tts_parser.add_argument(
         "filter_radius",
@@ -537,22 +538,22 @@ def parse_arguments():
     )
     train_parser.add_argument(
         "save_every_epoch",
-        type=int,  # Convert to int
+        type=str,
         help="Save every epoch",
     )
     train_parser.add_argument(
         "save_only_latest",
-        type=validate_true_false,
+        type=str,
         help="Save weight only at last epoch",
     )
     train_parser.add_argument(
         "save_every_weights",
-        type=validate_true_false,
+        type=str,
         help="Save weight every epoch",
     )
     train_parser.add_argument(
         "total_epoch",
-        type=int,  # Convert to int
+        type=str,
         help="Total epoch",
     )
     train_parser.add_argument(
@@ -562,7 +563,7 @@ def parse_arguments():
     )
     train_parser.add_argument(
         "batch_size",
-        type=int,  # Convert to int
+        type=str,
         help="Batch size",
     )
     train_parser.add_argument(
