@@ -7,7 +7,8 @@ from . import attentions
 from . import commons
 from .commons import init_weights, get_padding
 from torch.nn import Conv1d, ConvTranspose1d, Conv2d
-from torch.nn.utils import weight_norm, remove_weight_norm, spectral_norm
+from torch.nn.utils import remove_weight_norm
+from torch.nn.utils.parametrizations import spectral_norm, weight_norm
 from typing import Optional
 
 has_xpu = bool(hasattr(torch, "xpu") and torch.xpu.is_available())

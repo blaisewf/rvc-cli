@@ -43,6 +43,7 @@ def run_infer_script(
     split_audio,
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
+
     command = [
         "python",
         infer_script_path,
@@ -380,8 +381,8 @@ def parse_arguments():
     )
     infer_parser.add_argument(
         "split_audio",
-        type=str,
-        help="Enable split audio ( better results )",
+        type=validate_true_false,
+        help="Enable split audio (True or False)",
     )
 
     # Parser for 'batch_infer' mode
