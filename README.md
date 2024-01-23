@@ -15,7 +15,8 @@
    - [Inference](#inference)
    - [Training](#training)
    - [Additional Features](#additional-features)
-3. [Credits](#credits)
+3. [API](#api)
+4. [Credits](#credits)
 
 ### Installation
 
@@ -184,6 +185,30 @@ python main.py download "model_link"
 ```
 
 - `model_link`: Link of the model (enclosed in double quotes; Google Drive or Hugging Face)
+
+### API
+
+To use the RVC CLI via the API, you can utilize the provided `api.py` script. Make API requests to the following endpoints:
+
+- **Infer**: `/infer`
+- **Batch Infer**: `/batch_infer`
+- **TTS**: `/tts`
+- **Preprocess**: `/preprocess`
+- **Extract**: `/extract`
+- **Train**: `/train`
+- **Index**: `/index`
+- **Model Information**: `/model_information`
+- **Model Fusion**: `/model_fusion`
+- **Tensorboard**: `/tensorboard`
+- **Download**: `/download`
+
+You can make POST requests to these endpoints with the required parameters in the JSON format.
+
+Example using `curl` for Infer:
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"f0up_key": 0, "filter_radius": 5, "index_rate": 0.5, "hop_length": 256, "f0method": "rmvpe", "input_path": "input.wav", "output_path": "output.wav", "pth_file": "model.pth", "index_path": "index_file.index", "split_audio": false}' http://localhost:5000/infer
+```
 
 ### Credits
 
