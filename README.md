@@ -4,7 +4,7 @@
 
 ### Todo
 
-- Use this style for commands `python your_script.py infer --hop_length 128 --f0method rmvpe --input_path "input.wav" --output_path "output.wav" --pth_file "model.pth" --index_path "index_file.index"`
+- Use this style for commands `python app.py infer --hop_length 128 --f0method rmvpe --input_path "input.wav" --output_path "output.wav" --pth_file "model.pth" --index_path "index_file.index"`
 
 ### Table of Contents
 
