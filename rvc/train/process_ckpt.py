@@ -201,7 +201,7 @@ def extract_small_model(path, name, sr, if_f0, info, version):
             sr,
             int(if_f0),
         )
-        torch.save(opt, f"logs/weights/{name}.pth")
+        torch.save(opt, f"logs/{name}/{name}.pth")
         return "Success."
     except Exception as error:
         print(error)
@@ -213,7 +213,7 @@ def change_info(path, info, name):
         ckpt["info"] = info
         if name == "":
             name = os.path.basename(path)
-        torch.save(ckpt, f"logs/weights/{name}")
+        torch.save(ckpt, f"logs/{name}/{name}")
         return "Success."
     except Exception as error:
         print(error)
