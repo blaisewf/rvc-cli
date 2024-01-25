@@ -1,6 +1,5 @@
 import os
 import torch
-import pathlib
 from collections import OrderedDict
 
 logs_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs")
@@ -202,7 +201,6 @@ def extract_small_model(path, name, sr, if_f0, info, version):
             sr,
             int(if_f0),
         )
-        pathlib.Path(f"logs/{name}/").mkdir(parents=True, exist_ok=True) 
         torch.save(opt, f"logs/{name}/{name}.pth")
         return "Success."
     except Exception as error:
