@@ -283,7 +283,7 @@ def run_train_script(
 
 # Index
 def run_index_script(model_name, rvc_version):
-    index_script_path = os.path.join("rvc", "train", "index_generator.py")
+    index_script_path = os.path.join("rvc", "train", "process", "extract_index.py")
     command = [
         "python",
         index_script_path,
