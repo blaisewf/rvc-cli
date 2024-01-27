@@ -21,7 +21,7 @@ def replace_keys_in_dict(d, old_key_part, new_key_part):
 
 def extract_model(ckpt, sr, if_f0, name, model_dir, epoch, version, hps):
     try:
-        print(f"Saving model '{model_dir}' (epoch {epoch})")
+        print(f"Saved model '{model_dir}' (epoch {epoch})")
         pth_file = f"{name}_{epoch}e.pth"
         pth_file_old_version_path = os.path.join(
             model_dir, f"{pth_file}_old_version.pth"

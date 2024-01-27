@@ -82,4 +82,4 @@ try:
 except Exception as error:
     print(f"Failed to train index: {error}")
 
-print("Index training finished!")
+print(f"Saved index file '{index_filepath_added}'")
