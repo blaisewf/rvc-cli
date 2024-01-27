@@ -44,8 +44,7 @@ from losses import (
 )
 from mel_processing import mel_spectrogram_torch, spec_to_mel_torch
 
-from rvc.train.process.extract_final_model import extract_final_model
-from process.extract_small_model import extract_small_model
+from rvc.train.process.extract_model import extract_model
 
 from rvc.lib.infer_pack import commons
 
@@ -560,44 +559,47 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                 ckpt = net_g.module.state_dict()
             else:
                 ckpt = net_g.state_dict()
-            print(
-                "Saving checkpoint %s"
-                % (
-                extract_final_model(
-                    ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
-                )
-            )
-            )
+        extract_model(
+            ckpt,
+            hps.sample_rate,
+            hps.if_f0,
+            hps.name,
+            os.path.join(hps.model_dir, "{}_{}e.pth".format(hps.name, epoch)),
+            epoch,
+            hps.version,
+            hps,
+        )
 
     if rank == 0:
         if epoch > 1:
             change = last_loss_gen_all - loss_gen_all
             change_str = ""
             if change != 0:
-                change_str = (
-                    f" ({'decreased' if change > 0 else 'increased'} {abs(change)})" # decreased = good
-                )
+                change_str = f"({'decreased' if change > 0 else 'increased'} {abs(change)})"  # decreased = good
             print(
-                f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | loss_gen_all={loss_gen_all:.3f}{change_str}"
+                f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | loss_gen_all={round(loss_gen_all.item(), 3)} {change_str}"
             )
         last_loss_gen_all = loss_gen_all
 
     if epoch >= hps.total_epoch and rank == 0:
         print(
-            f"Training has been successfully completed with {epoch} epoch and {global_step} steps."
+            f"Training has been successfully completed with {epoch} epoch, {global_step} steps and {round(loss_gen_all.item(), 3)} loss gen."
         )
 
         if hasattr(net_g, "module"):
             ckpt = net_g.module.state_dict()
         else:
             ckpt = net_g.state_dict()
-        print(
-            "Saving final checkpoint %s"
-            % (
-                extract_final_model(
-                    ckpt, hps.sample_rate, hps.if_f0, hps.name, epoch, hps.version, hps
-                )
-            )
+
+        extract_model(
+            ckpt,
+            hps.sample_rate,
+            hps.if_f0,
+            hps.name,
+            os.path.join(hps.model_dir, "{}_{}e.pth".format(hps.name, epoch)),
+            epoch,
+            hps.version,
+            hps,
         )
         sleep(1)
         os._exit(2333333)

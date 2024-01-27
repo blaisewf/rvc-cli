@@ -19,12 +19,13 @@ def replace_keys_in_dict(d, old_key_part, new_key_part):
     return updated_dict
 
 
-def extract_final_model(ckpt, sr, if_f0, name, epoch, version, hps):
+def extract_model(ckpt, sr, if_f0, name, model_dir, epoch, version, hps):
     try:
+        print(f"Saving model '{model_dir}' (epoch {epoch})")
         pth_file = f"{name}_{epoch}e.pth"
-        pth_file_path = os.path.join("logs", pth_file)
-        pth_file_old_version_path = os.path.join("logs", f"{pth_file}_old_version.pth")
-
+        pth_file_old_version_path = os.path.join(
+            model_dir, f"{pth_file}_old_version.pth"
+        )
         opt = OrderedDict(
             weight={
                 key: value.half() for key, value in ckpt.items() if "enc_q" not in key
@@ -51,9 +52,9 @@ def extract_final_model(ckpt, sr, if_f0, name, epoch, version, hps):
             hps.data.sampling_rate,
         ]
         opt["info"], opt["sr"], opt["f0"], opt["version"] = epoch, sr, if_f0, version
-        torch.save(opt, pth_file_path)
+        torch.save(opt, model_dir)
 
-        model = torch.load(pth_file_path, map_location=torch.device("cpu"))
+        model = torch.load(model_dir, map_location=torch.device("cpu"))
         torch.save(
             replace_keys_in_dict(
                 replace_keys_in_dict(
@@ -64,9 +65,8 @@ def extract_final_model(ckpt, sr, if_f0, name, epoch, version, hps):
             ),
             pth_file_old_version_path,
         )
-        os.remove(pth_file_path)
-        os.rename(pth_file_old_version_path, pth_file_path)
+        os.remove(model_dir)
+        os.rename(pth_file_old_version_path, model_dir)
 
-        return "ready!"
     except Exception as error:
         print(error)
