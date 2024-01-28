@@ -281,12 +281,13 @@ def run(
                 None,
                 cache,
             )
+
         scheduler_g.step()
         scheduler_d.step()
 
 
 def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
-    global global_step, last_loss_gen_all
+    global global_step, last_loss_gen_all, lowestValue
     if epoch == 1:
         last_loss_gen_all = {}
     net_g, net_d = nets
@@ -465,6 +466,12 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                 loss_fm = feature_loss(fmap_r, fmap_g)
                 loss_gen, losses_gen = generator_loss(y_d_hat_g)
                 loss_gen_all = loss_gen + loss_fm + loss_mel + loss_kl
+
+                if loss_gen_all < lowestValue["value"]:
+                    lowestValue["value"] = loss_gen_all
+                    lowestValue["step"] = global_step
+                    lowestValue["epoch"] = epoch
+
         optim_g.zero_grad()
         scaler.scale(loss_gen_all).backward()
         scaler.unscale_(optim_g)
@@ -521,39 +528,31 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     images=image_dict,
                     scalars=scalar_dict,
                 )
+
+                # optim_g.step()
+                # optim_d.step()
+
         global_step += 1
 
     if epoch % hps.save_every_epoch == 0 and rank == 0:
-        if hps.if_latest == 0:
-            save_checkpoint(
-                net_g,
-                optim_g,
-                hps.train.learning_rate,
-                epoch,
-                os.path.join(hps.model_dir, "G_{}.pth".format(global_step)),
-            )
-            save_checkpoint(
-                net_d,
-                optim_d,
-                hps.train.learning_rate,
-                epoch,
-                os.path.join(hps.model_dir, "D_{}.pth".format(global_step)),
-            )
-        else:
-            save_checkpoint(
-                net_g,
-                optim_g,
-                hps.train.learning_rate,
-                epoch,
-                os.path.join(hps.model_dir, "G_{}.pth".format(2333333)),
-            )
-            save_checkpoint(
-                net_d,
-                optim_d,
-                hps.train.learning_rate,
-                epoch,
-                os.path.join(hps.model_dir, "D_{}.pth".format(2333333)),
-            )
+        checkpoint_suffix = "{}.pth".format(
+            global_step if hps.if_latest == 0 else 2333333
+        )
+        save_checkpoint(
+            net_g,
+            optim_g,
+            hps.train.learning_rate,
+            epoch,
+            os.path.join(hps.model_dir, "G_" + checkpoint_suffix),
+        )
+        save_checkpoint(
+            net_d,
+            optim_d,
+            hps.train.learning_rate,
+            epoch,
+            os.path.join(hps.model_dir, "D_" + checkpoint_suffix),
+        )
+
         if rank == 0 and hps.save_every_weights == "1":
             if hasattr(net_g, "module"):
                 ckpt = net_g.module.state_dict()
@@ -584,6 +583,9 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
     if epoch >= hps.total_epoch and rank == 0:
         print(
             f"Training has been successfully completed with {epoch} epoch, {global_step} steps and {round(loss_gen_all.item(), 3)} loss gen."
+        )
+        print(
+            f"Lowest generator loss: {lowestValue['value']} at epoch {lowestValue['epoch']}, step {lowestValue['step']}"
         )
 
         if hasattr(net_g, "module"):
