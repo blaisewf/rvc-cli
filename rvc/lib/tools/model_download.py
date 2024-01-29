@@ -91,6 +91,9 @@ def download_from_url(url):
 
         elif "/blob/" in url or "/resolve/" in url:
             os.chdir(zips_path)
+
+            if url.endswith("?download=true"):
+                url = url.replace("?download=true", "")
             if "/blob/" in url:
                 url = url.replace("/blob/", "/resolve/")
 
