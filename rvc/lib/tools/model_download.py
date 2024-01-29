@@ -217,7 +217,7 @@ if verify == "downloaded":
                 print(f"Error downloading {model_name}")
                 sys.exit()
     if extract_folder_path == "":
-        print("No zip founded...")
+        print("Zip file was not found.")
         sys.exit()
     result = search_pth_index(extract_folder_path)
 else:
