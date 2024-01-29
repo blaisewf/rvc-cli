@@ -195,6 +195,10 @@ def unzip_file(zip_path, zip_file_name):
 
 
 url = sys.argv[1]
+
+if "?download=true" in url:
+    url = url.replace("?download=true", "")
+    
 verify = download_from_url(url)
 
 if verify == "downloaded":
