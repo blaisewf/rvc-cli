@@ -2,7 +2,7 @@
 beautifulsoup4
 ffmpeg-python>=0.2.0
 numpy==1.23.5
-requests
+requests==2.31.0
 tqdm
 wget
 
@@ -39,6 +39,5 @@ tensorboard
 # Miscellaneous
 ffmpy==0.3.1
 git+https://github.com/lanpa/tensorboardX
-requests==2.31.0
 edge-tts==6.1.9
 flask
