@@ -5,6 +5,7 @@
 ### Todo
 
 - Use this style for commands `python app.py infer --hop_length 128 --f0method rmvpe --input_path "input.wav" --output_path "output.wav" --pth_file "model.pth" --index_path "index_file.index"`
+- Optimize the download of prerequisites so as not to run it every time main.py is executed.
 
 ### Table of Contents
 
@@ -106,7 +107,7 @@ python main.py preprocess "model_name" "dataset_path" sampling_rate
 
 - `model_name`: Name of the model (enclosed in double quotes)
 - `dataset_path`: Path to the dataset (enclosed in double quotes)
-- `sampling_rate`: Sampling rate (32000, 40000, or 48000): Optional, default `40000`
+- `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 
 #### Extract Features
 
@@ -132,7 +133,7 @@ python main.py train "model_name" rvc_version save_every_epoch save_only_latest 
 - `save_only_latest`: Save only the lastest final weight (True or False)
 - `save_every_weights`: Save a weight every training save (True or False)
 - `total_epoch`: Total number of training epochs (1 to 10000)
-- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000): Optional, default `40000`
+- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
 - `batch_size`: Batch size, limited by GPU VRAM (4 to ∞)
 - `gpu`: GPU number (0 to ∞ separated by -)
 - `pitch_guidance`: Train with or without pitch guidance (True or False)
