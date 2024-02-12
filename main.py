@@ -41,9 +41,9 @@ def run_infer_script(
     pth_file,
     index_path,
     split_audio,
+    f0_autotune,
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
-
     command = [
         "python",
         infer_script_path,
@@ -57,6 +57,7 @@ def run_infer_script(
         pth_file,
         index_path,
         str(split_audio),
+        str(f0_autotune),
     ]
     subprocess.run(command)
     return f"File {input_path} inferred successfully.", output_path
@@ -73,6 +74,8 @@ def run_batch_infer_script(
     output_folder,
     pth_file,
     index_path,
+    split_audio,
+    f0_autotune,
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
 
@@ -105,6 +108,8 @@ def run_batch_infer_script(
             output_path,
             pth_file,
             index_path,
+            str(split_audio),
+            str(f0_autotune),
         ]
         subprocess.run(command)
 
@@ -124,6 +129,8 @@ def run_tts_script(
     output_rvc_path,
     pth_file,
     index_path,
+    split_audio,
+    f0_autotune,
 ):
     tts_script_path = os.path.join("rvc", "lib", "tools", "tts.py")
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
@@ -151,6 +158,8 @@ def run_tts_script(
         output_rvc_path,
         pth_file,
         index_path,
+        str(split_audio),
+        str(f0_autotune),
     ]
     subprocess.run(command_tts)
     subprocess.run(command_infer)
@@ -283,7 +292,7 @@ def run_train_script(
 
 # Index
 def run_index_script(model_name, rvc_version):
-    index_script_path = os.path.join("rvc", "train", "process", "extract_index.py")
+    index_script_path = os.path.join("rvc", "train", "index_generator.py")
     command = [
         "python",
         index_script_path,
@@ -381,8 +390,13 @@ def parse_arguments():
     )
     infer_parser.add_argument(
         "split_audio",
-        type=validate_true_false,
-        help="Enable split audio (True or False)",
+        type=str,
+        help="Enable split audio ( better results )",
+    )
+    infer_parser.add_argument(
+        "f0_autotune",
+        type=str,
+        help="Enable autotune",
     )
 
     # Parser for 'batch_infer' mode
@@ -427,6 +441,16 @@ def parse_arguments():
         "index_path",
         type=str,
         help="Path to the .index file (enclose in double quotes)",
+    )
+    batch_infer_parser.add_argument(
+        "split_audio",
+        type=str,
+        help="Enable split audio ( better results )",
+    )
+    batch_infer_parser.add_argument(
+        "f0_autotune",
+        type=str,
+        help="Enable autotune",
     )
 
     # Parser for 'tts' mode
@@ -479,6 +503,16 @@ def parse_arguments():
         "index_path",
         type=str,
         help="Path to the .index file (enclose in double quotes)",
+    )
+    tts_parser.add_argument(
+        "split_audio",
+        type=str,
+        help="Enable split audio ( better results )",
+    )
+    tts_parser.add_argument(
+        "f0_autotune",
+        type=str,
+        help="Enable autotune",
     )
 
     # Parser for 'preprocess' mode
@@ -677,6 +711,8 @@ def main():
                 args.pth_file,
                 args.index_path,
                 args.split_audio,
+                args.f0_autotune,
+
             )
         elif args.mode == "batch_infer":
             run_batch_infer_script(
@@ -689,6 +725,8 @@ def main():
                 args.output_folder,
                 args.pth_file,
                 args.index_path,
+                args.split_audio,
+                args.f0_autotune,
             )
         elif args.mode == "tts":
             run_tts_script(
@@ -703,6 +741,8 @@ def main():
                 args.output_rvc_path,
                 args.pth_file,
                 args.index_path,
+                args.split_audio,
+                args.f0_autotune,
             )
         elif args.mode == "preprocess":
             run_preprocess_script(
