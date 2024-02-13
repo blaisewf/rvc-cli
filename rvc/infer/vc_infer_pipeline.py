@@ -14,7 +14,7 @@ import re
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 
-from rvc.lib.infer_pack.modules.F0Predictor.FCPEF0Predictor import FCPEF0Predictor
+from rvc.lib.FCPEF0Predictor import FCPEF0Predictor
 
 bh, ah = signal.butter(N=5, Wn=48, btype="high", fs=16000)
 

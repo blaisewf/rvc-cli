@@ -31,6 +31,8 @@ torchcrepe==0.0.21
 torchgen>=0.0.1
 torch_directml
 torchvision==0.16.1
+einops
+local-attention
 
 # Visualization
 matplotlib==3.7.2
