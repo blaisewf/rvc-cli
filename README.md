@@ -216,7 +216,18 @@ curl -X POST -H "Content-Type: application/json" -d '{"f0up_key": 0, "filter_rad
 
 The RVC CLI is built on the foundations of the following projects:
 
-- [Mangio-RVC-Fork](https://github.com/Mangio621/Mangio-RVC-Fork)
-- [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
+- [ContentVec](https://github.com/auspicious3000/contentvec/) by auspicious3000
+- [HIFIGAN](https://github.com/jik876/hifi-gan) by jik876
+- [Gradio](https://github.com/gradio-app/gradio) by gradio-app
+- [FFmpeg](https://github.com/FFmpeg/FFmpeg) by FFmpeg
+- [audio-slicer](https://github.com/openvpi/audio-slicer) by openvpi
+- [VITS](https://github.com/jaywalnut310/vits) by jaywalnut310
+- [RMVPE](https://github.com/Dream-High/RMVPE) by Dream-High
+- [FCPE](https://github.com/CNChTu/FCPE) by CNChTu
+- [So-Vits-SVC](https://github.com/svc-develop-team/so-vits-svc) by svc-develop-team
+- [Harmonify](https://huggingface.co/Eempostor/Harmonify) by Eempostor
+- [RVC_CLI](https://github.com/blaise-tk/RVC_CLI) by blaise-tk
+- [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) by RVC-Project
+- [Mangio-RVC-Fork](https://github.com/Mangio621/Mangio-RVC-Fork) by Mangio621
 
 We acknowledge and appreciate the contributions of the respective authors and communities involved in these projects.
