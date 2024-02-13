@@ -1,6 +1,8 @@
 ffmpeg.exe
 ffprobe.exe
+
 hubert_base.pt
+fcpe.pt
 rmvpe.pt
 rmvpe.onnx
 
