@@ -1,13 +1,7 @@
-ffmpeg.exe
-ffprobe.exe
-
-hubert_base.pt
-fcpe.pt
-rmvpe.pt
-rmvpe.onnx
-
-rvc/pretraineds/
-
+*.exe
+*.pt
+*.onnx
+*pth
 *.pyc
 
 logs
