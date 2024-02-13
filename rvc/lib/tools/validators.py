@@ -47,7 +47,7 @@ def validate_f0method(value):
         "crepe-tiny",
         "rmvpe",
         "fcpe",
-        "pyin",
+        # "pyin",
         "hybrid[crepe+rmvpe]",
         "hybrid[crepe+fcpe]",
         "hybrid[rmvpe+fcpe]",

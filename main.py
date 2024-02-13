@@ -372,7 +372,7 @@ def parse_arguments():
     infer_parser.add_argument(
         "f0method",
         type=validate_f0method,
-        help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, pyin, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
+        help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
     )
     infer_parser.add_argument(
         "input_path", type=str, help="Input path (enclose in double quotes)"
@@ -426,7 +426,7 @@ def parse_arguments():
     batch_infer_parser.add_argument(
         "f0method",
         type=validate_f0method,
-        help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, pyin, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
+        help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
     )
     batch_infer_parser.add_argument(
         "input_folder", type=str, help="Input folder (enclose in double quotes)"
@@ -488,7 +488,7 @@ def parse_arguments():
     tts_parser.add_argument(
         "f0method",
         type=validate_f0method,
-        help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, pyin, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
+        help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
     )
     tts_parser.add_argument(
         "output_tts_path", type=str, help="Output tts path (enclose in double quotes)"
@@ -546,7 +546,7 @@ def parse_arguments():
     extract_parser.add_argument(
         "f0method",
         type=validate_f0method,
-        help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, pyin, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
+        help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
     )
     extract_parser.add_argument(
         "hop_length",
