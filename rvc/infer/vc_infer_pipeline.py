@@ -14,7 +14,7 @@ import re
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 
-from rvc.lib.FCPEF0Predictor import FCPEF0Predictor
+from rvc.lib.infer_pack.modules.F0Predictor.FCPEF0Predictor import FCPEF0Predictor
 
 bh, ah = signal.butter(N=5, Wn=48, btype="high", fs=16000)
 
@@ -348,15 +348,6 @@ class VC(object):
                     "rmvpe.pt", is_half=self.is_half, device=self.device
                 )
             f0 = self.model_rmvpe.infer_from_audio(x, thred=0.03)
-        elif f0_method == "rmvpe+":
-            if hasattr(self, "model_rmvpe") == False:
-                from rvc.lib.rmvpe import RMVPE
-                print("Using RMVPE+ for f0 extraction, this may take a while, please be patient.")
-                
-                self.model_rmvpe = RMVPE(
-                    "rmvpe.pt", is_half=self.is_half, device=self.device,
-                )
-            f0 = self.model_rmvpe.infer_from_audio_with_pitch(x, thred=0.03, f0_min=int(f0_min), f0_max=int(f0_max))  
         elif f0_method == "fcpe":
             self.model_fcpe = FCPEF0Predictor("fcpe.pt", f0_min=int(f0_min), f0_max=int(f0_max), dtype=torch.float32, device=self.device, sampling_rate=self.sr, threshold=0.03)
             f0 = self.model_fcpe.compute_f0(x, p_len=p_len)
