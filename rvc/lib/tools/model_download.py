@@ -19,7 +19,7 @@ sys.path.append(now_dir)
 
 from rvc.lib.utils import format_title
 
-import rvc.lib.tools.gdown as gdown
+import gdown
 
 file_path = find_folder_parent(now_dir, "logs")
 
@@ -71,7 +71,7 @@ def download_from_url(url):
                 try:
                     gdown.download(
                         f"https://drive.google.com/uc?id={file_id}",
-                        quiet=False,
+                        quiet=True,
                         fuzzy=True,
                     )
                 except Exception as error:
@@ -215,6 +215,7 @@ if verify == "downloaded":
             model_name = format_title(model_zip.split(".zip")[0])
             extract_folder_path = os.path.join(
                 "logs",
+                "models",
                 os.path.normpath(model_name),
             )
 
