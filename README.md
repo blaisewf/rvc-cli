@@ -6,7 +6,7 @@
 
 - Use this style for commands `python app.py infer --hop_length 128 --f0method rmvpe --input_path "input.wav" --output_path "output.wav" --pth_file "model.pth" --index_path "index_file.index"`
 - Optimize the download of prerequisites so as not to run it every time main.py is executed.
-- Fix Google Colab
+- Fix Google Colab (missing some updates)
 
 ### Table of Contents
 
