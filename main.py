@@ -708,86 +708,86 @@ def main():
             )
         elif args.mode == "batch_infer":
             run_batch_infer_script(
-                args.f0up_key,
-                args.filter_radius,
-                args.index_rate,
-                args.hop_length,
-                args.f0method,
-                args.input_folder,
-                args.output_folder,
-                args.pth_file,
-                args.index_path,
-                args.split_audio,
-                args.f0autotune,
+                str(args.f0up_key),
+                str(args.filter_radius),
+                str(args.index_rate),
+                str(args.hop_length),
+                str(args.f0method),
+                str(args.input_folder),
+                str(args.output_folder),
+                str(args.pth_file),
+                str(args.index_path),
+                str(args.split_audio),
+                str(args.f0autotune),
             )
         elif args.mode == "tts":
             run_tts_script(
-                args.tts_text,
-                args.tts_voice,
-                args.f0up_key,
-                args.filter_radius,
-                args.index_rate,
-                args.hop_length,
-                args.f0method,
-                args.output_tts_path,
-                args.output_rvc_path,
-                args.pth_file,
-                args.index_path,
-                args.split_audio,
-                args.f0autotune,
+                str(args.tts_text),
+                str(args.tts_voice),
+                str(args.f0up_key),
+                str(args.filter_radius),
+                str(args.index_rate),
+                str(args.hop_length),
+                str(args.f0method),
+                str(args.output_tts_path),
+                str(args.output_rvc_path),
+                str(args.pth_file),
+                str(args.index_path),
+                str(args.split_audio),
+                str(args.f0autotune),
             )
         elif args.mode == "preprocess":
             run_preprocess_script(
-                args.model_name,
-                args.dataset_path,
-                args.sampling_rate,
+                str(args.model_name),
+                str(args.dataset_path),
+                str(args.sampling_rate),
             )
 
         elif args.mode == "extract":
             run_extract_script(
-                args.model_name,
-                args.rvc_version,
-                args.f0method,
-                args.hop_length,
-                args.sampling_rate,
+                str(args.model_name),
+                str(args.rvc_version),
+                str(args.f0method),
+                str(args.hop_length),
+                str(args.sampling_rate),
             )
         elif args.mode == "train":
             run_train_script(
-                args.model_name,
-                args.rvc_version,
-                args.save_every_epoch,
-                args.save_only_latest,
-                args.save_every_weights,
-                args.total_epoch,
-                args.sampling_rate,
-                args.batch_size,
-                args.gpu,
-                args.pitch_guidance,
-                args.pretrained,
-                args.custom_pretrained,
-                args.g_pretrained_path,
-                args.d_pretrained_path,
+                str(args.model_name),
+                str(args.rvc_version),
+                str(args.save_every_epoch),
+                str(rgs.save_only_latest),
+                str(args.save_every_weights),
+                str(args.total_epoch),
+                str(args.sampling_rate),
+                str(args.batch_size),
+                str(args.gpu),
+                str(args.pitch_guidance),
+                str(args.pretrained),
+                str(args.custom_pretrained),
+                str(args.g_pretrained_path),
+                str(args.d_pretrained_path),
             )
         elif args.mode == "index":
             run_index_script(
-                args.model_name,
-                args.rvc_version,
+                str(args.model_name),
+                str(args.rvc_version),
             )
         elif args.mode == "model_information":
             run_model_information_script(
-                args.pth_path,
+                str(args.pth_path),
             )
         elif args.mode == "model_fusion":
             run_model_fusion_script(
-                args.model_name,
-                args.pth_path_1,
-                args.pth_path_2,
+                str(args.model_name),
+                str(args.pth_path_1),
+                str(args.pth_path_2),
             )
         elif args.mode == "tensorboard":
             run_tensorboard_script()
         elif args.mode == "download":
             run_download_script(
-                args.model_link,
+                str(args.model_link),
             )
     except Exception as error:
         print(f"Error: {error}")
