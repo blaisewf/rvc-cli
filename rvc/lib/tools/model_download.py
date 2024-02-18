@@ -214,7 +214,7 @@ if verify == "downloaded":
             model_zip = os.path.basename(zipfile_path)
             model_name = format_title(model_zip.split(".zip")[0])
             extract_folder_path = os.path.join(
-                "models",
+                "logs",
                 os.path.normpath(model_name),
             )
 
