@@ -4,8 +4,8 @@
 
 ### Todo
 
-- Optimize the download of prerequisites so as not to run it every time main.py is executed.
-- Fix Google Colab (missing some updates)
+- [ ] Optimize the download of prerequisites so as not to run it every time main.py is executed.
+- [ ] Fix Google Colab (missing some updates)
 
 ### Table of Contents
 
