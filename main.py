@@ -380,6 +380,7 @@ def parse_arguments():
         "--hop_length",
         type=str,
         help="Value for hop_length (1 to 512)",
+        choices=range(1, 513),
     )
     infer_parser.add_argument(
         "--f0method",
@@ -398,11 +399,15 @@ def parse_arguments():
         "--split_audio",
         type=str,
         help="Enable split audio",
+        choices=["True", "False"],
+        default="False",
     )
     infer_parser.add_argument(
         "--f0autotune",
         type=str,
         help="Enable autotune",
+        choices=["True", "False"],
+        default="False",
     )
 
     # Parser for 'batch_infer' mode
@@ -428,6 +433,7 @@ def parse_arguments():
         "--hop_length",
         type=str,
         help="Value for hop_length (1 to 512)",
+        choices=range(1, 513),
     )
     batch_infer_parser.add_argument(
         "--f0method",
@@ -448,11 +454,15 @@ def parse_arguments():
         "--split_audio",
         type=str,
         help="Enable split audio",
+        choices=["True", "False"],
+        default="False",
     )
     batch_infer_parser.add_argument(
         "--f0autotune",
         type=str,
         help="Enable autotune",
+        choices=["True", "False"],
+        default="False",
     )
 
     # Parser for 'tts' mode
@@ -487,6 +497,7 @@ def parse_arguments():
         "--hop_length",
         type=str,
         help="Value for hop_length (1 to 512)",
+        choices=range(1, 513),
     )
     tts_parser.add_argument(
         "--f0method",
@@ -505,11 +516,14 @@ def parse_arguments():
         "--split_audio",
         type=str,
         help="Enable split audio",
+        choices=["True", "False"],
     )
     tts_parser.add_argument(
         "--f0autotune",
         type=str,
         help="Enable autotune",
+        choices=["True", "False"],
+        default="False",
     )
 
     # Parser for 'preprocess' mode
@@ -524,6 +538,7 @@ def parse_arguments():
         "--sampling_rate",
         type=str,
         help="Sampling rate (32000, 40000 or 48000)",
+        choices=["32000", "40000", "48000"],
     )
 
     # Parser for 'extract' mode
@@ -537,6 +552,8 @@ def parse_arguments():
         "--rvc_version",
         type=str,
         help="Version of the model (v1 or v2)",
+        choices=["v1", "v2"],
+        default="v2",
     )
     extract_parser.add_argument(
         "--f0method",
@@ -547,11 +564,13 @@ def parse_arguments():
         "--hop_length",
         type=str,
         help="Value for hop_length (1 to 512)",
+        choices=range(1, 513),
     )
     extract_parser.add_argument(
         "--sampling_rate",
         type=str,
         help="Sampling rate (32000, 40000 or 48000)",
+        choices=["32000", "40000", "48000"],
     )
 
     # Parser for 'train' mode
@@ -565,31 +584,32 @@ def parse_arguments():
         "--rvc_version",
         type=str,
         help="Version of the model (v1 or v2)",
+        choices=["v1", "v2"],
+        default="v2",
     )
     train_parser.add_argument(
-        "--save_every_epoch",
-        type=str,
-        help="Save every epoch",
+        "--save_every_epoch", type=str, help="Save every epoch", choices=range(1, 101)
     )
     train_parser.add_argument(
         "--save_only_latest",
         type=str,
         help="Save weight only at last epoch",
+        choices=["True", "False"],
     )
     train_parser.add_argument(
         "--save_every_weights",
         type=str,
         help="Save weight every epoch",
+        choices=["True", "False"],
     )
     train_parser.add_argument(
-        "--total_epoch",
-        type=str,
-        help="Total epoch",
+        "--total_epoch", type=str, help="Total epoch", choices=range(1, 1001)
     )
     train_parser.add_argument(
         "--sampling_rate",
         type=str,
         help="Sampling rate (32000, 40000, or 48000)",
+        choices=["32000", "40000", "48000"],
     )
     train_parser.add_argument(
         "--batch_size",
@@ -642,6 +662,8 @@ def parse_arguments():
         "--rvc_version",
         type=str,
         help="Version of the model (v1 or v2)",
+        choices=["v1", "v2"],
+        default="v2",
     )
 
     # Parser for 'model_information' mode
@@ -747,7 +769,6 @@ def main():
                 str(args.dataset_path),
                 str(args.sampling_rate),
             )
-
         elif args.mode == "extract":
             run_extract_script(
                 str(args.model_name),
