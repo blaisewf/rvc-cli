@@ -18,6 +18,7 @@ from rvc.lib.infer_pack.models import (
 from rvc.configs.config import Config
 
 import logging
+
 logging.getLogger("fairseq").setLevel(logging.WARNING)
 
 config = Config()
@@ -274,7 +275,9 @@ try:
 
     end_time = time.time()  # Registra el tiempo de finalización de la conversión
     elapsed_time = end_time - start_time
-    print(f"Conversion completed. Output file: '{output_file}' in {elapsed_time:.2f} seconds.")
+    print(
+        f"Conversion completed. Output file: '{output_file}' in {elapsed_time:.2f} seconds."
+    )
 
 except Exception as error:
     print(f"Voice conversion failed: {error}")
