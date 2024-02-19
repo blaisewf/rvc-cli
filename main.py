@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import argparse
 import subprocess
 
@@ -17,9 +18,17 @@ from rvc.lib.process.model_information import model_information
 config = Config()
 current_script_directory = os.path.dirname(os.path.realpath(__file__))
 logs_path = os.path.join(current_script_directory, "logs")
+
+# Check for prerequisites
 subprocess.run(
     ["python", os.path.join("rvc", "lib", "tools", "prerequisites_download.py")]
 )
+
+# Get TTS Voices
+with open(os.path.join("rvc", "lib", "tools", "tts_voices.json"), "r") as f:
+    voices_data = json.load(f)
+
+locales = list({voice["Locale"] for voice in voices_data})
 
 
 # Infer
@@ -457,6 +466,7 @@ def parse_arguments():
         "--tts_voice",
         type=str,
         help="Voice to be used",
+        choices=locales,
     )
     tts_parser.add_argument(
         "--f0up_key",
