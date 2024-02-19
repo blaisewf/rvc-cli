@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import torch
 import numpy as np
 import soundfile as sf
@@ -15,6 +16,9 @@ from rvc.lib.infer_pack.models import (
 )
 
 from rvc.configs.config import Config
+
+import logging
+logging.getLogger("fairseq").setLevel(logging.WARNING)
 
 config = Config()
 
@@ -246,7 +250,9 @@ f0autotune = f0autotune
 
 get_vc(model_path, 0)
 
+
 try:
+    start_time = time.time()
     result, audio_opt = vc_single(
         sid=0,
         input_audio_path=input_audio,
@@ -266,7 +272,9 @@ try:
     else:
         message = result
 
-    print(f"Conversion completed. Output file: '{output_file}'")
+    end_time = time.time()  # Registra el tiempo de finalización de la conversión
+    elapsed_time = end_time - start_time
+    print(f"Conversion completed. Output file: '{output_file}' in {elapsed_time:.2f} seconds.")
 
 except Exception as error:
     print(f"Voice conversion failed: {error}")
