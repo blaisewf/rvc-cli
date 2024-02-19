@@ -367,15 +367,9 @@ def parse_arguments():
         type=str,
         help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
     )
-    infer_parser.add_argument(
-        "--input_path", type=str, help="Input path"
-    )
-    infer_parser.add_argument(
-        "--output_path", type=str, help="Output path"
-    )
-    infer_parser.add_argument(
-        "--pth_file", type=str, help="Path to the .pth file"
-    )
+    infer_parser.add_argument("--input_path", type=str, help="Input path")
+    infer_parser.add_argument("--output_path", type=str, help="Output path")
+    infer_parser.add_argument("--pth_file", type=str, help="Path to the .pth file")
     infer_parser.add_argument(
         "--index_path",
         type=str,
@@ -421,12 +415,8 @@ def parse_arguments():
         type=str,
         help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
     )
-    batch_infer_parser.add_argument(
-        "--input_folder", type=str, help="Input folder"
-    )
-    batch_infer_parser.add_argument(
-        "--output_folder", type=str, help="Output folder"
-    )
+    batch_infer_parser.add_argument("--input_folder", type=str, help="Input folder")
+    batch_infer_parser.add_argument("--output_folder", type=str, help="Output folder")
     batch_infer_parser.add_argument(
         "--pth_file", type=str, help="Path to the .pth file"
     )
@@ -483,15 +473,9 @@ def parse_arguments():
         type=str,
         help="Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])",
     )
-    tts_parser.add_argument(
-        "--output_tts_path", type=str, help="Output tts path"
-    )
-    tts_parser.add_argument(
-        "--output_rvc_path", type=str, help="Output rvc path"
-    )
-    tts_parser.add_argument(
-        "--pth_file", type=str, help="Path to the .pth file"
-    )
+    tts_parser.add_argument("--output_tts_path", type=str, help="Output tts path")
+    tts_parser.add_argument("--output_rvc_path", type=str, help="Output rvc path")
+    tts_parser.add_argument("--pth_file", type=str, help="Path to the .pth file")
     tts_parser.add_argument(
         "--index_path",
         type=str,
@@ -510,9 +494,7 @@ def parse_arguments():
 
     # Parser for 'preprocess' mode
     preprocess_parser = subparsers.add_parser("preprocess", help="Run preprocessing")
-    preprocess_parser.add_argument(
-        "--model_name", type=str, help="Name of the model"
-    )
+    preprocess_parser.add_argument("--model_name", type=str, help="Name of the model")
     preprocess_parser.add_argument(
         "--dataset_path",
         type=str,
