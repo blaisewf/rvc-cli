@@ -331,6 +331,16 @@ def run_download_script(model_link):
     return f"Model downloaded successfully."
 
 
+# API
+def run_api_script():
+    api_script_path = os.path.join("api.py")
+    command = [
+        "python",
+        api_script_path,
+    ]
+    subprocess.run(command)
+
+
 # Parse arguments
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -663,6 +673,9 @@ def parse_arguments():
         help="Link of the model",
     )
 
+    # Parser for 'api' mode
+    subparsers.add_parser("api", help="Run the API")
+
     return parser.parse_args()
 
 
@@ -738,7 +751,7 @@ def main():
                 str(args.model_name),
                 str(args.rvc_version),
                 str(args.save_every_epoch),
-                str(rgs.save_only_latest),
+                str(args.save_only_latest),
                 str(args.save_every_weights),
                 str(args.total_epoch),
                 str(args.sampling_rate),
@@ -771,6 +784,8 @@ def main():
             run_download_script(
                 str(args.model_link),
             )
+        elif args.mode == "api":
+            run_api_script()
     except Exception as error:
         print(f"Error: {error}")
 

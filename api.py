@@ -3,7 +3,6 @@ import subprocess
 
 app = Flask(__name__)
 
-
 # Infer
 @app.route("/infer", methods=["POST"])
 def infer():
@@ -90,4 +89,4 @@ def execute_command(command):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

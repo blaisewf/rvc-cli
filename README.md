@@ -189,7 +189,11 @@ python main.py download --model_link "model_link"
 
 ### API
 
-To use the RVC CLI via the API, you can utilize the provided `api.py` script. Make API requests to the following endpoints:
+```bash
+python main.py api
+```
+
+To use the RVC CLI via the API, you can utilize the provided script. Make API requests to the following endpoints:
 
 - **Infer**: `/infer`
 - **Batch Infer**: `/batch_infer`
