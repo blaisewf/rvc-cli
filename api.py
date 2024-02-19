@@ -3,6 +3,7 @@ import subprocess
 
 app = Flask(__name__)
 
+
 # Infer
 @app.route("/infer", methods=["POST"])
 def infer():
