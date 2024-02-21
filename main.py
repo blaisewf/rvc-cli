@@ -36,6 +36,8 @@ def run_infer_script(
     f0up_key,
     filter_radius,
     index_rate,
+    rms_mix_rate,
+    protect,
     hop_length,
     f0method,
     input_path,
@@ -63,6 +65,8 @@ def run_infer_script(
                 index_path,
                 split_audio,
                 f0autotune,
+                rms_mix_rate,
+                protect,
             ],
         ),
     ]
@@ -75,6 +79,8 @@ def run_batch_infer_script(
     f0up_key,
     filter_radius,
     index_rate,
+    rms_mix_rate,
+    protect,
     hop_length,
     f0method,
     input_folder,
@@ -112,6 +118,8 @@ def run_batch_infer_script(
                     f0up_key,
                     filter_radius,
                     index_rate,
+                    rms_mix_rate,
+                    protect,
                     hop_length,
                     f0method,
                     input_path,
@@ -135,6 +143,8 @@ def run_tts_script(
     f0up_key,
     filter_radius,
     index_rate,
+    rms_mix_rate,
+    protect,
     hop_length,
     f0method,
     output_tts_path,
@@ -167,6 +177,8 @@ def run_tts_script(
                 f0up_key,
                 filter_radius,
                 index_rate,
+                rms_mix_rate,
+                protect,
                 hop_length,
                 f0method,
                 output_tts_path,
@@ -418,6 +430,20 @@ def parse_arguments():
         default="0.3",
     )
     infer_parser.add_argument(
+        "--rms_mix_rate",
+        type=str,
+        help="Value for rms_mix_rate",
+        choices=[str(i / 10) for i in range(11)],
+        default="1",
+    )
+    infer_parser.add_argument(
+        "--protect",
+        type=str,
+        help="Value for protect",
+        choices=[str(i / 10) for i in range(6)],
+        default="0.33",
+    )
+    infer_parser.add_argument(
         "--hop_length",
         type=str,
         help="Value for hop_length",
@@ -490,6 +516,20 @@ def parse_arguments():
         help="Value for index_rate",
         choices=[str(i / 10) for i in range(11)],
         default="0.3",
+    )
+    batch_infer_parser.add_argument(
+        "--rms_mix_rate",
+        type=str,
+        help="Value for rms_mix_rate",
+        choices=[str(i / 10) for i in range(11)],
+        default="1",
+    )
+    batch_infer_parser.add_argument(
+        "--protect",
+        type=str,
+        help="Value for protect",
+        choices=[str(i / 10) for i in range(6)],
+        default="0.33",
     )
     batch_infer_parser.add_argument(
         "--hop_length",
@@ -575,6 +615,20 @@ def parse_arguments():
         help="Value for index_rate",
         choices=[str(i / 10) for i in range(11)],
         default="0.3",
+    )
+    tts_parser.add_argument(
+        "--rms_mix_rate",
+        type=str,
+        help="Value for rms_mix_rate",
+        choices=[str(i / 10) for i in range(11)],
+        default="1",
+    )
+    tts_parser.add_argument(
+        "--protect",
+        type=str,
+        help="Value for protect",
+        choices=[str(i / 10) for i in range(6)],
+        default="0.33",
     )
     tts_parser.add_argument(
         "--hop_length",
@@ -852,6 +906,8 @@ def main():
                 str(args.f0up_key),
                 str(args.filter_radius),
                 str(args.index_rate),
+                str(args.rms_mix_rate),
+                str(args.protect),
                 str(args.hop_length),
                 str(args.f0method),
                 str(args.input_path),
@@ -866,6 +922,8 @@ def main():
                 str(args.f0up_key),
                 str(args.filter_radius),
                 str(args.index_rate),
+                str(args.rms_mix_rate),
+                str(args.protect),
                 str(args.hop_length),
                 str(args.f0method),
                 str(args.input_folder),
@@ -882,6 +940,8 @@ def main():
                 str(args.f0up_key),
                 str(args.filter_radius),
                 str(args.index_rate),
+                str(args.rms_mix_rate),
+                str(args.protect),
                 str(args.hop_length),
                 str(args.f0method),
                 str(args.output_tts_path),

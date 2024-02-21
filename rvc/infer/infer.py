@@ -51,8 +51,8 @@ def vc_single(
     file_index=None,
     index_rate=None,
     resample_sr=0,
-    rms_mix_rate=1,
-    protect=0.33,
+    rms_mix_rate=None,
+    protect=None,
     hop_length=None,
     output_path=None,
     split_audio=False,
@@ -127,6 +127,7 @@ def vc_single(
                 f"{os.path.basename(input_audio_path).split('.')[0]}_timestamps.txt",
             )
             tgt_sr, audio_opt = merge_audio(merge_timestamps_file)
+            os.remove(merge_timestamps_file)
 
         else:
             audio_opt = vc.pipeline(
@@ -231,23 +232,31 @@ audio_output_path = sys.argv[7]
 model_path = sys.argv[8]
 index_path = sys.argv[9]
 
+
 try:
     split_audio = sys.argv[10]
 except IndexError:
     split_audio = None
 
 f0autotune = sys.argv[11]
+rms_mix_rate = float(sys.argv[12])
+protect = float(sys.argv[13])
 
-sid = f0up_key
 input_audio = audio_input_path
 f0_pitch = f0up_key
 f0_file = None
 f0_method = f0method
-file_index = index_path
+
 index_rate = index_rate
 output_file = audio_output_path
 split_audio = split_audio
+protect = protect
+rms_mix_rate = rms_mix_rate
 f0autotune = f0autotune
+f0_up_key = f0_pitch
+
+file_index = index_path
+file_pth = model_path
 
 get_vc(model_path, 0)
 
@@ -257,11 +266,13 @@ try:
     result, audio_opt = vc_single(
         sid=0,
         input_audio_path=input_audio,
-        f0_up_key=f0_pitch,
+        f0_up_key=f0_up_key,
         f0_file=None,
         f0_method=f0_method,
         file_index=file_index,
         index_rate=index_rate,
+        rms_mix_rate=rms_mix_rate,
+        protect=protect,
         hop_length=hop_length,
         output_path=output_file,
         split_audio=split_audio,
@@ -273,7 +284,7 @@ try:
     else:
         message = result
 
-    end_time = time.time()  # Registra el tiempo de finalización de la conversión
+    end_time = time.time()
     elapsed_time = end_time - start_time
     print(
         f"Conversion completed. Output file: '{output_file}' in {elapsed_time:.2f} seconds."

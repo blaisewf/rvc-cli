@@ -56,6 +56,8 @@ python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --ind
 - `filter_radius`: Value for filter_radius (0 to 10)
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
+- `rms_mix_rate`: Value for rms_mix_rate (0 to 1)
+- `protect`: Value for protect (0 to 0.5)
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
 - `input_path`: Full path to the input audio file
 - `output_path`: Full path to the output audio file
@@ -75,6 +77,8 @@ python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius"
 - `filter_radius`: Value for filter_radius (0 to 10)
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
+- `rms_mix_rate`: Value for rms_mix_rate (0 to 1)
+- `protect`: Value for protect (0 to 0.5)
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
 - `input_folder_path`: Full path to the input audio folder (The folder may only contain audio files)
 - `output_folder_path`: Full path to the output audio folder
@@ -95,6 +99,8 @@ python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_ke
 - `filter_radius`: Value for filter_radius (0 to 10)
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
+- `rms_mix_rate`: Value for rms_mix_rate (0 to 1)
+- `protect`: Value for protect (0 to 0.5)
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
 - `output_tts_path`: Full path to the output TTS audio file
 - `output_rvc_path`: Full path to the input RVC audio file
