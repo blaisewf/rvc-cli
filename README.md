@@ -49,7 +49,7 @@ This command displays the available modes and their corresponding parameters, pr
 #### Single Inference
 
 ```bash
-python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --split_audio "split_audio" --f0autotune "f0autotune" --f0method "f0method" --input_path "input_path" --output_path "output_path" --pth_file "pth_file" --index_path "index_path"
+python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --split_audio "split_audio" --f0autotune "f0autotune" --f0method "f0method" --input_path "input_path" --output_path "output_path" --pth_path "pth_path" --index_path "index_path"
 ```
 
 - `f0up_key`: Value for f0up_key (-24 to +24)
@@ -59,14 +59,16 @@ python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --ind
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
 - `input_path`: Input audio path
 - `output_path`: Output audio path
-- `pth_file`: Path to the .pth file
+- `pth_path`: Path to the .pth file
 - `index_path`: Path to the .index file
 - `split_audio`: Value for split_audio (True or False)
+
+_If you need more help, check `python main.py infer -h`_
 
 #### Batch Inference
 
 ```bash
-python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --split_audio "split_audio" --f0autotune "f0autotune" --f0method "f0method" --input_folder_path "input_folder_path" --output_folder_path "output_folder_path" --pth_file "pth_file" --index_path "index_path"
+python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --split_audio "split_audio" --f0autotune "f0autotune" --f0method "f0method" --input_folder_path "input_folder_path" --output_folder_path "output_folder_path" --pth_path "pth_path" --index_path "index_path"
 ```
 
 - `f0up_key`: Value for f0up_key (-24 to +24)
@@ -76,13 +78,15 @@ python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius"
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
 - `input_folder_path`: Input folder path
 - `output_folder_path`: Output folder path
-- `pth_file`: Path to the .pth file
+- `pth_path`: Path to the .pth file
 - `index_path`: Path to the .index file
+
+_If you need more help, check `python main.py batch_infer -h`_
 
 #### TTS Inference
 
 ```bash
-python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --f0method "f0method" --output_tts_path "output_tts_path" --output_rvc_path "output_rvc_path" --pth_file "pth_file" --index_path "index_path"
+python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --f0method "f0method" --output_tts_path "output_tts_path" --output_rvc_path "output_rvc_path" --pth_path "pth_path" --index_path "index_path"
 ```
 
 - `tts_text`: Text for TTS synthesis
@@ -94,8 +98,10 @@ python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_ke
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
 - `output_tts_path`: Output TTS audio path
 - `output_rvc_path`: Output RVC audio path
-- `pth_file`: Path to the .pth file
+- `pth_path`: Path to the .pth file
 - `index_path`: Path to the .index file
+
+_If you need more help, check `python main.py tts_infer -h`_
 
 ### Training
 
@@ -108,6 +114,8 @@ python main.py preprocess --model_name "model_name" --dataset_path "dataset_path
 - `model_name`: Name of the model
 - `dataset_path`: Path to the dataset
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
+
+_If you need more help, check `python main.py preprocess -h`_
 
 #### Extract Features
 
@@ -134,13 +142,15 @@ python main.py train --model_name "model_name" --rvc_version "rvc_version" --sav
 - `save_every_weights`: Save a weight every training save (True or False)
 - `total_epoch`: Total number of training epochs (1 to 1000)
 - `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
-- `batch_size`: Batch size, limited by GPU VRAM (4 to ∞)
+- `batch_size`: Batch size, limited by GPU VRAM (1 to 50)
 - `gpu`: GPU number (0 to ∞ separated by -)
 - `pitch_guidance`: Train with or without pitch guidance (True or False)
 - `pretrained`: Train with or without pretrained models (True or False)
 - `custom_pretrained`: Use custom pretrained models; use parameters g\_/d_pretrained (True or False)
 - `g_pretrained_path`: Path to pretrained file G, only if you have used custom_pretrained
 - `d_pretrained_path`: Path to pretrained file D, only if you have used custom_pretrained
+
+_If you need more help, check `python main.py train -h`_
 
 #### Generate Index File
 
@@ -150,6 +160,8 @@ python main.py index --model_name "model_name" --rvc_version "rvc_version"
 
 - `model_name`: Name of the model
 - `rvc_version`: Version of the model (v1 or v2)
+
+_If you need more help, check `python main.py index -h`_
 
 ### Additional Features
 
@@ -161,7 +173,9 @@ python main.py model_information --pth_path "pth_path"
 
 - `pth_path`: Path to the .pth file
 
-#### Model Fusion
+_If you need more help, check `python main.py model_information -h`_
+
+#### Model Fusion (Not working)
 
 ```bash
 python main.py model_fusion --model_name "model_name" --pth_path_1 "pth_path_1" --pth_path_2 "pth_path_2"
@@ -170,6 +184,8 @@ python main.py model_fusion --model_name "model_name" --pth_path_1 "pth_path_1" 
 - `model_name`: Name of the model
 - `pth_path_1`: Path to the first .pth file
 - `pth_path_2`: Path to the second .pth file
+
+_If you need more help, check `python main.py model_fusion -h`_
 
 #### Launch TensorBoard
 
@@ -186,6 +202,7 @@ python main.py download --model_link "model_link"
 ```
 
 - `model_link`: Link of the model (enclosed in double quotes; Google Drive or Hugging Face)
+  _If you need more help, check `python main.py download -h`_
 
 ### API
 
