@@ -57,10 +57,10 @@ python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --ind
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
-- `input_path`: Input audio path
-- `output_path`: Output audio path
-- `pth_path`: Path to the .pth file
-- `index_path`: Path to the .index file
+- `input_path`: Full path to the input audio file
+- `output_path`: Full path to the output audio file
+- `pth_path`: Full path to the pth file
+- `index_path`: Full index file path
 - `split_audio`: Value for split_audio (True or False)
 
 _If you need more help, check `python main.py infer -h`_
@@ -76,10 +76,10 @@ python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius"
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
-- `input_folder_path`: Input folder path
-- `output_folder_path`: Output folder path
-- `pth_path`: Path to the .pth file
-- `index_path`: Path to the .index file
+- `input_folder_path`: Full path to the input audio folder (The folder may only contain audio files)
+- `output_folder_path`: Full path to the output audio folder
+- `pth_path`: Full path to the pth file
+- `index_path`: Full path to the index file
 
 _If you need more help, check `python main.py batch_infer -h`_
 
@@ -96,10 +96,10 @@ python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_ke
 - `index_rate`: Value for index_rate (0.0 to 1.0)
 - `hop_length`: Value for hop_length (1 to 512)
 - `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
-- `output_tts_path`: Output TTS audio path
-- `output_rvc_path`: Output RVC audio path
-- `pth_path`: Path to the .pth file
-- `index_path`: Path to the .index file
+- `output_tts_path`: Full path to the output TTS audio file
+- `output_rvc_path`: Full path to the input RVC audio file
+- `pth_path`: Full path to the pth file
+- `index_path`: Full path to the index file
 
 _If you need more help, check `python main.py tts_infer -h`_
 
@@ -112,7 +112,7 @@ python main.py preprocess --model_name "model_name" --dataset_path "dataset_path
 ```
 
 - `model_name`: Name of the model
-- `dataset_path`: Path to the dataset
+- `dataset_path`: Full path to the dataset folder (The folder may only contain audio files)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 
 _If you need more help, check `python main.py preprocess -h`_
