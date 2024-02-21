@@ -734,7 +734,7 @@ def parse_arguments():
         type=str,
         help="Batch size",
         choices=[str(i) for i in range(1, 51)],
-        default="8"
+        default="8",
     )
     train_parser.add_argument(
         "--gpu",
