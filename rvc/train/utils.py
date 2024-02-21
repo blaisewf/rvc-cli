@@ -6,6 +6,7 @@ import argparse
 import numpy as np
 from scipy.io.wavfile import read
 
+
 def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
     assert os.path.isfile(checkpoint_path)
     checkpoint_dict = torch.load(checkpoint_path, map_location="cpu")
