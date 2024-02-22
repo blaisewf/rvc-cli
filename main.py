@@ -378,7 +378,7 @@ def run_model_fusion_script(model_name, pth_path_1, pth_path_2):
 # Tensorboard
 def run_tensorboard_script():
     tensorboard_script_path = os.path.join(
-        "--rvc", "lib", "tools", "launch_tensorboard.py"
+        "rvc", "lib", "tools", "launch_tensorboard.py"
     )
     command = [
         "python",
@@ -401,10 +401,9 @@ def run_download_script(model_link):
 
 # API
 def run_api_script():
-    api_script_path = os.path.join("api.py")
     command = [
-        "python",
-        api_script_path,
+        "uvicorn",
+        "api:app",
     ]
     subprocess.run(command)
 
