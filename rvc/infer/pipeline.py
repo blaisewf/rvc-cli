@@ -36,21 +36,28 @@ def cache_harvest_f0(input_audio_path, fs, f0max, f0min, frame_period):
 
 
 def change_rms(data1, sr1, data2, sr2, rate):
+    # Compute RMS features
     rms1 = librosa.feature.rms(y=data1, frame_length=sr1 // 2 * 2, hop_length=sr1 // 2)
     rms2 = librosa.feature.rms(y=data2, frame_length=sr2 // 2 * 2, hop_length=sr2 // 2)
-    rms1 = torch.from_numpy(rms1)
+
+    # Convert to PyTorch tensors
+    rms1 = torch.tensor(rms1)
+    rms2 = torch.tensor(rms2)
+
+    # Interpolate to match the length of data2
     rms1 = F.interpolate(
         rms1.unsqueeze(0), size=data2.shape[0], mode="linear"
     ).squeeze()
-    rms2 = torch.from_numpy(rms2)
     rms2 = F.interpolate(
         rms2.unsqueeze(0), size=data2.shape[0], mode="linear"
     ).squeeze()
-    rms2 = torch.max(rms2, torch.zeros_like(rms2) + 1e-6)
-    data2 *= (
-        torch.pow(rms1, torch.tensor(1 - rate))
-        * torch.pow(rms2, torch.tensor(rate - 1))
-    ).numpy()
+
+    # Ensure non-zero values for rms2
+    rms2 = torch.clamp(rms2, min=1e-6)
+
+    # Compute modified data2
+    data2 *= (rms1 ** (1 - rate)) * (rms2 ** (rate - 1))
+
     return data2
 
 
@@ -72,81 +79,45 @@ class VC(object):
         self.t_center = self.sr * self.x_center
         self.t_max = self.sr * self.x_max
         self.device = config.device
-
-        self.note_dict = [
+        self.ref_freqs = [
             65.41,
-            69.30,
-            73.42,
-            77.78,
             82.41,
-            87.31,
-            92.50,
-            98.00,
-            103.83,
             110.00,
-            116.54,
-            123.47,
-            130.81,
-            138.59,
             146.83,
-            155.56,
-            164.81,
-            174.61,
-            185.00,
             196.00,
-            207.65,
-            220.00,
-            233.08,
             246.94,
-            261.63,
-            277.18,
-            293.66,
-            311.13,
             329.63,
-            349.23,
-            369.99,
-            392.00,
-            415.30,
             440.00,
-            466.16,
-            493.88,
-            523.25,
-            554.37,
             587.33,
-            622.25,
-            659.25,
-            698.46,
-            739.99,
             783.99,
-            830.61,
-            880.00,
-            932.33,
-            987.77,
             1046.50,
-            1108.73,
-            1174.66,
-            1244.51,
-            1318.51,
-            1396.91,
-            1479.98,
-            1567.98,
-            1661.22,
-            1760.00,
-            1864.66,
-            1975.53,
-            2093.00,
-            2217.46,
-            2349.32,
-            2489.02,
-            2637.02,
-            2793.83,
-            2959.96,
-            3135.96,
-            3322.44,
-            3520.00,
-            3729.31,
-            3951.07,
         ]
+        # Generate interpolated frequencies
+        self.note_dict = self.generate_interpolated_frequencies()
+
+    def generate_interpolated_frequencies(self):
+        # Generate interpolated frequencies based on the reference frequencies.
+        note_dict = []
+        for i in range(len(self.ref_freqs) - 1):
+            freq_low = self.ref_freqs[i]
+            freq_high = self.ref_freqs[i + 1]
+            # Interpolate between adjacent reference frequencies
+            interpolated_freqs = np.linspace(
+                freq_low, freq_high, num=10, endpoint=False
+            )
+            note_dict.extend(interpolated_freqs)
+        # Add the last reference frequency
+        note_dict.append(self.ref_freqs[-1])
+        return note_dict
+
+    def autotune_f0(self, f0):
+        # Autotunes the given fundamental frequency (f0) to the nearest musical note.
+        autotuned_f0 = np.zeros_like(f0)
+        for i, freq in enumerate(f0):
+            # Find the closest note
+            closest_note = min(self.note_dict, key=lambda x: abs(x - freq))
+            autotuned_f0[i] = closest_note
+        return autotuned_f0
 
     def get_optimal_torch_device(self, index: int = 0) -> torch.device:
         if torch.cuda.is_available():
@@ -155,24 +126,13 @@ class VC(object):
             return torch.device("mps")
         return torch.device("cpu")
 
-    def autotune_f0(self, f0):
-        autotuned_f0 = []
-        for freq in f0:
-            closest_notes = [
-                x
-                for x in self.note_dict
-                if abs(x - freq) == min(abs(n - freq) for n in self.note_dict)
-            ]
-            autotuned_f0.append(random.choice(closest_notes))
-        return np.array(autotuned_f0, np.float64)
-
     def get_f0_crepe_computation(
         self,
         x,
         f0_min,
         f0_max,
         p_len,
-        hop_length=120,
+        hop_length,
         model="full",
     ):
         x = x.astype(np.float32)
@@ -376,7 +336,6 @@ class VC(object):
             )
 
         if f0autotune == "True":
-            print("Autotuning f0")
             f0 = self.autotune_f0(f0)
 
         f0 *= pow(2, f0_up_key / 12)

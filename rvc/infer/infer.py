@@ -5,7 +5,7 @@ import torch
 import logging
 import numpy as np
 import soundfile as sf
-from vc_infer_pipeline import VC
+from pipeline import VC
 from rvc.lib.utils import load_audio
 from rvc.lib.tools.split_audio import process_audio, merge_audio
 from fairseq import checkpoint_utils
