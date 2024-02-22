@@ -4,8 +4,8 @@
 
 ### Todo
 
-- [ ] Optimize the download of prerequisites so as not to run it every time main.py is executed.
-- [ ] Fix Google Colab (missing some updates)
+- [ ] Improve the efficiency of prerequisite download to avoid running it every time `main.py` is executed.
+- [ ] Resolve issues with Google Colab (missing some updates)
 
 ### Table of Contents
 
@@ -21,11 +21,11 @@
 
 ### Installation
 
-Ensure you have the required Python packages installed by running (Python 3.9 is recommended):
+Ensure that you have the necessary Python packages installed by following these steps (Python 3.9 is recommended):
 
 #### Windows
 
-Execute the [install.bat](./install.bat) file to activate a Conda environment. Subsequently, launch the application using `env/python main.py` instead of the conventional `python main.py` command.
+Execute the [install.bat](./install.bat) file to activate a Conda environment. Afterward, launch the application using `env/python main.py` instead of the conventional `python main.py` command.
 
 #### Linux
 
@@ -36,13 +36,13 @@ chmod +x install.sh
 
 ### Getting Started
 
-For additional information and command-line options, refer to the help command:
+For detailed information and command-line options, refer to the help command:
 
 ```bash
 python main.py -h
 ```
 
-This command displays the available modes and their corresponding parameters, providing clarity on how to effectively use the RVC CLI.
+This command provides a clear overview of the available modes and their corresponding parameters, facilitating effective utilization of the RVC CLI.
 
 ### Inference
 
@@ -68,7 +68,7 @@ python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --ind
 - `clean_audio`: Value for clean_audio (True or False)
 - `clean_strength`: Value for clean_strength (0.0 to 1.0)
 
-_If you need more help, check `python main.py infer -h`_
+_Refer to `python main.py infer -h` for additional help._
 
 #### Batch Inference
 
@@ -91,7 +91,7 @@ python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius"
 - `clean_audio`: Value for clean_audio (True or False)
 - `clean_strength`: Value for clean_strength (0.0 to 1.0)
 
-_If you need more help, check `python main.py batch_infer -h`_
+_Refer to `python main.py batch_infer -h` for additional help._
 
 #### TTS Inference
 
@@ -116,7 +116,7 @@ python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_ke
 - `clean_audio`: Value for clean_audio (True or False)
 - `clean_strength`: Value for clean_strength (0.0 to 1.0)
 
-_If you need more help, check `python main.py tts_infer -h`_
+_Refer to `python main.py tts_infer -h` for additional help._
 
 ### Training
 
@@ -130,7 +130,7 @@ python main.py preprocess --model_name "model_name" --dataset_path "dataset_path
 - `dataset_path`: Full path to the dataset folder (The folder may only contain audio files)
 - `sampling_rate`: Sampling rate (32000, 40000, or 48000)
 
-_If you need more help, check `python main.py preprocess -h`_
+_Refer to `python main.py preprocess -h` for additional help._
 
 #### Extract Features
 
@@ -153,7 +153,7 @@ python main.py train --model_name "model_name" --rvc_version "rvc_version" --sav
 - `model_name`: Name of the model
 - `rvc_version`: Version of the model (v1 or v2)
 - `save_every_epoch`: Number of epochs after which to save the model checkpoint (1 to 50)
-- `save_only_latest`: Save only the lastest final weight (True or False)
+- `save_only_latest`: Save only the latest final weight (True or False)
 - `save_every_weights`: Save a weight every training save (True or False)
 - `total_epoch`: Total number of training epochs (1 to 1000)
 - `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
@@ -165,7 +165,7 @@ python main.py train --model_name "model_name" --rvc_version "rvc_version" --sav
 - `g_pretrained_path`: Path to pretrained file G, only if you have used custom_pretrained
 - `d_pretrained_path`: Path to pretrained file D, only if you have used custom_pretrained
 
-_If you need more help, check `python main.py train -h`_
+_Refer to `python main.py train -h` for additional help._
 
 #### Generate Index File
 
@@ -176,7 +176,7 @@ python main.py index --model_name "model_name" --rvc_version "rvc_version"
 - `model_name`: Name of the model
 - `rvc_version`: Version of the model (v1 or v2)
 
-_If you need more help, check `python main.py index -h`_
+_Refer to `python main.py index -h` for additional help._
 
 ### Additional Features
 
@@ -188,7 +188,7 @@ python main.py model_information --pth_path "pth_path"
 
 - `pth_path`: Path to the .pth file
 
-_If you need more help, check `python main.py model_information -h`_
+_Refer to `python main.py model_information -h` for additional help._
 
 #### Model Fusion (Not working)
 
@@ -200,7 +200,7 @@ python main.py model_fusion --model_name "model_name" --pth_path_1 "pth_path_1" 
 - `pth_path_1`: Path to the first .pth file
 - `pth_path_2`: Path to the second .pth file
 
-_If you need more help, check `python main.py model_fusion -h`_
+_Refer to `python main.py model_fusion -h` for additional help._
 
 #### Launch TensorBoard
 
@@ -217,7 +217,7 @@ python main.py download --model_link "model_link"
 ```
 
 - `model_link`: Link of the model (enclosed in double quotes; Google Drive or Hugging Face)
-  _If you need more help, check `python main.py download -h`_
+  _Refer to `python main.py download -h` for additional help._
 
 ### API
 
@@ -225,7 +225,7 @@ python main.py download --model_link "model_link"
 python main.py api
 ```
 
-To use the RVC CLI via the API, you can utilize the provided script. Make API requests to the following endpoints:
+To use the RVC CLI via the API, utilize the provided script. Make API requests to the following endpoints:
 
 - **Infer**: `/infer`
 - **Batch Infer**: `/batch_infer`
@@ -239,11 +239,11 @@ To use the RVC CLI via the API, you can utilize the provided script. Make API re
 - **Tensorboard**: `/tensorboard`
 - **Download**: `/download`
 
-You can make POST requests to these endpoints with the same required parameters as in CLI mode.
+Make POST requests to these endpoints with the same required parameters as in CLI mode.
 
 ### Credits
 
-The RVC CLI is built on the foundations of the following projects:
+The RVC CLI builds upon the foundations of the following projects:
 
 - [ContentVec](https://github.com/auspicious3000/contentvec/) by auspicious3000
 - [HIFIGAN](https://github.com/jik876/hifi-gan) by jik876
@@ -257,6 +257,7 @@ The RVC CLI is built on the foundations of the following projects:
 - [Harmonify](https://huggingface.co/Eempostor/Harmonify) by Eempostor
 - [RVC_CLI](https://github.com/blaise-tk/RVC_CLI) by blaise-tk
 - [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) by RVC-Project
+
 - [Mangio-RVC-Fork](https://github.com/Mangio621/Mangio-RVC-Fork) by Mangio621
 
 We acknowledge and appreciate the contributions of the respective authors and communities involved in these projects.
