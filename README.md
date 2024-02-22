@@ -257,7 +257,6 @@ The RVC CLI builds upon the foundations of the following projects:
 - [Harmonify](https://huggingface.co/Eempostor/Harmonify) by Eempostor
 - [RVC_CLI](https://github.com/blaise-tk/RVC_CLI) by blaise-tk
 - [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) by RVC-Project
-
 - [Mangio-RVC-Fork](https://github.com/Mangio621/Mangio-RVC-Fork) by Mangio621
 
 We acknowledge and appreciate the contributions of the respective authors and communities involved in these projects.
