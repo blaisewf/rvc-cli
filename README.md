@@ -227,6 +227,7 @@ python main.py api
 
 To use the RVC CLI via the API, utilize the provided script. Make API requests to the following endpoints:
 
+- **Docs**: `/docs`
 - **Infer**: `/infer`
 - **Batch Infer**: `/batch_infer`
 - **TTS**: `/tts`
@@ -236,7 +237,6 @@ To use the RVC CLI via the API, utilize the provided script. Make API requests t
 - **Index**: `/index`
 - **Model Information**: `/model_information`
 - **Model Fusion**: `/model_fusion`
-- **Tensorboard**: `/tensorboard`
 - **Download**: `/download`
 
 Make POST requests to these endpoints with the same required parameters as in CLI mode.
