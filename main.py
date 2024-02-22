@@ -46,6 +46,8 @@ def run_infer_script(
     index_path,
     split_audio,
     f0autotune,
+    clean_audio,
+    clean_strength,
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
     command = [
@@ -67,6 +69,8 @@ def run_infer_script(
                 f0autotune,
                 rms_mix_rate,
                 protect,
+                clean_audio,
+                clean_strength,
             ],
         ),
     ]
@@ -89,6 +93,8 @@ def run_batch_infer_script(
     index_path,
     split_audio,
     f0autotune,
+    clean_audio,
+    clean_strength,
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
 
@@ -128,6 +134,8 @@ def run_batch_infer_script(
                     index_path,
                     split_audio,
                     f0autotune,
+                    clean_audio,
+                    clean_strength,
                 ],
             ),
         ]
@@ -153,6 +161,8 @@ def run_tts_script(
     index_path,
     split_audio,
     f0autotune,
+    clean_audio,
+    clean_strength,
 ):
     tts_script_path = os.path.join("rvc", "lib", "tools", "tts.py")
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
@@ -187,6 +197,8 @@ def run_tts_script(
                 index_path,
                 split_audio,
                 f0autotune,
+                clean_audio,
+                clean_strength,
             ],
         ),
     ]
@@ -491,6 +503,20 @@ def parse_arguments():
         choices=["True", "False"],
         default="False",
     )
+    infer_parser.add_argument(
+        "--clean_audio",
+        type=str,
+        help="Enable clean audio",
+        choices=["True", "False"],
+        default="False",
+    )
+    infer_parser.add_argument(
+        "--clean_strength",
+        type=str,
+        help="Value for clean_strength",
+        choices=[str(i / 10) for i in range(11)],
+        default="0.7",
+    )
 
     # Parser for 'batch_infer' mode
     batch_infer_parser = subparsers.add_parser(
@@ -580,6 +606,20 @@ def parse_arguments():
         help="Enable autotune",
         choices=["True", "False"],
         default="False",
+    )
+    batch_infer_parser.add_argument(
+        "--clean_audio",
+        type=str,
+        help="Enable clean audio",
+        choices=["True", "False"],
+        default="False",
+    )
+    batch_infer_parser.add_argument(
+        "--clean_strength",
+        type=str,
+        help="Value for clean_strength",
+        choices=[str(i / 10) for i in range(11)],
+        default="0.7",
     )
 
     # Parser for 'tts' mode
@@ -677,6 +717,20 @@ def parse_arguments():
         help="Enable autotune",
         choices=["True", "False"],
         default="False",
+    )
+    tts_parser.add_argument(
+        "--clean_audio",
+        type=str,
+        help="Enable clean audio",
+        choices=["True", "False"],
+        default="False",
+    )
+    tts_parser.add_argument(
+        "--clean_strength",
+        type=str,
+        help="Value for clean_strength",
+        choices=[str(i / 10) for i in range(11)],
+        default="0.7",
     )
 
     # Parser for 'preprocess' mode
@@ -916,6 +970,8 @@ def main():
                 str(args.index_path),
                 str(args.split_audio),
                 str(args.f0autotune),
+                str(args.clean_audio),
+                str(args.clean_strength),
             )
         elif args.mode == "batch_infer":
             run_batch_infer_script(
@@ -932,6 +988,8 @@ def main():
                 str(args.index_path),
                 str(args.split_audio),
                 str(args.f0autotune),
+                str(args.clean_audio),
+                str(args.clean_strength),
             )
         elif args.mode == "tts":
             run_tts_script(
@@ -950,6 +1008,8 @@ def main():
                 str(args.index_path),
                 str(args.split_audio),
                 str(args.f0autotune),
+                str(args.clean_audio),
+                str(args.clean_strength),
             )
         elif args.mode == "preprocess":
             run_preprocess_script(

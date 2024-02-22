@@ -49,7 +49,7 @@ This command displays the available modes and their corresponding parameters, pr
 #### Single Inference
 
 ```bash
-python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --split_audio "split_audio" --f0autotune "f0autotune" --f0method "f0method" --input_path "input_path" --output_path "output_path" --pth_path "pth_path" --index_path "index_path"
+python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_path "input_path" --output_path "output_path" --pth_path "pth_path" --index_path "index_path" --split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength"
 ```
 
 - `f0up_key`: Value for f0up_key (-24 to +24)
@@ -65,13 +65,15 @@ python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --ind
 - `pth_path`: Full path to the pth file
 - `index_path`: Full index file path
 - `split_audio`: Value for split_audio (True or False)
+- `clean_audio`: Value for clean_audio (True or False)
+- `clean_strength`: Value for clean_strength (0.0 to 1.0)
 
 _If you need more help, check `python main.py infer -h`_
 
 #### Batch Inference
 
 ```bash
-python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --split_audio "split_audio" --f0autotune "f0autotune" --f0method "f0method" --input_folder_path "input_folder_path" --output_folder_path "output_folder_path" --pth_path "pth_path" --index_path "index_path"
+python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_folder_path "input_folder_path" --output_folder_path "output_folder_path" --pth_path "pth_path" --index_path "index_path" --clean_audio "clean_audio" --clean_strength "clean_strength"
 ```
 
 - `f0up_key`: Value for f0up_key (-24 to +24)
@@ -86,13 +88,15 @@ python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius"
 - `output_folder_path`: Full path to the output audio folder
 - `pth_path`: Full path to the pth file
 - `index_path`: Full path to the index file
+- `clean_audio`: Value for clean_audio (True or False)
+- `clean_strength`: Value for clean_strength (0.0 to 1.0)
 
 _If you need more help, check `python main.py batch_infer -h`_
 
 #### TTS Inference
 
 ```bash
-python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --f0method "f0method" --output_tts_path "output_tts_path" --output_rvc_path "output_rvc_path" --pth_path "pth_path" --index_path "index_path"
+python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --output_tts_path "output_tts_path" --output_rvc_path "output_rvc_path" --pth_path "pth_path" --index_path "index_path" --clean_audio "clean_audio" --clean_strength "clean_strength"
 ```
 
 - `tts_text`: Text for TTS synthesis
@@ -109,6 +113,8 @@ python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_ke
 - `output_rvc_path`: Full path to the input RVC audio file
 - `pth_path`: Full path to the pth file
 - `index_path`: Full path to the index file
+- `clean_audio`: Value for clean_audio (True or False)
+- `clean_strength`: Value for clean_strength (0.0 to 1.0)
 
 _If you need more help, check `python main.py tts_infer -h`_
 

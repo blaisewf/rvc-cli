@@ -18,6 +18,7 @@ sounddevice==0.4.6
 soundfile==0.12.1
 torchaudio==2.1.1
 praat-parselmouth
+noisereduce
 
 # Machine learning
 git+https://github.com/IAHispano/fairseq; sys_platform == 'linux'

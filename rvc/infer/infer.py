@@ -3,9 +3,12 @@ import sys
 import time
 import torch
 import logging
+
 import numpy as np
 import soundfile as sf
 from pipeline import VC
+from scipy.io import wavfile
+import noisereduce as nr
 from rvc.lib.utils import load_audio
 from rvc.lib.tools.split_audio import process_audio, merge_audio
 from fairseq import checkpoint_utils
@@ -36,6 +39,20 @@ def load_hubert():
     else:
         hubert_model = hubert_model.float()
     hubert_model.eval()
+
+
+def remove_audio_noise(input_audio_path, reduction_strength=0.7):
+    try:
+        rate, data = wavfile.read(input_audio_path)
+        reduced_noise = nr.reduce_noise(
+            y=data,
+            sr=rate,
+            prop_decrease=reduction_strength,
+        )
+        return reduced_noise
+    except Exception as error:
+        print(f"Error cleaning audio: {error}")
+        return None
 
 
 def vc_single(
@@ -162,7 +179,7 @@ def get_vc(weight_root, sid):
         global hubert_model
         if hubert_model is not None:
             print("clean_empty_cache")
-            del net_g, n_spk, vc, hubert_model, tgt_sr  # ,cpt
+            del net_g, n_spk, vc, hubert_model, tgt_sr
             hubert_model = net_g = n_spk = vc = hubert_model = tgt_sr = None
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
@@ -228,9 +245,10 @@ split_audio = sys.argv[10]
 f0autotune = sys.argv[11]
 rms_mix_rate = float(sys.argv[12])
 protect = float(sys.argv[13])
+clean_audio = sys.argv[14]
+clean_strength = float(sys.argv[15])
 
 get_vc(model_path, 0)
-
 
 try:
     start_time = time.time()
@@ -249,6 +267,11 @@ try:
         split_audio=split_audio,
         f0autotune=f0autotune,
     )
+
+    if clean_audio == "True":
+        cleaned_audio = remove_audio_noise(audio_output_path, clean_strength)
+        if cleaned_audio is not None:
+            sf.write(audio_output_path, cleaned_audio, tgt_sr, format="WAV")
 
     end_time = time.time()
     elapsed_time = end_time - start_time
