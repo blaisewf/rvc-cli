@@ -12,8 +12,8 @@ from rvc.configs.config import Config
 from rvc.train.extract.preparing_files import generate_config, generate_filelist
 from rvc.lib.tools.pretrained_selector import pretrained_selector
 
-from rvc.lib.process.model_fusion import model_fusion
-from rvc.lib.process.model_information import model_information
+from rvc.train.process.model_fusion import model_fusion
+from rvc.train.process.model_information import model_information
 
 config = Config()
 current_script_directory = os.path.dirname(os.path.realpath(__file__))
