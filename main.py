@@ -400,10 +400,14 @@ def run_download_script(model_link):
 
 
 # API
-def run_api_script():
+def run_api_script(ip, port):
     command = [
         "uvicorn",
         "api:app",
+        "--host",
+        ip,
+        "--port",
+        port,
     ]
     subprocess.run(command)
 
@@ -941,7 +945,19 @@ def parse_arguments():
     )
 
     # Parser for 'api' mode
-    subparsers.add_parser("api", help="Run the API")
+    api_parser = subparsers.add_parser("api", help="Run the API")
+    api_parser.add_argument(
+        "--ip",
+        type=str,
+        help="IP address",
+        default="127.0.0.1"
+    )
+    api_parser.add_argument(
+        "--port",
+        type=str,
+        help="Port",
+        default="8003"
+    )
 
     return parser.parse_args()
 
@@ -1063,7 +1079,10 @@ def main():
                 str(args.model_link),
             )
         elif args.mode == "api":
-            run_api_script()
+            run_api_script(
+                str(args.ip),
+                str(args.port),
+            )
     except Exception as error:
         print(f"Error: {error}")
 

@@ -222,8 +222,12 @@ python main.py download --model_link "model_link"
 ### API
 
 ```bash
-python main.py api
+python main.py api --host "host" --port "port"
 ```
+
+- `host`: Value for host IP
+- `port`: Value for port number
+  _Refer to `python main.py api -h` for additional help._
 
 To use the RVC CLI via the API, utilize the provided script. Make API requests to the following endpoints:
 
