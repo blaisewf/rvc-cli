@@ -39,18 +39,18 @@ def change_rms(data1, sr1, data2, sr2, rate):
     # print(data1.max(),data2.max())
     rms1 = librosa.feature.rms(y=data1, frame_length=sr1 // 2 * 2, hop_length=sr1 // 2)
     rms2 = librosa.feature.rms(y=data2, frame_length=sr2 // 2 * 2, hop_length=sr2 // 2)
-    
+
     rms1 = torch.from_numpy(rms1)
     rms1 = F.interpolate(
         rms1.unsqueeze(0), size=data2.shape[0], mode="linear"
     ).squeeze()
-    
+
     rms2 = torch.from_numpy(rms2)
     rms2 = F.interpolate(
         rms2.unsqueeze(0), size=data2.shape[0], mode="linear"
     ).squeeze()
     rms2 = torch.max(rms2, torch.zeros_like(rms2) + 1e-6)
-    
+
     data2 *= (
         torch.pow(rms1, torch.tensor(1 - rate))
         * torch.pow(rms2, torch.tensor(rate - 1))
