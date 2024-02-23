@@ -36,28 +36,25 @@ def cache_harvest_f0(input_audio_path, fs, f0max, f0min, frame_period):
 
 
 def change_rms(data1, sr1, data2, sr2, rate):
-    # Compute RMS features
+    # print(data1.max(),data2.max())
     rms1 = librosa.feature.rms(y=data1, frame_length=sr1 // 2 * 2, hop_length=sr1 // 2)
     rms2 = librosa.feature.rms(y=data2, frame_length=sr2 // 2 * 2, hop_length=sr2 // 2)
-
-    # Convert to PyTorch tensors
-    rms1 = torch.tensor(rms1)
-    rms2 = torch.tensor(rms2)
-
-    # Interpolate to match the length of data2
+    
+    rms1 = torch.from_numpy(rms1)
     rms1 = F.interpolate(
         rms1.unsqueeze(0), size=data2.shape[0], mode="linear"
     ).squeeze()
+    
+    rms2 = torch.from_numpy(rms2)
     rms2 = F.interpolate(
         rms2.unsqueeze(0), size=data2.shape[0], mode="linear"
     ).squeeze()
-
-    # Ensure non-zero values for rms2
-    rms2 = torch.clamp(rms2, min=1e-6)
-
-    # Compute modified data2
-    data2 *= (rms1 ** (1 - rate)) * (rms2 ** (rate - 1))
-
+    rms2 = torch.max(rms2, torch.zeros_like(rms2) + 1e-6)
+    
+    data2 *= (
+        torch.pow(rms1, torch.tensor(1 - rate))
+        * torch.pow(rms2, torch.tensor(rate - 1))
+    ).numpy()
     return data2
 
 
