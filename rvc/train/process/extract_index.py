@@ -83,4 +83,6 @@ try:
 except Exception as error:
     print(f"Failed to train index: {error}")
     if "one array to concatenate" in str(error):
-        print("If you are running this code in a virtual environment, make sure you have enough GPU available to generate the Index file.")
+        print(
+            "If you are running this code in a virtual environment, make sure you have enough GPU available to generate the Index file."
+        )
