@@ -232,6 +232,7 @@ python main.py api --host "host" --port "port"
 To use the RVC CLI via the API, utilize the provided script. Make API requests to the following endpoints:
 
 - **Docs**: `/docs`
+- **Ping**: `/ping`
 - **Infer**: `/infer`
 - **Batch Infer**: `/batch_infer`
 - **TTS**: `/tts`
