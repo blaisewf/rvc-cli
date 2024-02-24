@@ -916,7 +916,9 @@ def parse_arguments():
     )
 
     # Parser for 'model_blender' mode
-    model_blender_parser = subparsers.add_parser("model_blender", help="Fuse two models")
+    model_blender_parser = subparsers.add_parser(
+        "model_blender", help="Fuse two models"
+    )
     model_blender_parser.add_argument(
         "--model_name",
         type=str,
