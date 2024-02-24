@@ -12,7 +12,7 @@ from rvc.configs.config import Config
 from rvc.train.extract.preparing_files import generate_config, generate_filelist
 from rvc.lib.tools.pretrained_selector import pretrained_selector
 
-from rvc.train.process.model_fusion import model_fusion
+from rvc.train.process.model_blender import model_blender
 from rvc.train.process.model_information import model_information
 
 config = Config()
@@ -370,9 +370,9 @@ def run_model_information_script(pth_path):
     print(model_information(pth_path))
 
 
-# Model fusion
-def run_model_fusion_script(model_name, pth_path_1, pth_path_2, alpha):
-    model_fusion(model_name, pth_path_1, pth_path_2, alpha)
+# Model blender
+def run_model_blender_script(model_name, pth_path_1, pth_path_2, ratio):
+    model_blender(model_name, pth_path_1, pth_path_2, ratio)
 
 
 # Tensorboard
@@ -915,27 +915,27 @@ def parse_arguments():
         help="Path to the .pth file",
     )
 
-    # Parser for 'model_fusion' mode
-    model_fusion_parser = subparsers.add_parser("model_fusion", help="Fuse two models")
-    model_fusion_parser.add_argument(
+    # Parser for 'model_blender' mode
+    model_blender_parser = subparsers.add_parser("model_blender", help="Fuse two models")
+    model_blender_parser.add_argument(
         "--model_name",
         type=str,
         help="Name of the model",
     )
-    model_fusion_parser.add_argument(
+    model_blender_parser.add_argument(
         "--pth_path_1",
         type=str,
         help="Path to the first .pth file",
     )
-    model_fusion_parser.add_argument(
+    model_blender_parser.add_argument(
         "--pth_path_2",
         type=str,
         help="Path to the second .pth file",
     )
-    model_fusion_parser.add_argument(
-        "--alpha",
+    model_blender_parser.add_argument(
+        "--ratio",
         type=str,
-        help="Value for alpha",
+        help="Value for blender ratio",
         choices=[str(i / 10) for i in range(11)],
         default="0.5",
     )
@@ -1063,12 +1063,12 @@ def main():
             run_model_information_script(
                 str(args.pth_path),
             )
-        elif args.mode == "model_fusion":
-            run_model_fusion_script(
+        elif args.mode == "model_blender":
+            run_model_blender_script(
                 str(args.model_name),
                 str(args.pth_path_1),
                 str(args.pth_path_2),
-                str(args.alpha),
+                str(args.ratio),
             )
         elif args.mode == "tensorboard":
             run_tensorboard_script()

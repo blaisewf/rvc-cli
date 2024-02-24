@@ -190,18 +190,18 @@ python main.py model_information --pth_path "pth_path"
 
 _Refer to `python main.py model_information -h` for additional help._
 
-#### Model Fusion
+#### Model Blender
 
 ```bash
-python main.py model_fusion --model_name "model_name" --pth_path_1 "pth_path_1" --pth_path_2 "pth_path_2" --alpha "alpha"
+python main.py model_blender --model_name "model_name" --pth_path_1 "pth_path_1" --pth_path_2 "pth_path_2" --ratio "ratio"
 ```
 
 - `model_name`: Name of the model
 - `pth_path_1`: Path to the first .pth file
 - `pth_path_2`: Path to the second .pth file
-- `alpha`: Value for alpha (0.0 to 1)
+- `ratio`: Value for blender ratio (0.0 to 1)
 
-_Refer to `python main.py model_fusion -h` for additional help._
+_Refer to `python main.py model_blender -h` for additional help._
 
 #### Launch TensorBoard
 

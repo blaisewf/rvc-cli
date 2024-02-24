@@ -14,9 +14,9 @@ def extract(ckpt):
     return opt
 
 
-def model_fusion(name, path1, path2, alpha):
+def model_blender(name, path1, path2, ratio):
     try:
-        message = f"Model {path1} and {path2} are merged with alpha {alpha}."
+        message = f"Model {path1} and {path2} are merged with alpha {ratio}."
         ckpt1 = torch.load(path1, map_location="cpu")
         ckpt2 = torch.load(path2, map_location="cpu")
         cfg = ckpt1["config"]
@@ -41,12 +41,12 @@ def model_fusion(name, path1, path2, alpha):
             if key == "emb_g.weight" and ckpt1[key].shape != ckpt2[key].shape:
                 min_shape0 = min(ckpt1[key].shape[0], ckpt2[key].shape[0])
                 opt["weight"][key] = (
-                    alpha * (ckpt1[key][:min_shape0].float())
-                    + (1 - alpha) * (ckpt2[key][:min_shape0].float())
+                    ratio * (ckpt1[key][:min_shape0].float())
+                    + (1 - ratio) * (ckpt2[key][:min_shape0].float())
                 ).half()
             else:
                 opt["weight"][key] = (
-                    alpha * (ckpt1[key].float()) + (1 - alpha) * (ckpt2[key].float())
+                    ratio * (ckpt1[key].float()) + (1 - ratio) * (ckpt2[key].float())
                 ).half()
 
         opt["config"] = cfg
