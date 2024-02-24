@@ -41,8 +41,7 @@ tensorboard
 
 # Miscellaneous
 ffmpy==0.3.1
-git+https://github.com/lanpa/tensorboardX
-git+https://github.com/IAHispano/gdown
+tensorboardX
 edge-tts==6.1.9
 
 # API
