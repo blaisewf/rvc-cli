@@ -155,7 +155,7 @@ python main.py train --model_name "model_name" --rvc_version "rvc_version" --sav
 - `save_every_epoch`: Number of epochs after which to save the model checkpoint (1 to 50)
 - `save_only_latest`: Save only the latest final weight (True or False)
 - `save_every_weights`: Save a weight every training save (True or False)
-- `total_epoch`: Total number of training epochs (1 to 1000)
+- `total_epoch`: Total number of training epochs (1 to 10000)
 - `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
 - `batch_size`: Batch size, limited by GPU VRAM (1 to 50)
 - `gpu`: GPU number (0 to ∞ separated by -)

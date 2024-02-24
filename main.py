@@ -831,8 +831,8 @@ def parse_arguments():
         "--total_epoch",
         type=str,
         help="Total epoch",
-        choices=[str(i) for i in range(1, 1001)],
-        default="128",
+        choices=[str(i) for i in range(1, 10001)],
+        default="1000",
     )
     train_parser.add_argument(
         "--sampling_rate",
