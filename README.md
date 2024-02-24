@@ -128,7 +128,7 @@ python main.py preprocess --model_name "model_name" --dataset_path "dataset_path
 
 - `model_name`: Name of the model
 - `dataset_path`: Full path to the dataset folder (The folder may only contain audio files)
-- `sampling_rate`: Sampling rate (32000, 40000, or 48000)
+- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
 
 _Refer to `python main.py preprocess -h` for additional help._
 
@@ -142,7 +142,7 @@ python main.py extract --model_name "model_name" --rvc_version "rvc_version" --f
 - `rvc_version`: Version of the model (v1 or v2)
 - `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
 - `hop_length`: Value for hop_length (1 to 512)
-- `sampling_rate`: Sampling rate (32000, 40000, or 48000)
+- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
 
 #### Start Training
 
@@ -180,13 +180,23 @@ _Refer to `python main.py index -h` for additional help._
 
 ### Additional Features
 
+#### Model Extract
+
+```bash
+python main.py model_extract --pth_path "pth_path" --model_name "model_name" --sampling_rate "sampling_rate" --pitch_guidance "pitch_guidance" --rvc_version "rvc_version"
+```
+- `pth_path`: Path to the pth file
+- `model_name`: Name of the model
+- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
+- `pitch_guidance`: Train with or without pitch guidance (True or False)
+- `rvc_version`: Version of the model (v1 or v2)
+
 #### Model Information
 
 ```bash
 python main.py model_information --pth_path "pth_path"
 ```
-
-- `pth_path`: Path to the .pth file
+- `pth_path`: Path to the pth file
 
 _Refer to `python main.py model_information -h` for additional help._
 
@@ -197,8 +207,8 @@ python main.py model_blender --model_name "model_name" --pth_path_1 "pth_path_1"
 ```
 
 - `model_name`: Name of the model
-- `pth_path_1`: Path to the first .pth file
-- `pth_path_2`: Path to the second .pth file
+- `pth_path_1`: Path to the first pth file
+- `pth_path_2`: Path to the second pth file
 - `ratio`: Value for blender ratio (0.0 to 1)
 
 _Refer to `python main.py model_blender -h` for additional help._

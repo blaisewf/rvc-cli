@@ -359,6 +359,22 @@ def run_index_script(model_name, rvc_version):
     subprocess.run(command)
     return f"Index file for {model_name} generated successfully."
 
+# Model extract
+def run_model_extract_script(pth_path, model_name, sampling_rate, pitch_guidance, rvc_version):
+    f0 = 1 if str(pitch_guidance) == "True" else 0
+    model_extract_script_path = os.path.join("rvc", "train", "process", "extract_small_model.py")
+    command = [
+        "python",
+        model_extract_script_path,
+        pth_path,
+        model_name,
+        sampling_rate,
+        f0,
+        rvc_version,
+    ]
+
+    subprocess.run(command)
+    return f"Model {model_name} extracted successfully."
 
 # Model information
 def run_model_information_script(pth_path):
@@ -900,6 +916,39 @@ def parse_arguments():
         default="v2",
     )
 
+    # Parser for 'model_extract' mode
+    model_extract_parser = subparsers.add_parser("model_extract", help="Extract model")
+    model_extract_parser.add_argument(
+        "--pth_path",
+        type=str,
+        help="Path to the .pth file",
+    )
+    model_extract_parser.add_argument(
+        "--model_name",
+        type=str,
+        help="Name of the model",
+    )
+    model_extract_parser.add_argument(
+        "--sampling_rate",
+        type=str,
+        help="Sampling rate",
+        choices=["40000", "48000"],
+    )
+    model_extract_parser.add_argument(
+        "--pitch_guidance",
+        type=str,
+        help="Pitch guidance",
+        choices=["True", "False"],
+        default="True",
+    )
+    model_extract_parser.add_argument(
+        "--rvc_version",
+        type=str,
+        help="Version of the model",
+        choices=["v1", "v2"],
+        default="v2",
+    )
+
     # Parser for 'model_information' mode
     model_information_parser = subparsers.add_parser(
         "model_information", help="Print model information"
@@ -1054,6 +1103,14 @@ def main():
         elif args.mode == "index":
             run_index_script(
                 str(args.model_name),
+                str(args.rvc_version),
+            )
+        elif args.mode == "model_extract":
+            run_model_extract_script(
+                str(args.pth_path),
+                str(args.model_name),
+                str(args.sampling_rate),
+                str(args.pitch_guidance),
                 str(args.rvc_version),
             )
         elif args.mode == "model_information":
