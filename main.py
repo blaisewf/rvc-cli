@@ -1005,7 +1005,7 @@ def parse_arguments():
     # Parser for 'api' mode
     api_parser = subparsers.add_parser("api", help="Run the API")
     api_parser.add_argument("--ip", type=str, help="IP address", default="127.0.0.1")
-    api_parser.add_argument("--port", type=str, help="Port", default="8003")
+    api_parser.add_argument("--port", type=str, help="Port", default="8000")
 
     return parser.parse_args()
 

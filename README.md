@@ -52,69 +52,77 @@ This command provides a clear overview of the available modes and their correspo
 python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_path "input_path" --output_path "output_path" --pth_path "pth_path" --index_path "index_path" --split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength"
 ```
 
-- `f0up_key`: Value for f0up_key (-24 to +24)
-- `filter_radius`: Value for filter_radius (0 to 10)
-- `index_rate`: Value for index_rate (0.0 to 1.0)
-- `hop_length`: Value for hop_length (1 to 512)
-- `rms_mix_rate`: Value for rms_mix_rate (0 to 1)
-- `protect`: Value for protect (0 to 0.5)
-- `f0autotune`: Value for autotune (True or False)
-- `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
-- `input_path`: Full path to the input audio file
-- `output_path`: Full path to the output audio file
-- `pth_path`: Full path to the pth file
-- `index_path`: Full index file path
-- `split_audio`: Value for split_audio (True or False)
-- `clean_audio`: Value for clean_audio (True or False)
-- `clean_strength`: Value for clean_strength (0.0 to 1.0)
+| Parameter Name   | Required | Default | Valid Options                                                                                                                           | Description                        |
+| ---------------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `f0up_key`       | No       | 0       | -24 to +24                                                                                                                              | Value for f0up_key                 |
+| `filter_radius`  | No       | 3       | 0 to 10                                                                                                                                 | Value for filter_radius            |
+| `index_rate`     | No       | 0.3     | 0.0 to 1.0                                                                                                                              | Value for index_rate               |
+| `hop_length`     | No       | 128     | 1 to 512                                                                                                                                | Value for hop_length               |
+| `rms_mix_rate`   | No       | 1       | 0 to 1                                                                                                                                  | Value for rms_mix_rate             |
+| `protect`        | No       | 0.33    | 0 to 0.5                                                                                                                                | Value for protect                  |
+| `f0autotune`     | No       | False   | True or False                                                                                                                           | Value for autotune                 |
+| `f0method`       | No       | rmvpe   | pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe] | Value for f0method                 |
+| `input_path`     | Yes      |         | Full path to the input audio file                                                                                                       | Full path to the input audio file  |
+| `output_path`    | Yes      |         | Full path to the output audio file                                                                                                      | Full path to the output audio file |
+| `pth_path`       | Yes      |         | Full path to the pth file                                                                                                               | Full path to the pth file          |
+| `index_path`     | Yes      |         | Full index file path                                                                                                                    | Full index file path               |
+| `split_audio`    | No       | False   | True or False                                                                                                                           | Value for split_audio              |
+| `clean_audio`    | No       | False   | True or False                                                                                                                           | Value for clean_audio              |
+| `clean_strength` | No       | 0.7     | 0.0 to 1.0                                                                                                                              | Value for clean_strength           |
 
 _Refer to `python main.py infer -h` for additional help._
 
 #### Batch Inference
 
 ```bash
-python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_folder_path "input_folder_path" --output_folder_path "output_folder_path" --pth_path "pth_path" --index_path "index_path" --clean_audio "clean_audio" --clean_strength "clean_strength"
+python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_folder_path "input_folder_path" --output_folder_path "output_folder_path" --pth_path "pth_path" --index_path "index_path" --split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength"
 ```
 
-- `f0up_key`: Value for f0up_key (-24 to +24)
-- `filter_radius`: Value for filter_radius (0 to 10)
-- `index_rate`: Value for index_rate (0.0 to 1.0)
-- `hop_length`: Value for hop_length (1 to 512)
-- `rms_mix_rate`: Value for rms_mix_rate (0 to 1)
-- `protect`: Value for protect (0 to 0.5)
-- `f0autotune`: Value for autotune (True or False)
-- `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
-- `input_folder_path`: Full path to the input audio folder (The folder may only contain audio files)
-- `output_folder_path`: Full path to the output audio folder
-- `pth_path`: Full path to the pth file
-- `index_path`: Full path to the index file
-- `clean_audio`: Value for clean_audio (True or False)
-- `clean_strength`: Value for clean_strength (0.0 to 1.0)
+| Parameter Name       | Required | Default | Valid Options                                                                                                                           | Description                          |
+| -------------------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `f0up_key`           | No       | 0       | -24 to +24                                                                                                                              | Value for f0up_key                   |
+| `filter_radius`      | No       | 3       | 0 to 10                                                                                                                                 | Value for filter_radius              |
+| `index_rate`         | No       | 0.3     | 0.0 to 1.0                                                                                                                              | Value for index_rate                 |
+| `hop_length`         | No       | 128     | 1 to 512                                                                                                                                | Value for hop_length                 |
+| `rms_mix_rate`       | No       | 1       | 0 to 1                                                                                                                                  | Value for rms_mix_rate               |
+| `protect`            | No       | 0.33    | 0 to 0.5                                                                                                                                | Value for protect                    |
+| `f0autotune`         | No       | False   | True or False                                                                                                                           | Value for autotune                   |
+| `f0method`           | No       | rmvpe   | pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe] | Value for f0method                   |
+| `input_folder_path`  | Yes      |         | Full path to the input audio folder (The folder may only contain audio files)                                                           | Full path to the input audio folder  |
+| `output_folder_path` | Yes      |         | Full path to the output audio folder                                                                                                    | Full path to the output audio folder |
+| `pth_path`           | Yes      |         | Full path to the pth file                                                                                                               | Full path to the pth file            |
+| `index_path`         | Yes      |         | Full path to the index file                                                                                                             | Full path to the index file          |
+| `split_audio`        | No       | False   | True or False                                                                                                                           | Value for split_audio                |
+| `clean_audio`        | No       | False   | True or False                                                                                                                           | Value for clean_audio                |
+| `clean_strength`     | No       | 0.7     | 0.0 to 1.0                                                                                                                              | Value for clean_strength             |
 
 _Refer to `python main.py batch_infer -h` for additional help._
 
 #### TTS Inference
 
 ```bash
-python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --output_tts_path "output_tts_path" --output_rvc_path "output_rvc_path" --pth_path "pth_path" --index_path "index_path" --clean_audio "clean_audio" --clean_strength "clean_strength"
+python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --output_tts_path "output_tts_path" --output_rvc_path "output_rvc_path" --pth_path "pth_path" --index_path "index_path"--split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength"
 ```
 
-- `tts_text`: Text for TTS synthesis
-- `tts_voice`: Voice for TTS synthesis
-- `f0up_key`: Value for f0up_key (-24 to +24)
-- `filter_radius`: Value for filter_radius (0 to 10)
-- `index_rate`: Value for index_rate (0.0 to 1.0)
-- `hop_length`: Value for hop_length (1 to 512)
-- `rms_mix_rate`: Value for rms_mix_rate (0 to 1)
-- `protect`: Value for protect (0 to 0.5)
-- `f0autotune`: Value for autotune (True or False)
-- `f0method`: Value for f0method (pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe])
-- `output_tts_path`: Full path to the output TTS audio file
-- `output_rvc_path`: Full path to the input RVC audio file
-- `pth_path`: Full path to the pth file
-- `index_path`: Full path to the index file
-- `clean_audio`: Value for clean_audio (True or False)
-- `clean_strength`: Value for clean_strength (0.0 to 1.0)
+| Parameter Name    | Required | Default | Valid Options                                                                                                                           | Description                            |
+| ----------------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `tts_text`        | Yes      |         | Text for TTS synthesis                                                                                                                  | Text for TTS synthesis                 |
+| `tts_voice`       | Yes      |         | Voice for TTS synthesis                                                                                                                 | Voice for TTS synthesis                |
+| `f0up_key`        | No       | 0       | -24 to +24                                                                                                                              | Value for f0up_key                     |
+| `filter_radius`   | No       | 3       | 0 to 10                                                                                                                                 | Value for filter_radius                |
+| `index_rate`      | No       | 0.3     | 0.0 to 1.0                                                                                                                              | Value for index_rate                   |
+| `hop_length`      | No       | 128     | 1 to 512                                                                                                                                | Value for hop_length                   |
+| `rms_mix_rate`    | No       | 1       | 0 to 1                                                                                                                                  | Value for rms_mix_rate                 |
+| `protect`         | No       | 0.33    | 0 to 0.5                                                                                                                                | Value for protect                      |
+| `f0autotune`      | No       | False   | True or False                                                                                                                           | Value for autotune                     |
+| `f0method`        | No       | rmvpe   | pm, harvest, dio, crepe, crepe-tiny, rmvpe, fcpe, hybrid[crepe+rmvpe], hybrid[crepe+fcpe], hybrid[rmvpe+fcpe], hybrid[crepe+rmvpe+fcpe] | Value for f0method                     |
+| `output_tts_path` | Yes      |         | Full path to the output TTS audio file                                                                                                  | Full path to the output TTS audio file |
+| `output_rvc_path` | Yes      |         | Full path to the input RVC audio file                                                                                                   | Full path to the input RVC audio file  |
+| `pth_path`        | Yes      |         | Full path to the pth file                                                                                                               | Full path to the pth file              |
+| `index_path`      | Yes      |         | Full path to the index file                                                                                                             | Full path to the index file            |
+| `split_audio`     | No       | False   | True or False                                                                                                                           | Value for split_audio                  |
+| `clean_audio`     | No       | False   | True or False                                                                                                                           | Value for clean_audio                  |
+| `clean_strength`  | No       | 0.7     | 0.0 to 1.0                                                                                                                              | Value for clean_strength               |
 
 _Refer to `python main.py tts_infer -h` for additional help._
 
@@ -126,9 +134,11 @@ _Refer to `python main.py tts_infer -h` for additional help._
 python main.py preprocess --model_name "model_name" --dataset_path "dataset_path" --sampling_rate "sampling_rate"
 ```
 
-- `model_name`: Name of the model
-- `dataset_path`: Full path to the dataset folder (The folder may only contain audio files)
-- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
+| Parameter Name  | Required | Default | Valid Options                                                             | Description                     |
+| --------------- | -------- | ------- | ------------------------------------------------------------------------- | ------------------------------- |
+| `model_name`    | Yes      |         | Name of the model                                                         | Name of the model               |
+| `dataset_path`  | Yes      |         | Full path to the dataset folder (The folder may only contain audio files) | Full path to the dataset folder |
+| `sampling_rate` | Yes      |         | 32000, 40000, or 48000                                                    | Sampling rate of the audio data |
 
 _Refer to `python main.py preprocess -h` for additional help._
 
@@ -138,11 +148,13 @@ _Refer to `python main.py preprocess -h` for additional help._
 python main.py extract --model_name "model_name" --rvc_version "rvc_version" --f0method "f0method" --hop_length "hop_length" --sampling_rate "sampling_rate"
 ```
 
-- `model_name`: Name of the model
-- `rvc_version`: Version of the model (v1 or v2)
-- `f0method`: Value for f0method (pm, dio, crepe, crepe-tiny, harvest, rmvpe)
-- `hop_length`: Value for hop_length (1 to 512)
-- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
+| Parameter Name  | Required | Default | Valid Options                              | Description                     |
+| --------------- | -------- | ------- | ------------------------------------------ | ------------------------------- |
+| `model_name`    | Yes      |         | Name of the model                          | Name of the model               |
+| `rvc_version`   | No       | v2      | v1 or v2                                   | Version of the model            |
+| `f0method`      | No       | rmvpe   | pm, dio, crepe, crepe-tiny, harvest, rmvpe | Value for f0method              |
+| `hop_length`    | No       | 128     | 1 to 512                                   | Value for hop_length            |
+| `sampling_rate` | Yes      |         | 32000, 40000, or 48000                     | Sampling rate of the audio data |
 
 #### Start Training
 
@@ -150,20 +162,22 @@ python main.py extract --model_name "model_name" --rvc_version "rvc_version" --f
 python main.py train --model_name "model_name" --rvc_version "rvc_version" --save_every_epoch "save_every_epoch" --save_only_latest "save_only_latest" --save_every_weights "save_every_weights" --total_epoch "total_epoch" --sampling_rate "sampling_rate" --batch_size "batch_size" --gpu "gpu" --pitch_guidance "pitch_guidance" --pretrained "pretrained" --custom_pretrained "custom_pretrained" [--g_pretrained "g_pretrained"] [--d_pretrained "d_pretrained"]
 ```
 
-- `model_name`: Name of the model
-- `rvc_version`: Version of the model (v1 or v2)
-- `save_every_epoch`: Number of epochs after which to save the model checkpoint (1 to 50)
-- `save_only_latest`: Save only the latest final weight (True or False)
-- `save_every_weights`: Save a weight every training save (True or False)
-- `total_epoch`: Total number of training epochs (1 to 10000)
-- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
-- `batch_size`: Batch size, limited by GPU VRAM (1 to 50)
-- `gpu`: GPU number (0 to ∞ separated by -)
-- `pitch_guidance`: Train with or without pitch guidance (True or False)
-- `pretrained`: Train with or without pretrained models (True or False)
-- `custom_pretrained`: Use custom pretrained models; use parameters g\_/d_pretrained (True or False)
-- `g_pretrained_path`: Path to pretrained file G, only if you have used custom_pretrained
-- `d_pretrained_path`: Path to pretrained file D, only if you have used custom_pretrained
+| Parameter Name       | Required | Default | Valid Options                                                           | Description                                               |
+| -------------------- | -------- | ------- | ----------------------------------------------------------------------- | --------------------------------------------------------- |
+| `model_name`         | Yes      |         | Name of the model                                                       | Name of the model                                         |
+| `rvc_version`        | No       | v2      | v1 or v2                                                                | Version of the model                                      |
+| `save_every_epoch`   | Yes      |         | 1 to 50                                                                 | Number of epochs after which to save the model checkpoint |
+| `save_only_latest`   | No       | False   | True or False                                                           | Save only the latest final weight                         |
+| `save_every_weights` | No       | True    | True or False                                                           | Save a weight every training save                         |
+| `total_epoch`        | No       | 1000    | 1 to 10000                                                              | Total number of training epochs                           |
+| `sampling_rate`      | Yes      |         | 32000, 40000, or 48000                                                  | Sampling rate of the audio data                           |
+| `batch_size`         | No       | 8       | 1 to 50                                                                 | Batch size, limited by GPU VRAM                           |
+| `gpu`                | No       | 0       | 0 to ∞ separated by -                                                   | GPU number                                                |
+| `pitch_guidance`     | No       | True    | True or False                                                           | Train with or without pitch guidance                      |
+| `pretrained`         | No       | True    | True or False                                                           | Train with or without pretrained models                   |
+| `custom_pretrained`  | No       | False   | True or False                                                           | Use custom pretrained models                              |
+| `g_pretrained`       | No       | None    | Full path to pretrained file G, only if you have used custom_pretrained | Full path to pretrained file G                            |
+| `d_pretrained`       | No       | None    | Full path to pretrained file D, only if you have used custom_pretrained | Full path to pretrained file D                            |
 
 _Refer to `python main.py train -h` for additional help._
 
@@ -173,8 +187,11 @@ _Refer to `python main.py train -h` for additional help._
 python main.py index --model_name "model_name" --rvc_version "rvc_version"
 ```
 
-- `model_name`: Name of the model
-- `rvc_version`: Version of the model (v1 or v2)
+| Parameter Name | Required | Default | Valid Options | Description |
+| -------------- | -------- | ------- | ------------- | ----------- |
+
+| `model_name` | Yes | | Name of the model | Name of the model |
+|`rvc_version` | Yes | | v1 or v2 | Version of the model |
 
 _Refer to `python main.py index -h` for additional help._
 
@@ -185,20 +202,24 @@ _Refer to `python main.py index -h` for additional help._
 ```bash
 python main.py model_extract --pth_path "pth_path" --model_name "model_name" --sampling_rate "sampling_rate" --pitch_guidance "pitch_guidance" --rvc_version "rvc_version"
 ```
-- `pth_path`: Path to the pth file
-- `model_name`: Name of the model
-- `sampling_rate`: Sampling rate of the audio data (32000, 40000, or 48000)
-- `pitch_guidance`: Train with or without pitch guidance (True or False)
-- `rvc_version`: Version of the model (v1 or v2)
+
+| Parameter Name   | Required | Default | Valid Options          | Description                          |
+| ---------------- | -------- | ------- | ---------------------- | ------------------------------------ |
+| `pth_path`       | Yes      |         | Path to the pth file   | Full path to the pth file            |
+| `model_name`     | Yes      |         | Name of the model      | Name of the model                    |
+| `sampling_rate`  | Yes      |         | 32000, 40000, or 48000 | Sampling rate of the audio data      |
+| `pitch_guidance` | Yes      |         | True or False          | Train with or without pitch guidance |
+| `rvc_version`    | Yes      |         | v1 or v2               | Version of the model                 |
 
 #### Model Information
 
 ```bash
 python main.py model_information --pth_path "pth_path"
 ```
-- `pth_path`: Path to the pth file
 
-_Refer to `python main.py model_information -h` for additional help._
+| Parameter Name | Required | Default | Valid Options        | Description               |
+| -------------- | -------- | ------- | -------------------- | ------------------------- |
+| `pth_path`     | Yes      |         | Path to the pth file | Full path to the pth file |
 
 #### Model Blender
 
@@ -206,12 +227,12 @@ _Refer to `python main.py model_information -h` for additional help._
 python main.py model_blender --model_name "model_name" --pth_path_1 "pth_path_1" --pth_path_2 "pth_path_2" --ratio "ratio"
 ```
 
-- `model_name`: Name of the model
-- `pth_path_1`: Path to the first pth file
-- `pth_path_2`: Path to the second pth file
-- `ratio`: Value for blender ratio (0.0 to 1)
-
-_Refer to `python main.py model_blender -h` for additional help._
+| Parameter Name | Required | Default | Valid Options               | Description                      |
+| -------------- | -------- | ------- | --------------------------- | -------------------------------- |
+| `model_name`   | Yes      |         | Name of the model           | Name of the model                |
+| `pth_path_1`   | Yes      |         | Path to the first pth file  | Full path to the first pth file  |
+| `pth_path_2`   | Yes      |         | Path to the second pth file | Full path to the second pth file |
+| `ratio`        | No       | 0.5     | 0.0 to 1                    | Value for blender ratio          |
 
 #### Launch TensorBoard
 
@@ -227,8 +248,11 @@ Run the download script with the following command:
 python main.py download --model_link "model_link"
 ```
 
-- `model_link`: Link of the model (enclosed in double quotes; Google Drive or Hugging Face)
-  _Refer to `python main.py download -h` for additional help._
+| Parameter Name | Required | Default | Valid Options                                                               | Description       |
+| -------------- | -------- | ------- | --------------------------------------------------------------------------- | ----------------- |
+| `model_link`   | Yes      |         | Link of the model (enclosed in double quotes; Google Drive or Hugging Face) | Link of the model |
+
+_Refer to `python main.py download -h` for additional help._
 
 ### API
 
@@ -236,9 +260,10 @@ python main.py download --model_link "model_link"
 python main.py api --host "host" --port "port"
 ```
 
-- `host`: Value for host IP
-- `port`: Value for port number
-  _Refer to `python main.py api -h` for additional help._
+| Parameter Name | Required | Default   | Valid Options         | Description           |
+| -------------- | -------- | --------- | --------------------- | --------------------- |
+| `host`         | No       | 127.0.0.1 | Value for host IP     | Value for host IP     |
+| `port`         | No       | 8000      | Value for port number | Value for port number |
 
 To use the RVC CLI via the API, utilize the provided script. Make API requests to the following endpoints:
 
