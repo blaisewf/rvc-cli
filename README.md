@@ -187,11 +187,10 @@ _Refer to `python main.py train -h` for additional help._
 python main.py index --model_name "model_name" --rvc_version "rvc_version"
 ```
 
-| Parameter Name | Required | Default | Valid Options | Description |
-| -------------- | -------- | ------- | ------------- | ----------- |
-
-| `model_name` | Yes | | Name of the model | Name of the model |
-|`rvc_version` | Yes | | v1 or v2 | Version of the model |
+| Parameter Name | Required | Default | Valid Options     | Description          |
+| -------------- | -------- | ------- | ----------------- | -------------------- |
+| `model_name`   | Yes      |         | Name of the model | Name of the model    |
+| `rvc_version`  | Yes      |         | v1 or v2          | Version of the model |
 
 _Refer to `python main.py index -h` for additional help._
 
