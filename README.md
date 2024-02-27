@@ -148,13 +148,13 @@ _Refer to `python main.py preprocess -h` for additional help._
 python main.py extract --model_name "model_name" --rvc_version "rvc_version" --f0method "f0method" --hop_length "hop_length" --sampling_rate "sampling_rate"
 ```
 
-| Parameter Name  | Required | Default | Valid Options                              | Description                     |
-| --------------- | -------- | ------- | ------------------------------------------ | ------------------------------- |
-| `model_name`    | Yes      |         | Name of the model                          | Name of the model               |
-| `rvc_version`   | No       | v2      | v1 or v2                                   | Version of the model            |
-| `f0method`      | No       | rmvpe   | pm, dio, crepe, crepe-tiny, harvest, rmvpe | Value for f0method              |
-| `hop_length`    | No       | 128     | 1 to 512                                   | Value for hop_length            |
-| `sampling_rate` | Yes      |         | 32000, 40000, or 48000                     | Sampling rate of the audio data |
+| Parameter Name  | Required | Default | Valid Options                              | Description                                                                                                                                                                            |
+| --------------- | -------- | ------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `model_name`    | Yes      |         | Name of the model                          | Name of the model                                                                                                                                                                      |
+| `rvc_version`   | No       | v2      | v1 or v2                                   | Version of the model                                                                                                                                                                   |
+| `f0method`      | No       | rmvpe   | pm, harvest, dio, crepe, crepe-tiny, rmvpe | Pitch extraction algorithm to use for the audio conversion. The default algorithm is rmvpe, which is recommended for most cases.                                                       |
+| `hop_length`    | No       | 128     | 1 to 512                                   | Denotes the duration it takes for the system to transition to a significant pitch change. Smaller hop lengths require more time for inference but tend to yield higher pitch accuracy. |
+| `sampling_rate` | Yes      |         | 32000, 40000, or 48000                     | Sampling rate of the audio data                                                                                                                                                        |
 
 #### Start Training
 
@@ -210,13 +210,13 @@ _Refer to `python main.py index -h` for additional help._
 python main.py model_extract --pth_path "pth_path" --model_name "model_name" --sampling_rate "sampling_rate" --pitch_guidance "pitch_guidance" --rvc_version "rvc_version"
 ```
 
-| Parameter Name   | Required | Default | Valid Options          | Description                          |
-| ---------------- | -------- | ------- | ---------------------- | ------------------------------------ |
-| `pth_path`       | Yes      |         | Path to the pth file   | Full path to the pth file            |
-| `model_name`     | Yes      |         | Name of the model      | Name of the model                    |
-| `sampling_rate`  | Yes      |         | 32000, 40000, or 48000 | Sampling rate of the audio data      |
-| `pitch_guidance` | Yes      |         | True or False          | Train with or without pitch guidance |
-| `rvc_version`    | Yes      |         | v1 or v2               | Version of the model                 |
+| Parameter Name   | Required | Default | Valid Options          | Description                                                                                                                                                                                                                                                     |
+| ---------------- | -------- | ------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pth_path`       | Yes      |         | Path to the pth file   | Full path to the pth file                                                                                                                                                                                                                                       |
+| `model_name`     | Yes      |         | Name of the model      | Name of the model                                                                                                                                                                                                                                               |
+| `sampling_rate`  | Yes      |         | 32000, 40000, or 48000 | Sampling rate of the audio data                                                                                                                                                                                                                                 |
+| `pitch_guidance` | No       | True    | True or False          | By employing pitch guidance, it becomes feasible to mirror the intonation of the original voice, including its pitch. This feature is particularly valuable for singing and other scenarios where preserving the original melody or pitch pattern is essential. |
+| `rvc_version`    | Yes      |         | v1 or v2               | Version of the model                                                                                                                                                                                                                                            |
 
 #### Model Information
 
