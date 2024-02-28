@@ -19,10 +19,10 @@ def replace_keys_in_dict(d, old_key_part, new_key_part):
     return updated_dict
 
 
-def extract_model(ckpt, sr, if_f0, name, model_dir, epoch, version, hps):
+def extract_model(ckpt, sr, if_f0, name, model_dir, epoch, steps, version, hps):
     try:
-        print(f"Saved model '{model_dir}' (epoch {epoch})")
-        pth_file = f"{name}_{epoch}e.pth"
+        print(f"Saved model '{model_dir}' (epoch {epoch} and step {steps})")
+        pth_file = f"{name}_{epoch}e_{steps}s.pth"
         pth_file_old_version_path = os.path.join(
             model_dir, f"{pth_file}_old_version.pth"
         )
