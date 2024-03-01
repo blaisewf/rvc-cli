@@ -48,6 +48,7 @@ def run_infer_script(
     f0autotune,
     clean_audio,
     clean_strength,
+    export_format,
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
     command = [
@@ -71,6 +72,7 @@ def run_infer_script(
                 protect,
                 clean_audio,
                 clean_strength,
+                export_format,
             ],
         ),
     ]
@@ -95,6 +97,7 @@ def run_batch_infer_script(
     f0autotune,
     clean_audio,
     clean_strength,
+    export_format,
 ):
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
 
@@ -136,6 +139,7 @@ def run_batch_infer_script(
                     protect,
                     clean_audio,
                     clean_strength,
+                    export_format,
                 ],
             ),
         ]
@@ -163,6 +167,7 @@ def run_tts_script(
     f0autotune,
     clean_audio,
     clean_strength,
+    export_format,
 ):
     tts_script_path = os.path.join("rvc", "lib", "tools", "tts.py")
     infer_script_path = os.path.join("rvc", "infer", "infer.py")
@@ -199,6 +204,7 @@ def run_tts_script(
                 protect,
                 clean_audio,
                 clean_strength,
+                export_format,
             ],
         ),
     ]
@@ -542,6 +548,13 @@ def parse_arguments():
         choices=[str(i / 10) for i in range(11)],
         default="0.7",
     )
+    infer_parser.add_argument(
+        "--export_format",
+        type=str,
+        help="Export format",
+        choices=["WAV", "MP3", "FLAC", "OGG", "M4A"],
+        default="WAV",
+    )
 
     # Parser for 'batch_infer' mode
     batch_infer_parser = subparsers.add_parser(
@@ -645,6 +658,13 @@ def parse_arguments():
         help="Value for clean_strength",
         choices=[str(i / 10) for i in range(11)],
         default="0.7",
+    )
+    batch_infer_parser.add_argument(
+        "--export_format",
+        type=str,
+        help="Export format",
+        choices=["WAV", "MP3", "FLAC", "OGG", "M4A"],
+        default="WAV",
     )
 
     # Parser for 'tts' mode
@@ -756,6 +776,13 @@ def parse_arguments():
         help="Value for clean_strength",
         choices=[str(i / 10) for i in range(11)],
         default="0.7",
+    )
+    tts_parser.add_argument(
+        "--export_format",
+        type=str,
+        help="Export format",
+        choices=["WAV", "MP3", "FLAC", "OGG", "M4A"],
+        default="WAV",
     )
 
     # Parser for 'preprocess' mode
@@ -1041,6 +1068,7 @@ def main():
                 str(args.f0autotune),
                 str(args.clean_audio),
                 str(args.clean_strength),
+                str(args.export_format),
             )
         elif args.mode == "batch_infer":
             run_batch_infer_script(
@@ -1059,6 +1087,7 @@ def main():
                 str(args.f0autotune),
                 str(args.clean_audio),
                 str(args.clean_strength),
+                str(args.export_format),
             )
         elif args.mode == "tts":
             run_tts_script(
@@ -1079,6 +1108,7 @@ def main():
                 str(args.f0autotune),
                 str(args.clean_audio),
                 str(args.clean_strength),
+                str(args.export_format),
             )
         elif args.mode == "preprocess":
             run_preprocess_script(

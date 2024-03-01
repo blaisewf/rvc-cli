@@ -54,6 +54,13 @@ def remove_audio_noise(input_audio_path, reduction_strength=0.7):
         print(f"Error cleaning audio: {error}")
         return None
 
+def convert_audio_format(input_path, output_path, output_format):
+    try:
+        audio, sample_rate = sf.read(input_path)
+        sf.write(output_path, audio, sample_rate, format=output_format)
+    except Exception as error:
+        print(f"Failed to convert audio to {output_format} format: {error}")
+
 
 def vc_single(
     sid=0,
@@ -247,6 +254,7 @@ rms_mix_rate = float(sys.argv[12])
 protect = float(sys.argv[13])
 clean_audio = sys.argv[14]
 clean_strength = float(sys.argv[15])
+export_format = sys.argv[16]
 
 get_vc(model_path, 0)
 
@@ -272,6 +280,9 @@ try:
         cleaned_audio = remove_audio_noise(audio_output_path, clean_strength)
         if cleaned_audio is not None:
             sf.write(audio_output_path, cleaned_audio, tgt_sr, format="WAV")
+
+    if export_format != "WAV":
+        convert_audio_format(audio_output_path, audio_output_path, export_format)
 
     end_time = time.time()
     elapsed_time = end_time - start_time
