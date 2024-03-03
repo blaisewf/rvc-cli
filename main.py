@@ -373,7 +373,7 @@ def run_index_script(model_name, rvc_version):
 
 # Model extract
 def run_model_extract_script(
-    pth_path, model_name, sampling_rate, pitch_guidance, rvc_version
+    pth_path, model_name, sampling_rate, pitch_guidance, rvc_version, epoch, step
 ):
     f0 = 1 if str(pitch_guidance) == "True" else 0
     model_extract_script_path = os.path.join(
@@ -387,6 +387,8 @@ def run_model_extract_script(
         sampling_rate,
         f0,
         rvc_version,
+        epoch,
+        step,
     ]
 
     subprocess.run(command)
@@ -978,7 +980,6 @@ def parse_arguments():
         type=str,
         help="Pitch guidance",
         choices=["True", "False"],
-        default="True",
     )
     model_extract_parser.add_argument(
         "--rvc_version",
@@ -986,6 +987,17 @@ def parse_arguments():
         help="Version of the model",
         choices=["v1", "v2"],
         default="v2",
+    )
+    model_extract_parser.add_argument(
+        "--epoch",
+        type=str,
+        help="Epochs of the model",
+        choices=[str(i) for i in range(1, 10001)],
+    )
+    model_extract_parser.add_argument(
+        "--step",
+        type=str,
+        help="Steps of the model",
     )
 
     # Parser for 'model_information' mode
@@ -1154,6 +1166,8 @@ def main():
                 str(args.sampling_rate),
                 str(args.pitch_guidance),
                 str(args.rvc_version),
+                str(args.epoch),
+                str(args.step),
             )
         elif args.mode == "model_information":
             run_model_information_script(

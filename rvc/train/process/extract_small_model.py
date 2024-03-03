@@ -1,5 +1,7 @@
 import os
 import torch
+import hashlib
+import datetime
 from collections import OrderedDict
 
 
@@ -19,7 +21,7 @@ def replace_keys_in_dict(d, old_key_part, new_key_part):
     return updated_dict
 
 
-def extract_small_model(path, name, sr, if_f0, version):
+def extract_small_model(path, name, sr, if_f0, version, epoch, step):
     try:
         ckpt = torch.load(path, map_location="cpu")
         pth_file = f"{name}.pth"
@@ -145,10 +147,15 @@ def extract_small_model(path, name, sr, if_f0, version):
                     32000,
                 ]
 
-        opt["info"] = "Extracted model."
-        opt["version"] = version
+        opt["epoch"] = epoch
+        opt["step"] = step
         opt["sr"] = sr
         opt["f0"] = int(if_f0)
+        opt["version"] = version
+        opt["creation_date"] = datetime.datetime.now().isoformat()
+
+        model_hash = hashlib.sha256(torch.serialize(ckpt).numpy()).hexdigest()
+        opt["model_hash"] = model_hash
         torch.save(opt, pth_file_old_version_path)
 
         model = torch.load(pth_file_old_version_path, map_location=torch.device("cpu"))

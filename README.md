@@ -210,7 +210,7 @@ _Refer to `python main.py index -h` for additional help._
 #### Model Extract
 
 ```bash
-python main.py model_extract --pth_path "pth_path" --model_name "model_name" --sampling_rate "sampling_rate" --pitch_guidance "pitch_guidance" --rvc_version "rvc_version"
+python main.py model_extract --pth_path "pth_path" --model_name "model_name" --sampling_rate "sampling_rate" --pitch_guidance "pitch_guidance" --rvc_version "rvc_version" --epoch "epoch" --step "step"
 ```
 
 | Parameter Name   | Required | Default | Valid Options          | Description                                                                                                                                                                                                                                                     |
@@ -218,8 +218,10 @@ python main.py model_extract --pth_path "pth_path" --model_name "model_name" --s
 | `pth_path`       | Yes      |         | Path to the pth file   | Full path to the pth file                                                                                                                                                                                                                                       |
 | `model_name`     | Yes      |         | Name of the model      | Name of the model                                                                                                                                                                                                                                               |
 | `sampling_rate`  | Yes      |         | 32000, 40000, or 48000 | Sampling rate of the audio data                                                                                                                                                                                                                                 |
-| `pitch_guidance` | No       | True    | True or False          | By employing pitch guidance, it becomes feasible to mirror the intonation of the original voice, including its pitch. This feature is particularly valuable for singing and other scenarios where preserving the original melody or pitch pattern is essential. |
+| `pitch_guidance` | Yes      |         | True or False          | By employing pitch guidance, it becomes feasible to mirror the intonation of the original voice, including its pitch. This feature is particularly valuable for singing and other scenarios where preserving the original melody or pitch pattern is essential. |
 | `rvc_version`    | Yes      |         | v1 or v2               | Version of the model                                                                                                                                                                                                                                            |
+| `epoch`          | Yes      |         | 1 to 10000             | Specifies the overall quantity of epochs for the model training process.                                                                                                                                                                                        |
+| `step`           | Yes      |         | 1 to ∞                 | Specifies the overall quantity of steps for the model training process.                                                                                                                                                                                         |
 
 #### Model Information
 
