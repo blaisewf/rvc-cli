@@ -58,8 +58,9 @@ def extract_model(ckpt, sr, if_f0, name, model_dir, epoch, step, version, hps):
         opt["version"] = version
         opt["creation_date"] = datetime.datetime.now().isoformat()
 
-        hash_input = f"{epoch} {step} {datetime.datetime.now().isoformat()}"
-        model_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+        
+        hash_input = f"{str(ckpt)} {epoch} {step} {datetime.datetime.now().isoformat()}"
+        model_hash = hashlib.sha256(hash_input.encode()).hexdigest()       
         opt["model_hash"] = model_hash
 
         torch.save(opt, model_dir)

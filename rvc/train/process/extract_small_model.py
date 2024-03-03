@@ -154,7 +154,7 @@ def extract_small_model(path, name, sr, if_f0, version, epoch, step):
         opt["version"] = version
         opt["creation_date"] = datetime.datetime.now().isoformat()
 
-        hash_input = f"{epoch} {step} {datetime.datetime.now().isoformat()}"
+        hash_input = f"{str(ckpt)} {epoch} {step} {datetime.datetime.now().isoformat()}"
         model_hash = hashlib.sha256(hash_input.encode()).hexdigest()
         opt["model_hash"] = model_hash
 
