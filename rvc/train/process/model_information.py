@@ -26,8 +26,8 @@ def model_information(path):
         f"Epochs: {epochs}\n"
         f"Steps: {steps}\n"
         f"RVC Version: {version}\n"
-        f"Sampling rate: {sr}\n"
-        f"Pitch guidance: {pitch_guidance}\n"
+        f"Sampling Rate: {sr}\n"
+        f"Pitch Guidance: {pitch_guidance}\n"
         f"Creation Date: {prettify_date(creation_date)}\n"
-        f"Hash: {model_hash}"
+        f"Hash (ID): {model_hash}"
     )
