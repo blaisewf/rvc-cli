@@ -5,7 +5,6 @@
 ### Todo
 
 - [ ] Improve the efficiency of prerequisite download to avoid running it every time `main.py` is executed.
-- [ ] Resolve issues with Google Colab (missing some updates)
 
 ### Table of Contents
 
