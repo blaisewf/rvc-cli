@@ -61,6 +61,8 @@ def convert_audio_format(input_path, output_path, output_format):
             print(f"Converting audio to {export_format} format...")
             audio, sample_rate = sf.read(input_path)
             sf.write(output_path, audio, sample_rate, format=output_format.lower())
+            os.remove(input_path)
+        return output_path
     except Exception as error:
         print(f"Failed to convert audio to {output_format} format: {error}")
 
@@ -170,6 +172,8 @@ def vc_single(
                 f0autotune,
                 f0_file=f0_file,
             )
+        if output_path is not None:
+            sf.write(output_path, audio_opt, tgt_sr, format="WAV")
 
         return (tgt_sr, audio_opt)
 
@@ -277,9 +281,10 @@ try:
         cleaned_audio = remove_audio_noise(audio_output_path, clean_strength)
         if cleaned_audio is not None:
             sf.write(audio_output_path, cleaned_audio, tgt_sr, format="WAV")
-
-    convert_audio_format(audio_output_path, audio_output_path, export_format)
-    audio_output_path = audio_output_path.replace(".wav", f".{export_format.lower()}")
+  
+    output_path_format = audio_output_path.replace(".wav", f".{export_format.lower()}")
+    audio_output_path = convert_audio_format(audio_output_path, output_path_format, export_format)
+    
 
     end_time = time.time()
     elapsed_time = end_time - start_time
