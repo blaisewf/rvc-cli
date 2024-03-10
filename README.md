@@ -41,7 +41,7 @@ Download the necessary models and executables by running the following command:
 python main.py prerequisites
 ```
 
-_Refer to [this section](#prerequisites-download) to more information..._
+_More information about the prerequisites command [here](#prerequisites-download)_
 
 For detailed information and command-line options, refer to the help command:
 
