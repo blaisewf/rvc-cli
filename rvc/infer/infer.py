@@ -281,10 +281,11 @@ try:
         cleaned_audio = remove_audio_noise(audio_output_path, clean_strength)
         if cleaned_audio is not None:
             sf.write(audio_output_path, cleaned_audio, tgt_sr, format="WAV")
-  
+
     output_path_format = audio_output_path.replace(".wav", f".{export_format.lower()}")
-    audio_output_path = convert_audio_format(audio_output_path, output_path_format, export_format)
-    
+    audio_output_path = convert_audio_format(
+        audio_output_path, output_path_format, export_format
+    )
 
     end_time = time.time()
     elapsed_time = end_time - start_time
