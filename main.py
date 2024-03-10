@@ -19,11 +19,6 @@ config = Config()
 current_script_directory = os.path.dirname(os.path.realpath(__file__))
 logs_path = os.path.join(current_script_directory, "logs")
 
-# Check for prerequisites
-subprocess.run(
-    ["python", os.path.join("rvc", "lib", "tools", "prerequisites_download.py")]
-)
-
 # Get TTS Voices
 with open(os.path.join("rvc", "lib", "tools", "tts_voices.json"), "r") as f:
     voices_data = json.load(f)
@@ -428,6 +423,32 @@ def run_download_script(model_link):
     ]
     subprocess.run(command)
     return f"Model downloaded successfully."
+
+
+# Prerequisites
+def run_prerequisites_script(pretraineds_v1, pretraineds_v2, models, exe):
+    prerequisites_script_path = os.path.join(
+        "rvc", "lib", "tools", "prerequisites_download.py"
+    )
+    command = [
+        "python",
+        prerequisites_script_path,
+        *map(
+            str,
+            [
+                "--pretraineds_v1",
+                pretraineds_v1,
+                "--pretraineds_v2",
+                pretraineds_v2,
+                "--models",
+                models,
+                "--exe",
+                exe,
+            ],
+        ),
+    ]
+    subprocess.run(command)
+    return "Prerequisites installed successfully."
 
 
 # API
@@ -1048,6 +1069,39 @@ def parse_arguments():
         help="Link of the model",
     )
 
+    # Parser for 'prerequisites' mode
+    prerequisites_parser = subparsers.add_parser(
+        "prerequisites", help="Install prerequisites"
+    )
+    prerequisites_parser.add_argument(
+        "--pretraineds_v1",
+        type=str,
+        choices=["True", "False"],
+        default="True",
+        help="Download pretrained models for v1",
+    )
+    prerequisites_parser.add_argument(
+        "--pretraineds_v2",
+        type=str,
+        choices=["True", "False"],
+        default="True",
+        help="Download pretrained models for v2",
+    )
+    prerequisites_parser.add_argument(
+        "--models",
+        type=str,
+        choices=["True", "False"],
+        default="True",
+        help="Donwload models",
+    )
+    prerequisites_parser.add_argument(
+        "--exe",
+        type=str,
+        choices=["True", "False"],
+        default="True",
+        help="Download executables",
+    )
+
     # Parser for 'api' mode
     api_parser = subparsers.add_parser("api", help="Run the API")
     api_parser.add_argument("--ip", type=str, help="IP address", default="127.0.0.1")
@@ -1185,6 +1239,13 @@ def main():
         elif args.mode == "download":
             run_download_script(
                 str(args.model_link),
+            )
+        elif args.mode == "prerequisites":
+            run_prerequisites_script(
+                str(args.pretraineds_v1),
+                str(args.pretraineds_v2),
+                str(args.models),
+                str(args.exe),
             )
         elif args.mode == "api":
             run_api_script(
