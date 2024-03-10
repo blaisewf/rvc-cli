@@ -6,6 +6,7 @@ import torchcrepe
 import torch
 import parselmouth
 import tqdm
+import joblib
 from multiprocessing import Process, cpu_count
 
 current_directory = os.getcwd()
@@ -174,38 +175,34 @@ class FeatureInput:
         )
         return f0_coarse
 
-    def process_paths(self, paths, f0_method, hop_length, thread_n):
-        if len(paths) == 0:
-            print("There are no paths to process.")
-            return
-        with tqdm.tqdm(total=len(paths), leave=True, position=thread_n) as pbar:
-            description = f"Thread {thread_n} | Hop-Length {hop_length}"
-            pbar.set_description(description)
+    def process(self, paths, f0_method, hop_length):
+        
+        inp_path, opt_path1, opt_path2 = paths
+        
+        try:
+            if os.path.exists(opt_path1 + ".npy") and os.path.exists(
+                opt_path2 + ".npy"
+            ):
+                print("Nothing to do")
+                return
+            
+            print(f"Processing {inp_path}")
 
-            for idx, (inp_path, opt_path1, opt_path2) in enumerate(paths):
-                try:
-                    if os.path.exists(opt_path1 + ".npy") and os.path.exists(
-                        opt_path2 + ".npy"
-                    ):
-                        pbar.update(1)
-                        continue
-
-                    feature_pit = self.compute_f0(inp_path, f0_method, hop_length)
-                    np.save(
-                        opt_path2,
-                        feature_pit,
-                        allow_pickle=False,
-                    )  # nsf
-                    coarse_pit = self.coarse_f0(feature_pit)
-                    np.save(
-                        opt_path1,
-                        coarse_pit,
-                        allow_pickle=False,
-                    )  # ori
-                    pbar.update(1)
-                except Exception as error:
-                    print(f"f0fail-{idx}-{inp_path}-{error}")
-
+            feature_pit = self.compute_f0(inp_path, f0_method, hop_length)
+            np.save(
+                opt_path2,
+                feature_pit,
+                allow_pickle=False,
+            )  # nsf
+            coarse_pit = self.coarse_f0(feature_pit)
+            np.save(
+                opt_path1,
+                coarse_pit,
+                allow_pickle=False,
+            )  # ori
+            print(f"Completed {inp_path}")
+        except Exception as error:
+            print(f"f0fail-{idx}-{inp_path}-{error}")
 
 if __name__ == "__main__":
     feature_input = FeatureInput()
@@ -224,16 +221,11 @@ if __name__ == "__main__":
         output_path2 = f"{output_root2}/{name}"
         paths.append([input_path, output_path1, output_path2])
     print("Using f0 method: " + f0_method)
+    
     num_paths = len(paths)
     num_processes = min(num_processes, num_paths)
-    processes = []
-    for i in range(num_processes):
-        paths_to_process = [paths[j] for j in range(i, num_paths, num_processes)]
-        p = Process(
-            target=feature_input.process_paths,
-            args=(paths_to_process, f0_method, hop_length, i),
-        )
-        processes.append(p)
-        p.start()
-    for i in range(num_processes):
-        processes[i].join()
+    
+    results = joblib.Parallel(n_jobs=-1, backend="loky") \
+        (joblib.delayed(feature_input.process)(x, f0_method, hop_length) for x in paths)
+        
+    print("Extract feature completed")

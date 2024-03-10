@@ -275,7 +275,7 @@ def run_extract_script(model_name, rvc_version, f0method, hop_length, sampling_r
         ),
     ]
     subprocess.run(command_1)
-    subprocess.run(command_2)
+    # subprocess.run(command_2)
 
     generate_config(rvc_version, sampling_rate, model_path)
     generate_filelist(f0method, model_path, rvc_version, sampling_rate)
