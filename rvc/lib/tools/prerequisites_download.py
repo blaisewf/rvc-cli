@@ -71,6 +71,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+
 def download_files(file_list):
     for file_name in file_list:
         destination_path = os.path.join(file_name)
