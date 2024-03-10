@@ -223,13 +223,15 @@ if __name__ == "__main__":
         output_path1 = f"{output_root1}/{name}"
         output_path2 = f"{output_root2}/{name}"
         paths.append([input_path, output_path1, output_path2])
-
-    processes = []
     print("Using f0 method: " + f0_method)
+    num_paths = len(paths)
+    num_processes = min(num_processes, num_paths)
+    processes = []
     for i in range(num_processes):
+        paths_to_process = [paths[j] for j in range(i, num_paths, num_processes)]
         p = Process(
             target=feature_input.process_paths,
-            args=(paths[i::num_processes], f0_method, hop_length, i),
+            args=(paths_to_process, f0_method, hop_length, i),
         )
         processes.append(p)
         p.start()
