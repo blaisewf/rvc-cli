@@ -1,6 +1,5 @@
 import os
 import wget
-import sys
 import argparse
 
 url_base = "https://huggingface.co/IAHispano/Applio/resolve/main/Resources"
@@ -85,7 +84,7 @@ def download_files(file_list):
 if args.models == "True":
     download_files(models)
 
-if args.exe == "True" and sys.platform == "win32":
+if args.exe == "True" and os.name == "nt":
     download_files(executables)
 
 if args.pretraineds_v1 == "True":
