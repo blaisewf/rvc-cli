@@ -454,7 +454,7 @@ def run_prerequisites_script(pretraineds_v1, pretraineds_v2, models, exe):
 # API
 def run_api_script(ip, port):
     command = [
-        "uvicorn",
+        "env/Scripts/uvicorn.exe" if os.name == "nt" else "uvicorn",
         "api:app",
         "--host",
         ip,
