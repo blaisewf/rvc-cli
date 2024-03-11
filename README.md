@@ -277,12 +277,12 @@ _Refer to `python main.py download -h` for additional help._
 python main.py prerequisites --pretraineds_v1 "pretraineds_v1" --pretraineds_v2 "--pretraineds_v2" --models "models" --exe "exe"
 ```
 
-| Parameter Name   | Required | Default | Valid Options | Description                                                                               |
-| ---------------- | -------- | ------- | ------------- | ----------------------------------------------------------------------------------------- |
-| `pretraineds_v1` | No       | True    | True or False | Download pretrained models for v1                                                         |
-| `pretraineds_v2` | No       | True    | True or False | Download pretrained models for v2                                                         |
-| `models`         | No       | True    | True or False | Download models for v1 and v2                                                             |
-| `exe`            | No       | True    | True or False | Download the necessary executable files for the CLI to function properly (FFmpeg and SoX) |
+| Parameter Name   | Required | Default | Valid Options | Description                                                                                   |
+| ---------------- | -------- | ------- | ------------- | --------------------------------------------------------------------------------------------- |
+| `pretraineds_v1` | No       | True    | True or False | Download pretrained models for v1                                                             |
+| `pretraineds_v2` | No       | True    | True or False | Download pretrained models for v2                                                             |
+| `models`         | No       | True    | True or False | Download models for v1 and v2                                                                 |
+| `exe`            | No       | True    | True or False | Download the necessary executable files for the CLI to function properly (FFmpeg and FFprobe) |
 
 ### API
 
