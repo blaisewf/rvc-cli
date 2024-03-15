@@ -2,10 +2,6 @@
 
 [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blaise-tk/rvc_cli/blob/master/RVC_CLI.ipynb)
 
-### Todo
-
-- [ ] Improve the efficiency of prerequisite download to avoid running it every time `main.py` is executed.
-
 ### Table of Contents
 
 1. [Installation](#installation)
