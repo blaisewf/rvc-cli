@@ -70,10 +70,10 @@ torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = False
 
 global_step = 0
+lowestValue = {"step": 0, "value": float("inf"), "epoch": 0}
 bestEpochStep = 0
 last_loss_gen_all = 0
 lastValue = 1
-lowestValue = {"step": 0, "value": float("inf"), "epoch": 0}
 dirtyTb = []
 dirtyValues = []
 dirtySteps = []
@@ -104,13 +104,16 @@ def main():
         print("GPU not detected, reverting to CPU (not recommended)")
         n_gpus = 1
     children = []
-    for i in range(n_gpus):
-        subproc = mp.Process(
-            target=run,
-            args=(i, n_gpus, hps),
-        )
-        children.append(subproc)
-        subproc.start()
+    pid_file_path = os.path.join(now_dir, "rvc", "train", "train_pid.txt")
+    with open(pid_file_path, "w") as pid_file:
+        for i in range(n_gpus):
+            subproc = mp.Process(
+                target=run,
+                args=(i, n_gpus, hps),
+            )
+            children.append(subproc)
+            subproc.start()
+            pid_file.write(str(subproc.pid) + "\n")
 
     for i in range(n_gpus):
         children[i].join()
@@ -288,8 +291,11 @@ def run(
 
 def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
     global global_step, last_loss_gen_all, lowestValue
+
     if epoch == 1:
+        lowestValue = {"step": 0, "value": float("inf"), "epoch": 0}
         last_loss_gen_all = {}
+
     net_g, net_d = nets
     optim_g, optim_d = optims
     train_loader = loaders[0] if loaders is not None else None
@@ -471,6 +477,11 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     lowestValue["value"] = loss_gen_all
                     lowestValue["step"] = global_step
                     lowestValue["epoch"] = epoch
+                    # print(f'Lowest generator loss updated: {lowestValue["value"]} at epoch {epoch}, step {global_step}')
+                    if epoch > lowestValue["epoch"]:
+                        print(
+                            "Alert: The lower generating loss has been exceeded by a lower loss in a subsequent epoch."
+                        )
 
         optim_g.zero_grad()
         scaler.scale(loss_gen_all).backward()
@@ -574,12 +585,12 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
     if rank == 0:
         if epoch > 1:
-            change = last_loss_gen_all - loss_gen_all
-            change_str = ""
-            if change != 0:
-                change_str = f"({'decreased' if change > 0 else 'increased'} {abs(change)})"  # decreased = good
             print(
-                f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | loss_gen_all={round(loss_gen_all.item(), 3)} {change_str}"
+                f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowestValue={lowestValue['value']} (epoch {lowestValue['epoch']} and step {lowestValue['step']})"
+            )
+        else:
+            print(
+                f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()}"
             )
         last_loss_gen_all = loss_gen_all
 
@@ -590,6 +601,9 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         print(
             f"Lowest generator loss: {lowestValue['value']} at epoch {lowestValue['epoch']}, step {lowestValue['step']}"
         )
+
+        pid_file_path = os.path.join(now_dir, "rvc", "train", "train_pid.txt")
+        os.remove(pid_file_path)
 
         if hasattr(net_g, "module"):
             ckpt = net_g.module.state_dict()
