@@ -12,17 +12,19 @@ def calculate_features(y, sr):
     rolloff = librosa.feature.spectral_rolloff(S=stft, sr=sr)[0]
     return stft, duration, cent, bw, rolloff
 
+
 def plot_title(title):
     plt.suptitle(title, fontsize=16, fontweight="bold")
 
-def plot_spectrogram(y, sr, stft, duration, cmap='inferno'):
+
+def plot_spectrogram(y, sr, stft, duration, cmap="inferno"):
     plt.subplot(3, 1, 1)
     plt.imshow(
         librosa.amplitude_to_db(stft, ref=np.max),
         origin="lower",
         extent=[0, duration, 0, sr / 1000],
         aspect="auto",
-        cmap=cmap  # Change the colormap here
+        cmap=cmap,  # Change the colormap here
     )
     plt.colorbar(format="%+2.0f dB")
     plt.xlabel("Time (s)")
@@ -53,7 +55,7 @@ def analyze_audio(audio_file, save_plot_path="logs/audio_analysis.png"):
     stft, duration, cent, bw, rolloff = calculate_features(y, sr)
 
     plt.figure(figsize=(12, 10))
-    
+
     plot_title("Audio Analysis" + " - " + audio_file.split("/")[-1])
     plot_spectrogram(y, sr, stft, duration)
     plot_waveform(y, sr, duration)
@@ -65,15 +67,10 @@ def analyze_audio(audio_file, save_plot_path="logs/audio_analysis.png"):
         plt.savefig(save_plot_path, bbox_inches="tight", dpi=300)
     plt.close()
 
-    audio_info = f"""
-    - Sample Rate: {sr},
-    - Duration: {(
+    audio_info = f"""Sample Rate: {sr}\nDuration: {(
             str(round(duration, 2)) + " seconds"
             if duration < 60
             else str(round(duration / 60, 2)) + " minutes"
-    )},
-    - Number of Samples: {len(y)},
-    - Bits per Sample: {librosa.get_samplerate(audio_file)},
-    - Channels: {"Mono (1)" if y.ndim == 1 else "Stereo (2)"}
-    """
+    )}\nNumber of Samples: {len(y)}\nBits per Sample: {librosa.get_samplerate(audio_file)}\nChannels: {"Mono (1)" if y.ndim == 1 else "Stereo (2)"}"""
+
     return audio_info, save_plot_path
