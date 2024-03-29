@@ -263,6 +263,18 @@ python main.py download --model_link "model_link"
 
 _Refer to `python main.py download -h` for additional help._
 
+#### Audio Analyzer
+
+```bash
+python main.py audio_analyzer --input_path "input_path"
+```
+
+| Parameter Name | Required | Default | Valid Options                     | Description                       |
+| -------------- | -------- | ------- | --------------------------------- | --------------------------------- |
+| `input_path`   | Yes      | None    | Full path to the input audio file | Full path to the input audio file |
+
+_Refer to `python main.py audio_analyzer -h` for additional help._
+
 #### Prerequisites Download
 
 ```bash
