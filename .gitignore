@@ -1,9 +1,29 @@
+# Ignore compiled executables
 *.exe
+
+# Ignore model files
 *.pt
 *.onnx
-*pth
+*.pth
+
+# Ignore Python bytecode files
 *.pyc
 
-logs
-env
-venv
+# Ignore audio files
+*.wav
+*.flac
+*.mp3
+
+# Ignore generated logs
+logs/
+
+# Ignore environment and virtual environment directories
+env/
+venv/
+
+# Ignore cached files
+.cache/
+
+# Ignore specific project directories
+/tracks/
+/lyrics/

@@ -10,6 +10,7 @@
 2. [Getting Started](#getting-started)
    - [Inference](#inference)
    - [Training](#training)
+   - [Audio Separator](#audio-separator)
    - [Additional Features](#additional-features)
 3. [API](#api)
 4. [Credits](#credits)
@@ -202,6 +203,81 @@ python main.py index --model_name "model_name" --rvc_version "rvc_version"
 
 _Refer to `python main.py index -h` for additional help._
 
+### Audio Separator
+
+```bash
+python audio_separator.py [audio_file] [options]
+```
+
+#### Info and Debugging
+
+| Parameter Name        | Required | Default | Valid Options             | Description                                                            |
+| --------------------- | -------- | ------- | ------------------------- | ---------------------------------------------------------------------- |
+| `audio_file`          | Yes      | None    | Any valid audio file path | The path to the audio file you want to separate, in any common format. |
+| `-d`, `--debug`       | No       | False   |                           | Enable debug logging.                                                  |
+| `-e`, `--env_info`    | No       | False   |                           | Print environment information and exit.                                |
+| `-l`, `--list_models` | No       | False   |                           | List all supported models and exit.                                    |
+| `--log_level`         | No       | info    | info, debug, warning      | Log level.                                                             |
+
+#### Separation I/O Params
+
+| Parameter Name           | Required | Default                      | Valid Options             | Description                        |
+| ------------------------ | -------- | ---------------------------- | ------------------------- | ---------------------------------- |
+| `-m`, `--model_filename` | No       | UVR-MDX-NET-Inst_HQ_3.onnx   | Any valid model file path | Model to use for separation.       |
+| `--output_format`        | No       | WAV                          | Any common audio format   | Output format for separated files. |
+| `--output_dir`           | No       | None                         | Any valid directory path  | Directory to write output files.   |
+| `--model_file_dir`       | No       | /tmp/audio-separator-models/ | Any valid directory path  | Model files directory.             |
+
+#### Common Separation Parameters
+
+| Parameter Name    | Required | Default | Valid Options                                           | Description                                                |
+| ----------------- | -------- | ------- | ------------------------------------------------------- | ---------------------------------------------------------- |
+| `--invert_spect`  | No       | False   |                                                         | Invert secondary stem using spectrogram.                   |
+| `--normalization` | No       | 0.9     | Any float value                                         | Max peak amplitude to normalize input and output audio to. |
+| `--single_stem`   | No       | None    | Instrumental, Vocals, Drums, Bass, Guitar, Piano, Other | Output only a single stem.                                 |
+| `--sample_rate`   | No       | 44100   | Any integer value                                       | Modify the sample rate of the output audio.                |
+
+#### MDXC Architecture Parameters
+
+| Parameter Name                  | Required | Default | Valid Options     | Description                                                                                     |
+| ------------------------------- | -------- | ------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| `--mdxc_segment_size`           | No       | 256     | Any integer value | Size of segments for MDXC architecture.                                                         |
+| `--mdxc_use_model_segment_size` | No       | False   |                   | Use model default segment size instead of the value from the config file for MDXC architecture. |
+| `--mdxc_overlap`                | No       | 8       | 2 to 50           | Amount of overlap between prediction windows for MDXC architecture.                             |
+| `--mdxc_batch_size`             | No       | 1       | Any integer value | Batch size for MDXC architecture.                                                               |
+| `--mdxc_pitch_shift`            | No       | 0       | Any integer value | Shift audio pitch by a number of semitones while processing for MDXC architecture.              |
+
+#### MDX Architecture Parameters
+
+| Parameter Name         | Required | Default | Valid Options     | Description                                                        |
+| ---------------------- | -------- | ------- | ----------------- | ------------------------------------------------------------------ |
+| `--mdx_segment_size`   | No       | 256     | Any integer value | Size of segments for MDX architecture.                             |
+| `--mdx_overlap`        | No       | 0.25    | 0.001 to 0.999    | Amount of overlap between prediction windows for MDX architecture. |
+| `--mdx_batch_size`     | No       | 1       | Any integer value | Batch size for MDX architecture.                                   |
+| `--mdx_hop_length`     | No       | 1024    | Any integer value | Hop length for MDX architecture.                                   |
+| `--mdx_enable_denoise` | No       | False   |                   | Enable denoising during separation for MDX architecture.           |
+
+#### Demucs Architecture Parameters
+
+| Parameter Name              | Required | Default | Valid Options     | Description                                                       |
+| --------------------------- | -------- | ------- | ----------------- | ----------------------------------------------------------------- |
+| `--demucs_segment_size`     | No       | Default | Any integer value | Size of segments for Demucs architecture.                         |
+| `--demucs_shifts`           | No       | 2       | Any integer value | Number of predictions with random shifts for Demucs architecture. |
+| `--demucs_overlap`          | No       | 0.25    | 0.001 to 0.999    | Overlap between prediction windows for Demucs architecture.       |
+| `--demucs_segments_enabled` | No       | True    |                   | Enable segment-wise processing for Demucs architecture.           |
+
+#### VR Architecture Parameters
+
+| Parameter Name                | Required | Default | Valid Options     | Description                                                           |
+| ----------------------------- | -------- | ------- | ----------------- | --------------------------------------------------------------------- |
+| `--vr_batch_size`             | No       | 4       | Any integer value | Batch size for VR architecture.                                       |
+| `--vr_window_size`            | No       | 512     | Any integer value | Window size for VR architecture.                                      |
+| `--vr_aggression`             | No       | 5       | -100 to 100       | Intensity of primary stem extraction for VR architecture.             |
+| `--vr_enable_tta`             | No       | False   |                   | Enable Test-Time-Augmentation for VR architecture.                    |
+| `--vr_high_end_process`       | No       | False   |                   | Mirror the missing frequency range of the output for VR architecture. |
+| `--vr_enable_post_process`    | No       | False   |                   | Identify leftover artifacts within vocal output for VR architecture.  |
+| `--vr_post_process_threshold` | No       | 0.2     | 0.1 to 0.3        | Threshold for post-process feature for VR architecture.               |
+
 ### Additional Features
 
 #### Model Extract
@@ -325,6 +401,7 @@ The RVC CLI builds upon the foundations of the following projects:
 - [Gradio](https://github.com/gradio-app/gradio) by gradio-app
 - [FFmpeg](https://github.com/FFmpeg/FFmpeg) by FFmpeg
 - [audio-slicer](https://github.com/openvpi/audio-slicer) by openvpi
+- [python-audio-separator](https://github.com/karaokenerds/python-audio-separator) by karaokenerds
 - [VITS](https://github.com/jaywalnut310/vits) by jaywalnut310
 - [RMVPE](https://github.com/Dream-High/RMVPE) by Dream-High
 - [FCPE](https://github.com/CNChTu/FCPE) by CNChTu

@@ -5,6 +5,10 @@ numpy==1.23.5
 requests==2.31.0
 tqdm
 wget
+six>=1.16
+samplerate==0.1.0
+pyyaml
+ml_collections
 
 # Audio processing
 faiss-cpu==1.7.3
@@ -27,6 +31,7 @@ numba; sys_platform == 'linux'
 numba==0.56.4; sys_platform == 'win32'
 onnxruntime
 onnxruntime_gpu==1.15.1
+onnx2torch>=1.5
 torch==2.1.1
 torchcrepe==0.0.21
 torchgen>=0.0.1
@@ -34,6 +39,9 @@ torch_directml
 torchvision==0.16.1
 einops
 local-attention
+onnx>=1.14
+onnxruntime
+onnxruntime_gpu==1.15.1
 
 # Visualization
 matplotlib==3.7.2
@@ -43,6 +51,8 @@ tensorboard
 ffmpy==0.3.1
 tensorboardX
 edge-tts==6.1.9
+julius>=0.2
+diffq>=0.2
 
 # API
 pydantic
