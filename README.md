@@ -10,7 +10,7 @@
 2. [Getting Started](#getting-started)
    - [Inference](#inference)
    - [Training](#training)
-   - [Audio Separator](#audio-separator)
+   - [UVR](#uvr)
    - [Additional Features](#additional-features)
 3. [API](#api)
 4. [Credits](#credits)
@@ -203,10 +203,10 @@ python main.py index --model_name "model_name" --rvc_version "rvc_version"
 
 _Refer to `python main.py index -h` for additional help._
 
-### Audio Separator
+### UVR
 
 ```bash
-python audio_separator.py [audio_file] [options]
+python uvr.py [audio_file] [options]
 ```
 
 #### Info and Debugging
