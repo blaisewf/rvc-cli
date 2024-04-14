@@ -402,6 +402,7 @@ The RVC CLI builds upon the foundations of the following projects:
 - [FFmpeg](https://github.com/FFmpeg/FFmpeg) by FFmpeg
 - [audio-slicer](https://github.com/openvpi/audio-slicer) by openvpi
 - [python-audio-separator](https://github.com/karaokenerds/python-audio-separator) by karaokenerds
+- [ultimatevocalremovergui](https://github.com/Anjok07/ultimatevocalremovergui) by Anjok07
 - [VITS](https://github.com/jaywalnut310/vits) by jaywalnut310
 - [RMVPE](https://github.com/Dream-High/RMVPE) by Dream-High
 - [FCPE](https://github.com/CNChTu/FCPE) by CNChTu
