@@ -5,6 +5,7 @@
 *.pt
 *.onnx
 *.pth
+*.index
 
 # Ignore Python bytecode files
 *.pyc
