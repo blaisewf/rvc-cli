@@ -403,12 +403,11 @@ The RVC CLI builds upon the foundations of the following projects:
 - [audio-slicer](https://github.com/openvpi/audio-slicer) by openvpi
 - [python-audio-separator](https://github.com/karaokenerds/python-audio-separator) by karaokenerds
 - [ultimatevocalremovergui](https://github.com/Anjok07/ultimatevocalremovergui) by Anjok07
-- [VITS](https://github.com/jaywalnut310/vits) by jaywalnut310
 - [RMVPE](https://github.com/Dream-High/RMVPE) by Dream-High
 - [FCPE](https://github.com/CNChTu/FCPE) by CNChTu
+- [VITS](https://github.com/jaywalnut310/vits) by jaywalnut310
 - [So-Vits-SVC](https://github.com/svc-develop-team/so-vits-svc) by svc-develop-team
 - [Harmonify](https://huggingface.co/Eempostor/Harmonify) by Eempostor
-- [RVC_CLI](https://github.com/blaise-tk/RVC_CLI) by blaise-tk
 - [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) by RVC-Project
 - [Mangio-RVC-Fork](https://github.com/Mangio621/Mangio-RVC-Fork) by Mangio621
 
