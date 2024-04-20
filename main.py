@@ -1177,12 +1177,12 @@ def main():
                 str(args.batch_size),
                 str(args.gpu),
                 str(args.pitch_guidance),
+                str(args.overtraining_detector),
+                str(args.overtraining_threshold),
                 str(args.pretrained),
                 str(args.custom_pretrained),
                 str(args.g_pretrained_path),
                 str(args.d_pretrained_path),
-                str(args.overtraining_detector),
-                str(args.overtraining_threshold),
             )
         elif args.mode == "index":
             run_index_script(
