@@ -41,8 +41,10 @@ class Result:
 def pcm16(file: str) -> Result:
     return Result(file, "PCM_16")
 
+
 def pcm24(file: str) -> Result:
     return Result(file, "FLOAT")
+
 
 def save_audiofile(file: str, wav_set="PCM_16") -> Result:
     return Result(file, wav_set)

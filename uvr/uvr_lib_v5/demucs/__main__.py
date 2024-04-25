@@ -41,7 +41,11 @@ def main():
     print(f"Experiment {name}")
 
     if args.musdb is None and args.rank == 0:
-        print("You must provide the path to the MusDB dataset with the --musdb flag. " "To download the MusDB dataset, see https://sigsep.github.io/datasets/musdb.html.", file=sys.stderr)
+        print(
+            "You must provide the path to the MusDB dataset with the --musdb flag. "
+            "To download the MusDB dataset, see https://sigsep.github.io/datasets/musdb.html.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     eval_folder = args.evals / name
@@ -66,10 +70,18 @@ def main():
 
     if args.world_size > 1:
         if device != "cuda" and args.rank == 0:
-            print("Error: distributed training is only available with cuda device", file=sys.stderr)
+            print(
+                "Error: distributed training is only available with cuda device",
+                file=sys.stderr,
+            )
             sys.exit(1)
         th.cuda.set_device(args.rank % th.cuda.device_count())
-        distributed.init_process_group(backend="nccl", init_method="tcp://" + args.master, rank=args.rank, world_size=args.world_size)
+        distributed.init_process_group(
+            backend="nccl",
+            init_method="tcp://" + args.master,
+            rank=args.rank,
+            world_size=args.world_size,
+        )
 
     checkpoint = args.checkpoints / f"{name}.th"
     checkpoint_tmp = args.checkpoints / f"{name}.th.tmp"
@@ -81,7 +93,9 @@ def main():
         args.repeat = 0
         model = load_model(args.models / args.test)
     elif args.tasnet:
-        model = ConvTasNet(audio_channels=args.audio_channels, samplerate=args.samplerate, X=args.X)
+        model = ConvTasNet(
+            audio_channels=args.audio_channels, samplerate=args.samplerate, X=args.X
+        )
     else:
         model = Demucs(
             audio_channels=args.audio_channels,
@@ -129,7 +143,12 @@ def main():
             done.unlink()
 
     if args.augment:
-        augment = nn.Sequential(FlipSign(), FlipChannels(), Shift(args.data_stride), Remix(group_size=args.remix_group_size)).to(device)
+        augment = nn.Sequential(
+            FlipSign(),
+            FlipChannels(),
+            Shift(args.data_stride),
+            Remix(group_size=args.remix_group_size),
+        ).to(device)
     else:
         augment = Shift(args.data_stride)
 
@@ -145,7 +164,13 @@ def main():
     print(f"Number of training samples adjusted to {samples}")
 
     if args.raw:
-        train_set = Rawset(args.raw / "train", samples=samples + args.data_stride, channels=args.audio_channels, streams=[0, 1, 2, 3, 4], stride=args.data_stride)
+        train_set = Rawset(
+            args.raw / "train",
+            samples=samples + args.data_stride,
+            channels=args.audio_channels,
+            streams=[0, 1, 2, 3, 4],
+            stride=args.data_stride,
+        )
 
         valid_set = Rawset(args.raw / "valid", channels=args.audio_channels)
     else:
@@ -156,16 +181,38 @@ def main():
         metadata = json.load(open(args.metadata))
         duration = Fraction(samples + args.data_stride, args.samplerate)
         stride = Fraction(args.data_stride, args.samplerate)
-        train_set = StemsSet(get_musdb_tracks(args.musdb, subsets=["train"], split="train"), metadata, duration=duration, stride=stride, samplerate=args.samplerate, channels=args.audio_channels)
-        valid_set = StemsSet(get_musdb_tracks(args.musdb, subsets=["train"], split="valid"), metadata, samplerate=args.samplerate, channels=args.audio_channels)
+        train_set = StemsSet(
+            get_musdb_tracks(args.musdb, subsets=["train"], split="train"),
+            metadata,
+            duration=duration,
+            stride=stride,
+            samplerate=args.samplerate,
+            channels=args.audio_channels,
+        )
+        valid_set = StemsSet(
+            get_musdb_tracks(args.musdb, subsets=["train"], split="valid"),
+            metadata,
+            samplerate=args.samplerate,
+            channels=args.audio_channels,
+        )
 
     best_loss = float("inf")
     for epoch, metrics in enumerate(saved.metrics):
-        print(f"Epoch {epoch:03d}: " f"train={metrics['train']:.8f} " f"valid={metrics['valid']:.8f} " f"best={metrics['best']:.4f} " f"duration={human_seconds(metrics['duration'])}")
+        print(
+            f"Epoch {epoch:03d}: "
+            f"train={metrics['train']:.8f} "
+            f"valid={metrics['valid']:.8f} "
+            f"best={metrics['best']:.4f} "
+            f"duration={human_seconds(metrics['duration'])}"
+        )
         best_loss = metrics["best"]
 
     if args.world_size > 1:
-        dmodel = DistributedDataParallel(model, device_ids=[th.cuda.current_device()], output_device=th.cuda.current_device())
+        dmodel = DistributedDataParallel(
+            model,
+            device_ids=[th.cuda.current_device()],
+            output_device=th.cuda.current_device(),
+        )
     else:
         dmodel = model
 
@@ -173,16 +220,46 @@ def main():
         begin = time.time()
         model.train()
         train_loss = train_model(
-            epoch, train_set, dmodel, criterion, optimizer, augment, batch_size=args.batch_size, device=device, repeat=args.repeat, seed=args.seed, workers=args.workers, world_size=args.world_size
+            epoch,
+            train_set,
+            dmodel,
+            criterion,
+            optimizer,
+            augment,
+            batch_size=args.batch_size,
+            device=device,
+            repeat=args.repeat,
+            seed=args.seed,
+            workers=args.workers,
+            world_size=args.world_size,
         )
         model.eval()
-        valid_loss = validate_model(epoch, valid_set, model, criterion, device=device, rank=args.rank, split=args.split_valid, world_size=args.world_size)
+        valid_loss = validate_model(
+            epoch,
+            valid_set,
+            model,
+            criterion,
+            device=device,
+            rank=args.rank,
+            split=args.split_valid,
+            world_size=args.world_size,
+        )
 
         duration = time.time() - begin
         if valid_loss < best_loss:
             best_loss = valid_loss
-            saved.best_state = {key: value.to("cpu").clone() for key, value in model.state_dict().items()}
-        saved.metrics.append({"train": train_loss, "valid": valid_loss, "best": best_loss, "duration": duration})
+            saved.best_state = {
+                key: value.to("cpu").clone()
+                for key, value in model.state_dict().items()
+            }
+        saved.metrics.append(
+            {
+                "train": train_loss,
+                "valid": valid_loss,
+                "best": best_loss,
+                "duration": duration,
+            }
+        )
         if args.rank == 0:
             json.dump(saved.metrics, open(metrics_path, "w"))
 
@@ -192,7 +269,11 @@ def main():
             th.save(saved, checkpoint_tmp)
             checkpoint_tmp.rename(checkpoint)
 
-        print(f"Epoch {epoch:03d}: " f"train={train_loss:.8f} valid={valid_loss:.8f} best={best_loss:.4f} " f"duration={human_seconds(duration)}")
+        print(
+            f"Epoch {epoch:03d}: "
+            f"train={train_loss:.8f} valid={valid_loss:.8f} best={best_loss:.4f} "
+            f"duration={human_seconds(duration)}"
+        )
 
     del dmodel
     model.load_state_dict(saved.best_state)
@@ -200,7 +281,18 @@ def main():
         device = "cpu"
         model.to(device)
     model.eval()
-    evaluate(model, args.musdb, eval_folder, rank=args.rank, world_size=args.world_size, device=device, save=args.save, split=args.split_valid, shifts=args.shifts, workers=args.eval_workers)
+    evaluate(
+        model,
+        args.musdb,
+        eval_folder,
+        rank=args.rank,
+        world_size=args.world_size,
+        device=device,
+        save=args.save,
+        split=args.split_valid,
+        shifts=args.shifts,
+        workers=args.eval_workers,
+    )
     model.to("cpu")
     save_model(model, args.models / f"{name}.th")
     if args.rank == 0:

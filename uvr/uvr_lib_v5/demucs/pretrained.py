@@ -22,7 +22,14 @@ from .tasnet_v2 import ConvTasNet
 from .utils import set_state
 
 from .hdemucs import HDemucs
-from .repo import RemoteRepo, LocalRepo, ModelOnlyRepo, BagOnlyRepo, AnyModelRepo, ModelLoadingError  # noqa
+from .repo import (
+    RemoteRepo,
+    LocalRepo,
+    ModelOnlyRepo,
+    BagOnlyRepo,
+    AnyModelRepo,
+    ModelLoadingError,
+)  # noqa
 
 logger = logging.getLogger(__name__)
 ROOT_URL = "https://dl.fbaipublicfiles.com/demucs/mdx_final/"
@@ -39,8 +46,17 @@ def demucs_unittest():
 def add_model_flags(parser):
     group = parser.add_mutually_exclusive_group(required=False)
     group.add_argument("-s", "--sig", help="Locally trained XP signature.")
-    group.add_argument("-n", "--name", default="mdx_extra_q", help="Pretrained model name or signature. Default is mdx_extra_q.")
-    parser.add_argument("--repo", type=Path, help="Folder containing all pre-trained models for use with -n.")
+    group.add_argument(
+        "-n",
+        "--name",
+        default="mdx_extra_q",
+        help="Pretrained model name or signature. Default is mdx_extra_q.",
+    )
+    parser.add_argument(
+        "--repo",
+        type=Path,
+        help="Folder containing all pre-trained models for use with -n.",
+    )
 
 
 def _parse_remote_files(remote_file_list) -> tp.Dict[str, str]:

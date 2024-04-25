@@ -104,9 +104,7 @@ class Separator:
         self.log_handler = logging.StreamHandler()
 
         if self.log_formatter is None:
-            self.log_formatter = logging.Formatter(
-                "%(message)s"
-            )
+            self.log_formatter = logging.Formatter("%(message)s")
 
         self.log_handler.setFormatter(self.log_formatter)
 
@@ -199,7 +197,6 @@ class Separator:
             "onnxruntime-silicon"
         )
         onnxruntime_cpu_package = self.get_package_distribution("onnxruntime")
-
 
     def setup_torch_device(self):
         """
@@ -766,9 +763,7 @@ class Separator:
         )
 
         module_name, class_name = separator_classes[model_type].split(".")
-        module = importlib.import_module(
-            f"uvr.architectures.{module_name}"
-        )
+        module = importlib.import_module(f"uvr.architectures.{module_name}")
         separator_class = getattr(module, class_name)
 
         self.logger.debug(
@@ -800,9 +795,7 @@ class Separator:
         - output_files (list of str): A list containing the paths to the separated audio stem files.
         """
         # Starting the separation process
-        self.logger.info(
-            f"Starting separation process for: {audio_file_path}"
-        )
+        self.logger.info(f"Starting separation process for: {audio_file_path}")
         separate_start_time = time.perf_counter()
 
         self.logger.debug(

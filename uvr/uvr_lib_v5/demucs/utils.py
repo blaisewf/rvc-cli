@@ -232,7 +232,9 @@ def tensor_chunk(tensor_or_chunk):
         return TensorChunk(tensor_or_chunk)
 
 
-def apply_model_v1(model, mix, shifts=None, split=False, progress=False, set_progress_bar=None):
+def apply_model_v1(
+    model, mix, shifts=None, split=False, progress=False, set_progress_bar=None
+):
     """
     Apply model to a given mixture.
 
@@ -263,7 +265,9 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False, set_pro
             if set_progress_bar:
                 progress_value += 1
                 set_progress_bar(0.1, (0.8 / len(offsets) * progress_value))
-                chunk_out = apply_model_v1(model, chunk, shifts=shifts, set_progress_bar=set_progress_bar)
+                chunk_out = apply_model_v1(
+                    model, chunk, shifts=shifts, set_progress_bar=set_progress_bar
+                )
             else:
                 chunk_out = apply_model_v1(model, chunk, shifts=shifts)
             out[..., offset : offset + shift] = chunk_out
@@ -278,7 +282,9 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False, set_pro
         for offset in offsets[:shifts]:
             shifted = mix[..., offset : offset + length + max_shift]
             if set_progress_bar:
-                shifted_out = apply_model_v1(model, shifted, set_progress_bar=set_progress_bar)
+                shifted_out = apply_model_v1(
+                    model, shifted, set_progress_bar=set_progress_bar
+                )
             else:
                 shifted_out = apply_model_v1(model, shifted)
             out += shifted_out[..., max_shift - offset : max_shift - offset + length]
@@ -293,7 +299,16 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False, set_pro
         return center_trim(out, mix)
 
 
-def apply_model_v2(model, mix, shifts=None, split=False, overlap=0.25, transition_power=1.0, progress=False, set_progress_bar=None):
+def apply_model_v2(
+    model,
+    mix,
+    shifts=None,
+    split=False,
+    overlap=0.25,
+    transition_power=1.0,
+    progress=False,
+    set_progress_bar=None,
+):
     """
     Apply model to a given mixture.
 
@@ -325,7 +340,9 @@ def apply_model_v2(model, mix, shifts=None, split=False, overlap=0.25, transitio
         # We start from a triangle shaped weight, with maximal weight in the middle
         # of the segment. Then we normalize and take to the power `transition_power`.
         # Large values of transition power will lead to sharper transitions.
-        weight = th.cat([th.arange(1, segment // 2 + 1), th.arange(segment - segment // 2, 0, -1)]).to(device)
+        weight = th.cat(
+            [th.arange(1, segment // 2 + 1), th.arange(segment - segment // 2, 0, -1)]
+        ).to(device)
         assert len(weight) == segment
         # If the overlap < 50%, this will translate to linear transition when
         # transition_power is 1.
@@ -335,7 +352,9 @@ def apply_model_v2(model, mix, shifts=None, split=False, overlap=0.25, transitio
             if set_progress_bar:
                 progress_value += 1
                 set_progress_bar(0.1, (0.8 / len(offsets) * progress_value))
-                chunk_out = apply_model_v2(model, chunk, shifts=shifts, set_progress_bar=set_progress_bar)
+                chunk_out = apply_model_v2(
+                    model, chunk, shifts=shifts, set_progress_bar=set_progress_bar
+                )
             else:
                 chunk_out = apply_model_v2(model, chunk, shifts=shifts)
             chunk_length = chunk_out.shape[-1]
@@ -356,7 +375,9 @@ def apply_model_v2(model, mix, shifts=None, split=False, overlap=0.25, transitio
 
             if set_progress_bar:
                 progress_value += 1
-                shifted_out = apply_model_v2(model, shifted, set_progress_bar=set_progress_bar)
+                shifted_out = apply_model_v2(
+                    model, shifted, set_progress_bar=set_progress_bar
+                )
             else:
                 shifted_out = apply_model_v2(model, shifted)
             out += shifted_out[..., max_shift - offset :]
@@ -461,7 +482,13 @@ def save_model(model, quantizer, training_args, path):
     state = get_state(model, quantizer)
 
     save_to = path
-    package = {"klass": klass, "args": args, "kwargs": kwargs, "state": state, "training_args": training_args}
+    package = {
+        "klass": klass,
+        "args": args,
+        "kwargs": kwargs,
+        "state": state,
+        "training_args": training_args,
+    }
     th.save(package, save_to)
 
 
