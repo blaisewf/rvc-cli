@@ -54,6 +54,7 @@ def run_infer_script(
     clean_audio,
     clean_strength,
     export_format,
+    embedder_model,
     upscale_audio,
 ):
     f0autotune = "True" if str(f0autotune) == "True" else "False"
@@ -76,6 +77,7 @@ def run_infer_script(
         clean_audio,
         clean_strength,
         export_format,
+        embedder_model,
         upscale_audio,
     )
     return f"File {input_path} inferred successfully.", output_path.replace(
@@ -101,6 +103,7 @@ def run_batch_infer_script(
     clean_audio,
     clean_strength,
     export_format,
+    embedder_model,
     upscale_audio,
 ):
     f0autotune = "True" if str(f0autotune) == "True" else "False"
@@ -140,6 +143,7 @@ def run_batch_infer_script(
                 clean_audio,
                 clean_strength,
                 export_format,
+                embedder_model,
                 upscale_audio,
             )
 
@@ -166,6 +170,7 @@ def run_tts_script(
     clean_audio,
     clean_strength,
     export_format,
+    embedder_model,
     upscale_audio,
 ):
     f0autotune = "True" if str(f0autotune) == "True" else "False"
@@ -202,6 +207,7 @@ def run_tts_script(
         clean_audio,
         clean_strength,
         export_format,
+        embedder_model,
         upscale_audio,
     )
 
@@ -234,7 +240,9 @@ def run_preprocess_script(model_name, dataset_path, sampling_rate):
 
 
 # Extract
-def run_extract_script(model_name, rvc_version, f0method, hop_length, sampling_rate):
+def run_extract_script(
+    model_name, rvc_version, f0method, hop_length, sampling_rate, embedder_model
+):
     model_path = os.path.join(logs_path, model_name)
     extract_f0_script_path = os.path.join(
         "rvc", "train", "extract", "extract_f0_print.py"
@@ -268,6 +276,7 @@ def run_extract_script(model_name, rvc_version, f0method, hop_length, sampling_r
                 model_path,
                 rvc_version,
                 "True",
+                embedder_model,
             ],
         ),
     ]
@@ -552,6 +561,20 @@ def parse_arguments():
         choices=["WAV", "MP3", "FLAC", "OGG", "M4A"],
         default="WAV",
     )
+    infer_parser.add_argument(
+        "--embedder_model",
+        type=str,
+        help="Embedder model",
+        choices=["contentvec", "hubert"],
+        default="hubert",
+    )
+    infer_parser.add_argument(
+        "--upscale_audio",
+        type=str,
+        help="Enable audio upscaling",
+        choices=["True", "False"],
+        default="False",
+    )
 
     # Parser for 'batch_infer' mode
     batch_infer_parser = subparsers.add_parser(
@@ -662,6 +685,20 @@ def parse_arguments():
         help="Export format",
         choices=["WAV", "MP3", "FLAC", "OGG", "M4A"],
         default="WAV",
+    )
+    batch_infer_parser.add_argument(
+        "--embedder_model",
+        type=str,
+        help="Embedder model",
+        choices=["contentvec", "hubert"],
+        default="hubert",
+    )
+    batch_infer_parser.add_argument(
+        "--upscale_audio",
+        type=str,
+        help="Enable audio upscaling",
+        choices=["True", "False"],
+        default="False",
     )
 
     # Parser for 'tts' mode
@@ -781,6 +818,20 @@ def parse_arguments():
         choices=["WAV", "MP3", "FLAC", "OGG", "M4A"],
         default="WAV",
     )
+    tts_parser.add_argument(
+        "--embedder_model",
+        type=str,
+        help="Embedder model",
+        choices=["contentvec", "hubert"],
+        default="hubert",
+    )
+    tts_parser.add_argument(
+        "--upscale_audio",
+        type=str,
+        help="Enable audio upscaling",
+        choices=["True", "False"],
+        default="False",
+    )
 
     # Parser for 'preprocess' mode
     preprocess_parser = subparsers.add_parser("preprocess", help="Run preprocessing")
@@ -837,6 +888,13 @@ def parse_arguments():
         type=str,
         help="Sampling rate",
         choices=["32000", "40000", "48000"],
+    )
+    extract_parser.add_argument(
+        "--embedder_model",
+        type=str,
+        help="Embedder model",
+        choices=["contentvec", "hubert"],
+        default="hubert",
     )
 
     # Parser for 'train' mode
@@ -1132,6 +1190,8 @@ def main():
                 str(args.clean_audio),
                 str(args.clean_strength),
                 str(args.export_format),
+                str(args.embedder_model),
+                str(args.upscale_audio),
             )
         elif args.mode == "batch_infer":
             run_batch_infer_script(
@@ -1151,6 +1211,8 @@ def main():
                 str(args.clean_audio),
                 str(args.clean_strength),
                 str(args.export_format),
+                str(args.embedder_model),
+                str(args.upscale_audio),
             )
         elif args.mode == "tts":
             run_tts_script(
@@ -1172,6 +1234,8 @@ def main():
                 str(args.clean_audio),
                 str(args.clean_strength),
                 str(args.export_format),
+                str(args.embedder_model),
+                str(args.upscale_audio),
             )
         elif args.mode == "preprocess":
             run_preprocess_script(
@@ -1186,6 +1250,7 @@ def main():
                 str(args.f0method),
                 str(args.hop_length),
                 str(args.sampling_rate),
+                str(args.embedder_model),
             )
         elif args.mode == "train":
             run_train_script(
