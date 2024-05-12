@@ -5,6 +5,7 @@ import unicodedata
 from fairseq import checkpoint_utils
 
 import logging
+
 logging.getLogger("fairseq").setLevel(logging.WARNING)
 
 
@@ -30,6 +31,7 @@ def format_title(title):
     formatted_title = re.sub(r"[^\w\s.-]", "", formatted_title)
     formatted_title = re.sub(r"\s+", "_", formatted_title)
     return formatted_title
+
 
 def load_embedding(embedder_model):
     embedding_list = {
