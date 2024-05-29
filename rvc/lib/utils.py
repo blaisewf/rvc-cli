@@ -40,25 +40,24 @@ def format_title(title):
 def load_embedding(embedder_model, custom_embedder=None):
     embedder_root = os.path.join(now_dir, "rvc", "embedders")
     embedding_list = {
-        "contentvec": os.path.join(embedder_root, "contentvec_base.pt"),
-        "hubert": os.path.join(embedder_root, "hubert_base.pt"),
+        "contentvec": os.path.join(embedder_root, "hubert_base.pt"),
     }
 
     if embedder_model == "custom":
         model_path = custom_embedder
         if not custom_embedder and os.path.exists(custom_embedder):
             print("Custom embedder not found. Using the default embedder.")
-            model_path = embedding_list["hubert"]
+            model_path = embedding_list["contentvec"]
     else:
         model_path = embedding_list[embedder_model]
         if not os.path.exists(model_path):
             print("Custom embedder not found. Using the default embedder.")
-            model_path = embedding_list["hubert"]
+            model_path = embedding_list["contentvec"]
 
     models = checkpoint_utils.load_model_ensemble_and_task(
         [model_path],
         suffix="",
     )
 
-    print(f"Embedding model {embedder_model} loaded successfully.")
+    # print(f"Embedding model {embedder_model} loaded successfully.")
     return models
