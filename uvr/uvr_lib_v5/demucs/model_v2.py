@@ -16,9 +16,7 @@ from .utils import capture_init, center_trim
 class BLSTM(nn.Module):
     def __init__(self, dim, layers=1):
         super().__init__()
-        self.lstm = nn.LSTM(
-            bidirectional=True, num_layers=layers, hidden_size=dim, input_size=dim
-        )
+        self.lstm = nn.LSTM(bidirectional=True, num_layers=layers, hidden_size=dim, input_size=dim)
         self.linear = nn.Linear(2 * dim, dim)
 
     def forward(self, x):
@@ -146,10 +144,7 @@ class Demucs(nn.Module):
             else:
                 out_channels = len(self.sources) * audio_channels
             if rewrite:
-                decode += [
-                    nn.Conv1d(channels, ch_scale * channels, context),
-                    activation,
-                ]
+                decode += [nn.Conv1d(channels, ch_scale * channels, context), activation]
             decode += [nn.ConvTranspose1d(channels, out_channels, kernel_size, stride)]
             if index > 0:
                 decode.append(nn.ReLU())

@@ -62,14 +62,7 @@ class ModelParameters(object):
             self.param = json.loads(f.read(), object_pairs_hook=int_keys)
 
         # Ensure certain parameters are set to False if not specified in the configuration.
-        for k in [
-            "mid_side",
-            "mid_side_b",
-            "mid_side_b2",
-            "stereo_w",
-            "stereo_n",
-            "reverse",
-        ]:
+        for k in ["mid_side", "mid_side_b", "mid_side_b2", "stereo_w", "stereo_n", "reverse"]:
             if not k in self.param:
                 self.param[k] = False
 

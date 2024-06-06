@@ -53,9 +53,7 @@ def overlap_and_add(signal, frame_step):
 
     subframe_signal = signal.view(*outer_dimensions, -1, subframe_length)
 
-    frame = torch.arange(0, output_subframes, device=signal.device).unfold(
-        0, subframes_per_frame, subframe_step
-    )
+    frame = torch.arange(0, output_subframes, device=signal.device).unfold(0, subframes_per_frame, subframe_step)
     frame = frame.long()  # signal may in GPU or CPU
     frame = frame.contiguous().view(-1)
 
@@ -67,23 +65,7 @@ def overlap_and_add(signal, frame_step):
 
 class ConvTasNet(nn.Module):
     @capture_init
-    def __init__(
-        self,
-        sources,
-        N=256,
-        L=20,
-        B=256,
-        H=512,
-        P=3,
-        X=8,
-        R=4,
-        audio_channels=2,
-        norm_type="gLN",
-        causal=False,
-        mask_nonlinear="relu",
-        samplerate=44100,
-        segment_length=44100 * 2 * 4,
-    ):
+    def __init__(self, sources, N=256, L=20, B=256, H=512, P=3, X=8, R=4, audio_channels=2, norm_type="gLN", causal=False, mask_nonlinear="relu", samplerate=44100, segment_length=44100 * 2 * 4):
         """
         Args:
             sources: list of sources
@@ -111,9 +93,7 @@ class ConvTasNet(nn.Module):
         self.segment_length = segment_length
         # Components
         self.encoder = Encoder(L, N, audio_channels)
-        self.separator = TemporalConvNet(
-            N, B, H, P, X, R, self.C, norm_type, causal, mask_nonlinear
-        )
+        self.separator = TemporalConvNet(N, B, H, P, X, R, self.C, norm_type, causal, mask_nonlinear)
         self.decoder = Decoder(N, L, audio_channels)
         # init
         for p in self.parameters():
@@ -150,9 +130,7 @@ class Encoder(nn.Module):
         self.L, self.N = L, N
         # Components
         # 50% overlap
-        self.conv1d_U = nn.Conv1d(
-            audio_channels, N, kernel_size=L, stride=L // 2, bias=False
-        )
+        self.conv1d_U = nn.Conv1d(audio_channels, N, kernel_size=L, stride=L // 2, bias=False)
 
     def forward(self, mixture):
         """
@@ -188,19 +166,13 @@ class Decoder(nn.Module):
         # S = DV
         est_source = self.basis_signals(source_w)  # [M, C, K, ac * L]
         m, c, k, _ = est_source.size()
-        est_source = (
-            est_source.view(m, c, k, self.audio_channels, -1)
-            .transpose(2, 3)
-            .contiguous()
-        )
+        est_source = est_source.view(m, c, k, self.audio_channels, -1).transpose(2, 3).contiguous()
         est_source = overlap_and_add(est_source, self.L // 2)  # M x C x ac x T
         return est_source
 
 
 class TemporalConvNet(nn.Module):
-    def __init__(
-        self, N, B, H, P, X, R, C, norm_type="gLN", causal=False, mask_nonlinear="relu"
-    ):
+    def __init__(self, N, B, H, P, X, R, C, norm_type="gLN", causal=False, mask_nonlinear="relu"):
         """
         Args:
             N: Number of filters in autoencoder
@@ -230,26 +202,13 @@ class TemporalConvNet(nn.Module):
             for x in range(X):
                 dilation = 2**x
                 padding = (P - 1) * dilation if causal else (P - 1) * dilation // 2
-                blocks += [
-                    TemporalBlock(
-                        B,
-                        H,
-                        P,
-                        stride=1,
-                        padding=padding,
-                        dilation=dilation,
-                        norm_type=norm_type,
-                        causal=causal,
-                    )
-                ]
+                blocks += [TemporalBlock(B, H, P, stride=1, padding=padding, dilation=dilation, norm_type=norm_type, causal=causal)]
             repeats += [nn.Sequential(*blocks)]
         temporal_conv_net = nn.Sequential(*repeats)
         # [M, B, K] -> [M, C*N, K]
         mask_conv1x1 = nn.Conv1d(B, C * N, 1, bias=False)
         # Put together
-        self.network = nn.Sequential(
-            layer_norm, bottleneck_conv1x1, temporal_conv_net, mask_conv1x1
-        )
+        self.network = nn.Sequential(layer_norm, bottleneck_conv1x1, temporal_conv_net, mask_conv1x1)
 
     def forward(self, mixture_w):
         """
@@ -272,33 +231,14 @@ class TemporalConvNet(nn.Module):
 
 
 class TemporalBlock(nn.Module):
-    def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size,
-        stride,
-        padding,
-        dilation,
-        norm_type="gLN",
-        causal=False,
-    ):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, dilation, norm_type="gLN", causal=False):
         super(TemporalBlock, self).__init__()
         # [M, B, K] -> [M, H, K]
         conv1x1 = nn.Conv1d(in_channels, out_channels, 1, bias=False)
         prelu = nn.PReLU()
         norm = chose_norm(norm_type, out_channels)
         # [M, H, K] -> [M, B, K]
-        dsconv = DepthwiseSeparableConv(
-            out_channels,
-            in_channels,
-            kernel_size,
-            stride,
-            padding,
-            dilation,
-            norm_type,
-            causal,
-        )
+        dsconv = DepthwiseSeparableConv(out_channels, in_channels, kernel_size, stride, padding, dilation, norm_type, causal)
         # Put together
         self.net = nn.Sequential(conv1x1, prelu, norm, dsconv)
 
@@ -317,30 +257,11 @@ class TemporalBlock(nn.Module):
 
 
 class DepthwiseSeparableConv(nn.Module):
-    def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size,
-        stride,
-        padding,
-        dilation,
-        norm_type="gLN",
-        causal=False,
-    ):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, dilation, norm_type="gLN", causal=False):
         super(DepthwiseSeparableConv, self).__init__()
         # Use `groups` option to implement depthwise convolution
         # [M, H, K] -> [M, H, K]
-        depthwise_conv = nn.Conv1d(
-            in_channels,
-            in_channels,
-            kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=in_channels,
-            bias=False,
-        )
+        depthwise_conv = nn.Conv1d(in_channels, in_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, groups=in_channels, bias=False)
         if causal:
             chomp = Chomp1d(padding)
         prelu = nn.PReLU()
@@ -445,9 +366,7 @@ class GlobalLayerNorm(nn.Module):
         """
         # TODO: in torch 1.0, torch.mean() support dim list
         mean = y.mean(dim=1, keepdim=True).mean(dim=2, keepdim=True)  # [M, 1, 1]
-        var = (
-            (torch.pow(y - mean, 2)).mean(dim=1, keepdim=True).mean(dim=2, keepdim=True)
-        )
+        var = (torch.pow(y - mean, 2)).mean(dim=1, keepdim=True).mean(dim=2, keepdim=True)
         gLN_y = self.gamma * (y - mean) / torch.pow(var + EPS, 0.5) + self.beta
         return gLN_y
 

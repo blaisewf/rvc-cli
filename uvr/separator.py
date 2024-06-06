@@ -1,5 +1,3 @@
-""" This file contains the Separator class, to facilitate the separation of stems from audio. """
-
 from importlib import metadata
 import os
 import sys
@@ -20,47 +18,6 @@ from tqdm import tqdm
 
 
 class Separator:
-    """
-    The Separator class is designed to facilitate the separation of audio sources from a given audio file.
-    It supports various separation architectures and models, including MDX, VR, and Demucs. The class provides
-    functionalities to configure separation parameters, load models, and perform audio source separation.
-    It also handles logging, normalization, and output formatting of the separated audio stems.
-
-    The actual separation task is handled by one of the architecture-specific classes in the `architectures` module;
-    this class is responsible for initialising logging, configuring hardware acceleration, loading the model,
-    initiating the separation process and passing outputs back to the caller.
-
-    Common Attributes:
-        log_level (int): The logging level.
-        log_formatter (logging.Formatter): The logging formatter.
-        model_file_dir (str): The directory where model files are stored.
-        output_dir (str): The directory where output files will be saved.
-        output_format (str): The format of the output audio file.
-        normalization_threshold (float): The threshold for audio normalization.
-        output_single_stem (str): Option to output a single stem.
-        invert_using_spec (bool): Flag to invert using spectrogram.
-        sample_rate (int): The sample rate of the audio.
-
-    MDX Architecture Specific Attributes:
-        hop_length (int): The hop length for STFT.
-        segment_size (int): The segment size for processing.
-        overlap (float): The overlap between segments.
-        batch_size (int): The batch size for processing.
-        enable_denoise (bool): Flag to enable or disable denoising.
-
-    VR Architecture Specific Attributes & Defaults:
-        batch_size: 16
-        window_size: 512
-        aggression: 5
-        enable_tta: False
-        enable_post_process: False
-        post_process_threshold: 0.2
-        high_end_process: False
-
-    Demucs Architecture Specific Attributes & Defaults:
-        model_path: The path to the Demucs model file.
-    """
-
     def __init__(
         self,
         log_level=logging.INFO,
@@ -167,26 +124,9 @@ class Separator:
         """
         This method sets up the PyTorch and/or ONNX Runtime inferencing device, using GPU hardware acceleration if available.
         """
-        self.check_ffmpeg_installed()
         self.log_onnxruntime_packages()
         self.setup_torch_device()
 
-    def check_ffmpeg_installed(self):
-        """
-        This method checks if ffmpeg is installed and logs its version.
-        """
-        try:
-            ffmpeg_version_output = subprocess.check_output(
-                ["ffmpeg", "-version"], text=True
-            )
-        except FileNotFoundError:
-            self.logger.error(
-                "FFmpeg is not installed. Please install FFmpeg to use this package."
-            )
-            # Raise an exception if this is being run by a user, as ffmpeg is required for pydub to write audio
-            # but if we're just running unit tests in CI, no reason to throw
-            if "PYTEST_CURRENT_TEST" not in os.environ:
-                raise
 
     def log_onnxruntime_packages(self):
         """
@@ -197,6 +137,7 @@ class Separator:
             "onnxruntime-silicon"
         )
         onnxruntime_cpu_package = self.get_package_distribution("onnxruntime")
+
 
     def setup_torch_device(self):
         """
@@ -231,7 +172,6 @@ class Separator:
                 "ONNXruntime has CUDAExecutionProvider available, enabling acceleration"
             )
             self.onnx_execution_provider = ["CUDAExecutionProvider"]
-
     def configure_mps(self, ort_providers):
         """
         This method configures the Apple Silicon MPS/CoreML device for PyTorch and ONNX Runtime, if available.
@@ -364,7 +304,21 @@ class Separator:
         #             "MDX23C Model: MDX23C-InstVoc HQ": {
         #                     "MDX23C-8KFFT-InstVoc_HQ.ckpt": "model_2_stem_full_band_8k.yaml"
         #             }
-        #     }
+        #     },
+        #     "roformer_download_list": {
+        #             "Roformer Model: BS-Roformer-Viperx-1297": {
+        #                     "model_bs_roformer_ep_317_sdr_12.9755.ckpt": "model_bs_roformer_ep_317_sdr_12.9755.yaml"
+        #             },
+        #             "Roformer Model: BS-Roformer-Viperx-1296": {
+        #                     "model_bs_roformer_ep_368_sdr_12.9628.ckpt": "model_bs_roformer_ep_368_sdr_12.9628.yaml"
+        #             },
+        #             "Roformer Model: BS-Roformer-Viperx-1053": {
+        #                     "model_bs_roformer_ep_937_sdr_10.5309.ckpt": "model_bs_roformer_ep_937_sdr_10.5309.yaml"
+        #             },
+        #             "Roformer Model: Mel-Roformer-Viperx-1143": {
+        #                     "model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt": "model_mel_band_roformer_ep_3005_sdr_11.4360.yaml"
+        #             }
+        #     },
         # }
 
         # Only show Demucs v4 models as we've only implemented support for v4
@@ -385,6 +339,7 @@ class Separator:
             "MDXC": {
                 **model_downloads_list["mdx23c_download_list"],
                 **model_downloads_list["mdx23c_download_vip_list"],
+                **model_downloads_list["roformer_download_list"],
             },
         }
         return model_files_grouped_by_type
@@ -551,9 +506,14 @@ class Separator:
         This method loads model-specific parameters from the YAML file for that model.
         The parameters in the YAML are critical to inferencing, as they need to match whatever was used during training.
         """
-        model_data_yaml_filepath = os.path.join(
-            self.model_file_dir, yaml_config_filename
-        )
+        # Verify if the YAML filename includes a full path or just the filename
+        if not os.path.exists(yaml_config_filename):
+            model_data_yaml_filepath = os.path.join(
+                self.model_file_dir, yaml_config_filename
+            )
+        else:
+            model_data_yaml_filepath = yaml_config_filename
+
         self.logger.debug(
             f"Loading model data from YAML at path {model_data_yaml_filepath}"
         )
@@ -562,6 +522,10 @@ class Separator:
             open(model_data_yaml_filepath, encoding="utf-8"), Loader=yaml.FullLoader
         )
         self.logger.debug(f"Model data loaded from YAML file: {model_data}")
+
+        if "roformer" in model_data_yaml_filepath:
+            model_data["is_roformer"] = True
+
         return model_data
 
     def load_model_data_using_hash(self, model_path):
@@ -693,7 +657,9 @@ class Separator:
 
         return model_data
 
-    def load_model(self, model_filename="UVR-MDX-NET-Inst_HQ_3.onnx"):
+    def load_model(
+        self, model_filename="model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt"
+    ):
         """
         This method instantiates the architecture-specific separation class,
         loading the separation model into memory, downloading it first if necessary.
@@ -763,7 +729,9 @@ class Separator:
         )
 
         module_name, class_name = separator_classes[model_type].split(".")
-        module = importlib.import_module(f"uvr.architectures.{module_name}")
+        module = importlib.import_module(
+            f"uvr.architectures.{module_name}"
+        )
         separator_class = getattr(module, class_name)
 
         self.logger.debug(
@@ -795,7 +763,9 @@ class Separator:
         - output_files (list of str): A list containing the paths to the separated audio stem files.
         """
         # Starting the separation process
-        self.logger.info(f"Starting separation process for: {audio_file_path}")
+        self.logger.info(
+            f"Starting separation process for audio_file_path: {audio_file_path}"
+        )
         separate_start_time = time.perf_counter()
 
         self.logger.debug(

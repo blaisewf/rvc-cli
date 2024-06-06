@@ -194,7 +194,7 @@ python main.py train --model_name "model_name" --rvc_version "rvc_version" --sav
 | `custom_pretrained`      | No       | False   | True or False                                                           | Utilizing custom pretrained models can lead to superior results, as selecting the most suitable pretrained models tailored to the specific use case can significantly enhance performance.                                                                      |
 | `g_pretrained`           | No       | None    | Full path to pretrained file G, only if you have used custom_pretrained | Full path to pretrained file G                                                                                                                                                                                                                                  |
 | `d_pretrained`           | No       | None    | Full path to pretrained file D, only if you have used custom_pretrained | Full path to pretrained file D                                                                                                                                                                                                                                  |
-| `sync_graph`  | No       | False   | True or False                                                           | Synchronize the graph of the tensorbaord. Only enable this setting if you are training a new model.                                                                                                                                                                                                                                  |
+| `sync_graph`             | No       | False   | True or False                                                           | Synchronize the graph of the tensorbaord. Only enable this setting if you are training a new model.                                                                                                                                                             |
 
 _Refer to `python main.py train -h` for additional help._
 
@@ -247,13 +247,13 @@ python uvr.py [audio_file] [options]
 
 #### MDXC Architecture Parameters
 
-| Parameter Name                  | Required | Default | Valid Options     | Description                                                                                     |
-| ------------------------------- | -------- | ------- | ----------------- | ----------------------------------------------------------------------------------------------- |
-| `--mdxc_segment_size`           | No       | 256     | Any integer value | Size of segments for MDXC architecture.                                                         |
-| `--mdxc_use_model_segment_size` | No       | False   |                   | Use model default segment size instead of the value from the config file for MDXC architecture. |
-| `--mdxc_overlap`                | No       | 8       | 2 to 50           | Amount of overlap between prediction windows for MDXC architecture.                             |
-| `--mdxc_batch_size`             | No       | 1       | Any integer value | Batch size for MDXC architecture.                                                               |
-| `--mdxc_pitch_shift`            | No       | 0       | Any integer value | Shift audio pitch by a number of semitones while processing for MDXC architecture.              |
+| Parameter Name                       | Required | Default | Valid Options     | Description                                                                        |
+| ------------------------------------ | -------- | ------- | ----------------- | ---------------------------------------------------------------------------------- |
+| `--mdxc_segment_size`                | No       | 256     | Any integer value | Size of segments for MDXC architecture.                                            |
+| `--mdxc_override_model_segment_size` | No       | False   |                   | Opverride model default segment size instead of using the model default value.     |
+| `--mdxc_overlap`                     | No       | 8       | 2 to 50           | Amount of overlap between prediction windows for MDXC architecture.                |
+| `--mdxc_batch_size`                  | No       | 1       | Any integer value | Batch size for MDXC architecture.                                                  |
+| `--mdxc_pitch_shift`                 | No       | 0       | Any integer value | Shift audio pitch by a number of semitones while processing for MDXC architecture. |
 
 #### MDX Architecture Parameters
 

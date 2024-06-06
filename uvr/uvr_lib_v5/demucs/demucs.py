@@ -27,9 +27,7 @@ class BLSTM(nn.Module):
         super().__init__()
         assert max_steps is None or max_steps % 4 == 0
         self.max_steps = max_steps
-        self.lstm = nn.LSTM(
-            bidirectional=True, num_layers=layers, hidden_size=dim, input_size=dim
-        )
+        self.lstm = nn.LSTM(bidirectional=True, num_layers=layers, hidden_size=dim, input_size=dim)
         self.linear = nn.Linear(2 * dim, dim)
         self.skip = skip
 
@@ -80,9 +78,7 @@ def rescale_conv(conv, reference):
 
 def rescale_module(module, reference):
     for sub in module.modules():
-        if isinstance(
-            sub, (nn.Conv1d, nn.ConvTranspose1d, nn.Conv2d, nn.ConvTranspose2d)
-        ):
+        if isinstance(sub, (nn.Conv1d, nn.ConvTranspose1d, nn.Conv2d, nn.ConvTranspose2d)):
             rescale_conv(sub, reference)
 
 
@@ -108,21 +104,7 @@ class DConv(nn.Module):
     e.g. of dim `channels // compress`.
     """
 
-    def __init__(
-        self,
-        channels: int,
-        compress: float = 4,
-        depth: int = 2,
-        init: float = 1e-4,
-        norm=True,
-        attn=False,
-        heads=4,
-        ndecay=4,
-        lstm=False,
-        gelu=True,
-        kernel=3,
-        dilate=True,
-    ):
+    def __init__(self, channels: int, compress: float = 4, depth: int = 2, init: float = 1e-4, norm=True, attn=False, heads=4, ndecay=4, lstm=False, gelu=True, kernel=3, dilate=True):
         """
         Args:
             channels: input/output channels for residual branch.
@@ -363,30 +345,13 @@ class Demucs(nn.Module):
                 norm_fn = lambda d: nn.GroupNorm(norm_groups, d)  # noqa
 
             encode = []
-            encode += [
-                nn.Conv1d(in_channels, channels, kernel_size, stride),
-                norm_fn(channels),
-                act2(),
-            ]
+            encode += [nn.Conv1d(in_channels, channels, kernel_size, stride), norm_fn(channels), act2()]
             attn = index >= dconv_attn
             lstm = index >= dconv_lstm
             if dconv_mode & 1:
-                encode += [
-                    DConv(
-                        channels,
-                        depth=dconv_depth,
-                        init=dconv_init,
-                        compress=dconv_comp,
-                        attn=attn,
-                        lstm=lstm,
-                    )
-                ]
+                encode += [DConv(channels, depth=dconv_depth, init=dconv_init, compress=dconv_comp, attn=attn, lstm=lstm)]
             if rewrite:
-                encode += [
-                    nn.Conv1d(channels, ch_scale * channels, 1),
-                    norm_fn(ch_scale * channels),
-                    activation,
-                ]
+                encode += [nn.Conv1d(channels, ch_scale * channels, 1), norm_fn(ch_scale * channels), activation]
             self.encoder.append(nn.Sequential(*encode))
 
             decode = []
@@ -395,29 +360,10 @@ class Demucs(nn.Module):
             else:
                 out_channels = len(self.sources) * audio_channels
             if rewrite:
-                decode += [
-                    nn.Conv1d(
-                        channels, ch_scale * channels, 2 * context + 1, padding=context
-                    ),
-                    norm_fn(ch_scale * channels),
-                    activation,
-                ]
+                decode += [nn.Conv1d(channels, ch_scale * channels, 2 * context + 1, padding=context), norm_fn(ch_scale * channels), activation]
             if dconv_mode & 2:
-                decode += [
-                    DConv(
-                        channels,
-                        depth=dconv_depth,
-                        init=dconv_init,
-                        compress=dconv_comp,
-                        attn=attn,
-                        lstm=lstm,
-                    )
-                ]
-            decode += [
-                nn.ConvTranspose1d(
-                    channels, out_channels, kernel_size, stride, padding=padding
-                )
-            ]
+                decode += [DConv(channels, depth=dconv_depth, init=dconv_init, compress=dconv_comp, attn=attn, lstm=lstm)]
+            decode += [nn.ConvTranspose1d(channels, out_channels, kernel_size, stride, padding=padding)]
             if index > 0:
                 decode += [norm_fn(out_channels), act2()]
             self.decoder.insert(0, nn.Sequential(*decode))

@@ -78,43 +78,13 @@ def determine_model_capacity(n_fft_bins, nn_architecture):
 
     # Mapping network architectures to their corresponding model capacity data.
     if nn_architecture in sp_model_arch:
-        model_capacity_data = [
-            (2, 16),
-            (2, 16),
-            (18, 8, 1, 1, 0),
-            (8, 16),
-            (34, 16, 1, 1, 0),
-            (16, 32),
-            (32, 2, 1),
-            (16, 2, 1),
-            (16, 2, 1),
-        ]
+        model_capacity_data = [(2, 16), (2, 16), (18, 8, 1, 1, 0), (8, 16), (34, 16, 1, 1, 0), (16, 32), (32, 2, 1), (16, 2, 1), (16, 2, 1)]
 
     if nn_architecture in hp_model_arch:
-        model_capacity_data = [
-            (2, 32),
-            (2, 32),
-            (34, 16, 1, 1, 0),
-            (16, 32),
-            (66, 32, 1, 1, 0),
-            (32, 64),
-            (64, 2, 1),
-            (32, 2, 1),
-            (32, 2, 1),
-        ]
+        model_capacity_data = [(2, 32), (2, 32), (34, 16, 1, 1, 0), (16, 32), (66, 32, 1, 1, 0), (32, 64), (64, 2, 1), (32, 2, 1), (32, 2, 1)]
 
     if nn_architecture in hp2_model_arch:
-        model_capacity_data = [
-            (2, 64),
-            (2, 64),
-            (66, 32, 1, 1, 0),
-            (32, 64),
-            (130, 64, 1, 1, 0),
-            (64, 128),
-            (128, 2, 1),
-            (64, 2, 1),
-            (64, 2, 1),
-        ]
+        model_capacity_data = [(2, 64), (2, 64), (66, 32, 1, 1, 0), (32, 64), (130, 64, 1, 1, 0), (64, 128), (128, 2, 1), (64, 2, 1), (64, 2, 1)]
 
     # Initializing the CascadedASPPNet model with the selected model capacity data.
     cascaded = CascadedASPPNet
@@ -167,13 +137,7 @@ class CascadedASPPNet(nn.Module):
 
         # Processing the low and high frequency bands separately in the first stage.
         bandwidth = input_tensor.size()[2] // 2
-        aux1 = torch.cat(
-            [
-                self.stg1_low_band_net(input_tensor[:, :, :bandwidth]),
-                self.stg1_high_band_net(input_tensor[:, :, bandwidth:]),
-            ],
-            dim=2,
-        )
+        aux1 = torch.cat([self.stg1_low_band_net(input_tensor[:, :, :bandwidth]), self.stg1_high_band_net(input_tensor[:, :, bandwidth:])], dim=2)
 
         # Combining the outputs of the first stage and passing through the second stage.
         hidden_state = torch.cat([input_tensor, aux1], dim=1)
@@ -187,26 +151,14 @@ class CascadedASPPNet(nn.Module):
         mask = torch.sigmoid(self.out(hidden_state))
 
         # Padding the mask to match the output frequency bin size.
-        mask = F.pad(
-            input=mask,
-            pad=(0, 0, 0, self.output_bin - mask.size()[2]),
-            mode="replicate",
-        )
+        mask = F.pad(input=mask, pad=(0, 0, 0, self.output_bin - mask.size()[2]), mode="replicate")
 
         # During training, auxiliary outputs are also produced and padded accordingly.
         if self.training:
             aux1 = torch.sigmoid(self.aux1_out(aux1))
-            aux1 = F.pad(
-                input=aux1,
-                pad=(0, 0, 0, self.output_bin - aux1.size()[2]),
-                mode="replicate",
-            )
+            aux1 = F.pad(input=aux1, pad=(0, 0, 0, self.output_bin - aux1.size()[2]), mode="replicate")
             aux2 = torch.sigmoid(self.aux2_out(aux2))
-            aux2 = F.pad(
-                input=aux2,
-                pad=(0, 0, 0, self.output_bin - aux2.size()[2]),
-                mode="replicate",
-            )
+            aux2 = F.pad(input=aux2, pad=(0, 0, 0, self.output_bin - aux2.size()[2]), mode="replicate")
             return mask * mix, aux1 * mix, aux2 * mix
         else:
             return mask  # * mix

@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from functools import partial
 
-
 class STFT:
     def __init__(self, n_fft, hop_length, dim_f, device):
         self.n_fft = n_fft
@@ -12,7 +11,7 @@ class STFT:
         self.device = device
 
     def __call__(self, x):
-
+        
         x_is_mps = not x.device.type in ["cuda", "cpu"]
         if x_is_mps:
             x = x.cpu()
@@ -21,26 +20,17 @@ class STFT:
         batch_dims = x.shape[:-2]
         c, t = x.shape[-2:]
         x = x.reshape([-1, t])
-        x = torch.stft(
-            x,
-            n_fft=self.n_fft,
-            hop_length=self.hop_length,
-            window=window,
-            center=True,
-            return_complex=False,
-        )
+        x = torch.stft(x, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True,return_complex=False)
         x = x.permute([0, 3, 1, 2])
-        x = x.reshape([*batch_dims, c, 2, -1, x.shape[-1]]).reshape(
-            [*batch_dims, c * 2, -1, x.shape[-1]]
-        )
+        x = x.reshape([*batch_dims, c, 2, -1, x.shape[-1]]).reshape([*batch_dims, c * 2, -1, x.shape[-1]])
 
         if x_is_mps:
             x = x.to(self.device)
 
-        return x[..., : self.dim_f, :]
+        return x[..., :self.dim_f, :]
 
     def inverse(self, x):
-
+        
         x_is_mps = not x.device.type in ["cuda", "cpu"]
         if x_is_mps:
             x = x.cpu()
@@ -53,10 +43,8 @@ class STFT:
         x = torch.cat([x, f_pad], -2)
         x = x.reshape([*batch_dims, c // 2, 2, n, t]).reshape([-1, 2, n, t])
         x = x.permute([0, 2, 3, 1])
-        x = x[..., 0] + x[..., 1] * 1.0j
-        x = torch.istft(
-            x, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True
-        )
+        x = x[..., 0] + x[..., 1] * 1.j
+        x = torch.istft(x, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True)
         x = x.reshape([*batch_dims, 2, -1])
 
         if x_is_mps:
@@ -64,15 +52,14 @@ class STFT:
 
         return x
 
-
 def get_norm(norm_type):
     def norm(c, norm_type):
-        if norm_type == "BatchNorm":
+        if norm_type == 'BatchNorm':
             return nn.BatchNorm2d(c)
-        elif norm_type == "InstanceNorm":
+        elif norm_type == 'InstanceNorm':
             return nn.InstanceNorm2d(c, affine=True)
-        elif "GroupNorm" in norm_type:
-            g = int(norm_type.replace("GroupNorm", ""))
+        elif 'GroupNorm' in norm_type:
+            g = int(norm_type.replace('GroupNorm', ''))
             return nn.GroupNorm(num_groups=g, num_channels=c)
         else:
             return nn.Identity()
@@ -81,12 +68,12 @@ def get_norm(norm_type):
 
 
 def get_act(act_type):
-    if act_type == "gelu":
+    if act_type == 'gelu':
         return nn.GELU()
-    elif act_type == "relu":
+    elif act_type == 'relu':
         return nn.ReLU()
-    elif act_type[:3] == "elu":
-        alpha = float(act_type.replace("elu", ""))
+    elif act_type[:3] == 'elu':
+        alpha = float(act_type.replace('elu', ''))
         return nn.ELU(alpha)
     else:
         raise Exception
@@ -98,13 +85,7 @@ class Upscale(nn.Module):
         self.conv = nn.Sequential(
             norm(in_c),
             act,
-            nn.ConvTranspose2d(
-                in_channels=in_c,
-                out_channels=out_c,
-                kernel_size=scale,
-                stride=scale,
-                bias=False,
-            ),
+            nn.ConvTranspose2d(in_channels=in_c, out_channels=out_c, kernel_size=scale, stride=scale, bias=False)
         )
 
     def forward(self, x):
@@ -117,13 +98,7 @@ class Downscale(nn.Module):
         self.conv = nn.Sequential(
             norm(in_c),
             act,
-            nn.Conv2d(
-                in_channels=in_c,
-                out_channels=out_c,
-                kernel_size=scale,
-                stride=scale,
-                bias=False,
-            ),
+            nn.Conv2d(in_channels=in_c, out_channels=out_c, kernel_size=scale, stride=scale, bias=False)
         )
 
     def forward(self, x):
@@ -180,9 +155,7 @@ class TFC_TDF_net(nn.Module):
         norm = get_norm(norm_type=config.model.norm)
         act = get_act(act_type=config.model.act)
 
-        self.num_target_instruments = (
-            1 if config.training.target_instrument else len(config.training.instruments)
-        )
+        self.num_target_instruments = 1 if config.training.target_instrument else len(config.training.instruments)
         self.num_subbands = config.model.num_subbands
 
         dim_c = self.num_subbands * config.audio.num_channels * 2
@@ -219,12 +192,10 @@ class TFC_TDF_net(nn.Module):
         self.final_conv = nn.Sequential(
             nn.Conv2d(c + dim_c, c, 1, 1, 0, bias=False),
             act,
-            nn.Conv2d(c, self.num_target_instruments * dim_c, 1, 1, 0, bias=False),
+            nn.Conv2d(c, self.num_target_instruments * dim_c, 1, 1, 0, bias=False)
         )
 
-        self.stft = STFT(
-            config.audio.n_fft, config.audio.hop_length, config.audio.dim_f, self.device
-        )
+        self.stft = STFT(config.audio.n_fft, config.audio.hop_length, config.audio.dim_f, self.device)
 
     def cac2cws(self, x):
         k = self.num_subbands
@@ -278,3 +249,5 @@ class TFC_TDF_net(nn.Module):
         x = self.stft.inverse(x)
 
         return x
+
+

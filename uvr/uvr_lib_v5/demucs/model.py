@@ -15,9 +15,7 @@ from .utils import capture_init, center_trim
 class BLSTM(nn.Module):
     def __init__(self, dim, layers=1):
         super().__init__()
-        self.lstm = nn.LSTM(
-            bidirectional=True, num_layers=layers, hidden_size=dim, input_size=dim
-        )
+        self.lstm = nn.LSTM(bidirectional=True, num_layers=layers, hidden_size=dim, input_size=dim)
         self.linear = nn.Linear(2 * dim, dim)
 
     def forward(self, x):
@@ -63,21 +61,7 @@ def downsample(x, stride):
 class Demucs(nn.Module):
     @capture_init
     def __init__(
-        self,
-        sources=4,
-        audio_channels=2,
-        channels=64,
-        depth=6,
-        rewrite=True,
-        glu=True,
-        upsample=False,
-        rescale=0.1,
-        kernel_size=8,
-        stride=4,
-        growth=2.0,
-        lstm_layers=2,
-        context=3,
-        samplerate=44100,
+        self, sources=4, audio_channels=2, channels=64, depth=6, rewrite=True, glu=True, upsample=False, rescale=0.1, kernel_size=8, stride=4, growth=2.0, lstm_layers=2, context=3, samplerate=44100
     ):
         """
         Args:
@@ -120,9 +104,7 @@ class Demucs(nn.Module):
 
         self.final = None
         if upsample:
-            self.final = nn.Conv1d(
-                channels + audio_channels, sources * audio_channels, 1
-            )
+            self.final = nn.Conv1d(channels + audio_channels, sources * audio_channels, 1)
             stride = 1
 
         if glu:
@@ -148,16 +130,11 @@ class Demucs(nn.Module):
                 else:
                     out_channels = sources * audio_channels
             if rewrite:
-                decode += [
-                    nn.Conv1d(channels, ch_scale * channels, context),
-                    activation,
-                ]
+                decode += [nn.Conv1d(channels, ch_scale * channels, context), activation]
             if upsample:
                 decode += [nn.Conv1d(channels, out_channels, kernel_size, stride=1)]
             else:
-                decode += [
-                    nn.ConvTranspose1d(channels, out_channels, kernel_size, stride)
-                ]
+                decode += [nn.ConvTranspose1d(channels, out_channels, kernel_size, stride)]
             if index > 0:
                 decode.append(nn.ReLU())
             self.decoder.insert(0, nn.Sequential(*decode))
