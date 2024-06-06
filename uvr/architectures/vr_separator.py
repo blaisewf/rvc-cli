@@ -44,10 +44,16 @@ class VRSeparator(CommonSeparator):
 
         # Model params are additional technical parameter values from JSON files in separator/uvr_lib_v5/vr_network/modelparams/*.json,
         # with filenames referenced by the model_data["vr_model_param"] value
-        package_root_filepath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        vr_params_json_dir = os.path.join(package_root_filepath, "uvr_lib_v5", "vr_network", "modelparams")
+        package_root_filepath = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))
+        )
+        vr_params_json_dir = os.path.join(
+            package_root_filepath, "uvr_lib_v5", "vr_network", "modelparams"
+        )
         vr_params_json_filename = f"{self.model_data['vr_model_param']}.json"
-        vr_params_json_filepath = os.path.join(vr_params_json_dir, vr_params_json_filename)
+        vr_params_json_filepath = os.path.join(
+            vr_params_json_dir, vr_params_json_filename
+        )
         self.model_params = ModelParameters(vr_params_json_filepath)
 
         self.logger.debug(f"Model params: {self.model_params.param}")
@@ -94,16 +100,30 @@ class VRSeparator(CommonSeparator):
         # - Values beyond 5 might muddy the sound for non-vocal models.
         self.aggression = float(int(arch_config.get("aggression", 5)) / 100)
 
-        self.aggressiveness = {"value": self.aggression, "split_bin": self.model_params.param["band"][1]["crop_stop"], "aggr_correction": self.model_params.param.get("aggr_correction")}
+        self.aggressiveness = {
+            "value": self.aggression,
+            "split_bin": self.model_params.param["band"][1]["crop_stop"],
+            "aggr_correction": self.model_params.param.get("aggr_correction"),
+        }
 
         self.model_samplerate = self.model_params.param["sr"]
 
-        self.logger.debug(f"VR arch params: enable_tta={self.enable_tta}, enable_post_process={self.enable_post_process}, post_process_threshold={self.post_process_threshold}")
-        self.logger.debug(f"VR arch params: batch_size={self.batch_size}, window_size={self.window_size}")
-        self.logger.debug(f"VR arch params: high_end_process={self.high_end_process}, aggression={self.aggression}")
-        self.logger.debug(f"VR arch params: is_vr_51_model={self.is_vr_51_model}, model_samplerate={self.model_samplerate}, model_capacity={self.model_capacity}")
+        self.logger.debug(
+            f"VR arch params: enable_tta={self.enable_tta}, enable_post_process={self.enable_post_process}, post_process_threshold={self.post_process_threshold}"
+        )
+        self.logger.debug(
+            f"VR arch params: batch_size={self.batch_size}, window_size={self.window_size}"
+        )
+        self.logger.debug(
+            f"VR arch params: high_end_process={self.high_end_process}, aggression={self.aggression}"
+        )
+        self.logger.debug(
+            f"VR arch params: is_vr_51_model={self.is_vr_51_model}, model_samplerate={self.model_samplerate}, model_capacity={self.model_capacity}"
+        )
 
-        self.model_run = lambda *args, **kwargs: self.logger.error("Model run method is not initialised yet.")
+        self.model_run = lambda *args, **kwargs: self.logger.error(
+            "Model run method is not initialised yet."
+        )
 
         # This should go away once we refactor to remove soundfile.write and replace with pydub like we did for the MDX rewrite
         self.wav_subtype = "PCM_16"
@@ -127,39 +147,72 @@ class VRSeparator(CommonSeparator):
         self.audio_file_path = audio_file_path
         self.audio_file_base = os.path.splitext(os.path.basename(audio_file_path))[0]
 
-        self.logger.debug(f"Starting separation for input audio file {self.audio_file_path}...")
+        self.logger.debug(
+            f"Starting separation for input audio file {self.audio_file_path}..."
+        )
 
-        nn_arch_sizes = [31191, 33966, 56817, 123821, 123812, 129605, 218409, 537238, 537227]  # default
+        nn_arch_sizes = [
+            31191,
+            33966,
+            56817,
+            123821,
+            123812,
+            129605,
+            218409,
+            537238,
+            537227,
+        ]  # default
         vr_5_1_models = [56817, 218409]
         model_size = math.ceil(os.stat(self.model_path).st_size / 1024)
         nn_arch_size = min(nn_arch_sizes, key=lambda x: abs(x - model_size))
-        self.logger.debug(f"Model size determined: {model_size}, NN architecture size: {nn_arch_size}")
+        self.logger.debug(
+            f"Model size determined: {model_size}, NN architecture size: {nn_arch_size}"
+        )
 
         if nn_arch_size in vr_5_1_models or self.is_vr_51_model:
             self.logger.debug("Using CascadedNet for VR 5.1 model...")
-            self.model_run = nets_new.CascadedNet(self.model_params.param["bins"] * 2, nn_arch_size, nout=self.model_capacity[0], nout_lstm=self.model_capacity[1])
+            self.model_run = nets_new.CascadedNet(
+                self.model_params.param["bins"] * 2,
+                nn_arch_size,
+                nout=self.model_capacity[0],
+                nout_lstm=self.model_capacity[1],
+            )
             self.is_vr_51_model = True
         else:
             self.logger.debug("Determining model capacity...")
-            self.model_run = nets.determine_model_capacity(self.model_params.param["bins"] * 2, nn_arch_size)
+            self.model_run = nets.determine_model_capacity(
+                self.model_params.param["bins"] * 2, nn_arch_size
+            )
 
-        self.model_run.load_state_dict(torch.load(self.model_path, map_location=self.torch_device_cpu))
+        self.model_run.load_state_dict(
+            torch.load(self.model_path, map_location=self.torch_device_cpu)
+        )
         self.model_run.to(self.torch_device)
         self.logger.debug("Model loaded and moved to device.")
 
-        y_spec, v_spec = self.inference_vr(self.loading_mix(), self.torch_device, self.aggressiveness)
+        y_spec, v_spec = self.inference_vr(
+            self.loading_mix(), self.torch_device, self.aggressiveness
+        )
         self.logger.debug("Inference completed.")
 
         # Sanitize y_spec and v_spec to replace NaN and infinite values
         y_spec = np.nan_to_num(y_spec, nan=0.0, posinf=0.0, neginf=0.0)
         v_spec = np.nan_to_num(v_spec, nan=0.0, posinf=0.0, neginf=0.0)
 
-        self.logger.debug("Sanitization completed. Replaced NaN and infinite values in y_spec and v_spec.")
+        self.logger.debug(
+            "Sanitization completed. Replaced NaN and infinite values in y_spec and v_spec."
+        )
 
         # After inference_vr call
-        self.logger.debug(f"Inference VR completed. y_spec shape: {y_spec.shape}, v_spec shape: {v_spec.shape}")
-        self.logger.debug(f"y_spec stats - min: {np.min(y_spec)}, max: {np.max(y_spec)}, isnan: {np.isnan(y_spec).any()}, isinf: {np.isinf(y_spec).any()}")
-        self.logger.debug(f"v_spec stats - min: {np.min(v_spec)}, max: {np.max(v_spec)}, isnan: {np.isnan(v_spec).any()}, isinf: {np.isinf(v_spec).any()}")
+        self.logger.debug(
+            f"Inference VR completed. y_spec shape: {y_spec.shape}, v_spec shape: {v_spec.shape}"
+        )
+        self.logger.debug(
+            f"y_spec stats - min: {np.min(y_spec)}, max: {np.max(y_spec)}, isnan: {np.isnan(y_spec).any()}, isinf: {np.isinf(y_spec).any()}"
+        )
+        self.logger.debug(
+            f"v_spec stats - min: {np.min(v_spec)}, max: {np.max(v_spec)}, isnan: {np.isnan(v_spec).any()}, isinf: {np.isinf(v_spec).any()}"
+        )
 
         # Not yet implemented from UVR features:
         #
@@ -177,39 +230,75 @@ class VRSeparator(CommonSeparator):
         self.logger.debug("Processing output files...")
 
         # Save and process the primary stem if needed
-        if not self.output_single_stem or self.output_single_stem.lower() == self.primary_stem_name.lower():
+        if (
+            not self.output_single_stem
+            or self.output_single_stem.lower() == self.primary_stem_name.lower()
+        ):
             self.logger.debug(f"Processing primary stem: {self.primary_stem_name}")
             if not isinstance(self.primary_source, np.ndarray):
-                self.logger.debug(f"Preparing to convert spectrogram to waveform. Spec shape: {y_spec.shape}")
+                self.logger.debug(
+                    f"Preparing to convert spectrogram to waveform. Spec shape: {y_spec.shape}"
+                )
 
                 self.primary_source = self.spec_to_wav(y_spec).T
                 self.logger.debug("Converting primary source spectrogram to waveform.")
                 if not self.model_samplerate == 44100:
-                    self.primary_source = librosa.resample(self.primary_source.T, orig_sr=self.model_samplerate, target_sr=44100).T
+                    self.primary_source = librosa.resample(
+                        self.primary_source.T,
+                        orig_sr=self.model_samplerate,
+                        target_sr=44100,
+                    ).T
                     self.logger.debug("Resampling primary source to 44100Hz.")
 
-            self.primary_stem_output_path = os.path.join(f"{self.audio_file_base}_({self.primary_stem_name})_{self.model_name}.{self.output_format.lower()}")
+            self.primary_stem_output_path = os.path.join(
+                f"{self.audio_file_base}_({self.primary_stem_name})_{self.model_name}.{self.output_format.lower()}"
+            )
 
-            self.logger.info(f"Saving {self.primary_stem_name} stem to {self.primary_stem_output_path}...")
-            self.final_process(self.primary_stem_output_path, self.primary_source, self.primary_stem_name)
+            self.logger.info(
+                f"Saving {self.primary_stem_name} stem to {self.primary_stem_output_path}..."
+            )
+            self.final_process(
+                self.primary_stem_output_path,
+                self.primary_source,
+                self.primary_stem_name,
+            )
             output_files.append(self.primary_stem_output_path)
 
         # Save and process the secondary stem if needed
-        if not self.output_single_stem or self.output_single_stem.lower() == self.secondary_stem_name.lower():
+        if (
+            not self.output_single_stem
+            or self.output_single_stem.lower() == self.secondary_stem_name.lower()
+        ):
             self.logger.debug(f"Processing secondary stem: {self.secondary_stem_name}")
             if not isinstance(self.secondary_source, np.ndarray):
-                self.logger.debug(f"Preparing to convert spectrogram to waveform. Spec shape: {v_spec.shape}")
+                self.logger.debug(
+                    f"Preparing to convert spectrogram to waveform. Spec shape: {v_spec.shape}"
+                )
 
                 self.secondary_source = self.spec_to_wav(v_spec).T
-                self.logger.debug("Converting secondary source spectrogram to waveform.")
+                self.logger.debug(
+                    "Converting secondary source spectrogram to waveform."
+                )
                 if not self.model_samplerate == 44100:
-                    self.secondary_source = librosa.resample(self.secondary_source.T, orig_sr=self.model_samplerate, target_sr=44100).T
+                    self.secondary_source = librosa.resample(
+                        self.secondary_source.T,
+                        orig_sr=self.model_samplerate,
+                        target_sr=44100,
+                    ).T
                     self.logger.debug("Resampling secondary source to 44100Hz.")
 
-            self.secondary_stem_output_path = os.path.join(f"{self.audio_file_base}_({self.secondary_stem_name})_{self.model_name}.{self.output_format.lower()}")
+            self.secondary_stem_output_path = os.path.join(
+                f"{self.audio_file_base}_({self.secondary_stem_name})_{self.model_name}.{self.output_format.lower()}"
+            )
 
-            self.logger.info(f"Saving {self.secondary_stem_name} stem to {self.secondary_stem_output_path}...")
-            self.final_process(self.secondary_stem_output_path, self.secondary_source, self.secondary_stem_name)
+            self.logger.info(
+                f"Saving {self.secondary_stem_name} stem to {self.secondary_stem_output_path}..."
+            )
+            self.final_process(
+                self.secondary_stem_output_path,
+                self.secondary_source,
+                self.secondary_stem_name,
+            )
             output_files.append(self.secondary_stem_output_path)
 
         # Not yet implemented from UVR features:
@@ -223,7 +312,9 @@ class VRSeparator(CommonSeparator):
 
         bands_n = len(self.model_params.param["band"])
 
-        audio_file = spec_utils.write_array_to_mem(self.audio_file_path, subtype=self.wav_subtype)
+        audio_file = spec_utils.write_array_to_mem(
+            self.audio_file_path, subtype=self.wav_subtype
+        )
         is_mp3 = audio_file.endswith(".mp3") if isinstance(audio_file, str) else False
 
         self.logger.debug(f"loading_mix iteraring through {bands_n} bands")
@@ -236,8 +327,21 @@ class VRSeparator(CommonSeparator):
                 wav_resolution = "polyphase"
 
             if d == bands_n:  # high-end band
-                X_wave[d], _ = librosa.load(audio_file, sr=bp["sr"], mono=False, dtype=np.float32, res_type=wav_resolution)
-                X_spec_s[d] = spec_utils.wave_to_spectrogram(X_wave[d], bp["hl"], bp["n_fft"], self.model_params, band=d, is_v51_model=self.is_vr_51_model)
+                X_wave[d], _ = librosa.load(
+                    audio_file,
+                    sr=bp["sr"],
+                    mono=False,
+                    dtype=np.float32,
+                    res_type=wav_resolution,
+                )
+                X_spec_s[d] = spec_utils.wave_to_spectrogram(
+                    X_wave[d],
+                    bp["hl"],
+                    bp["n_fft"],
+                    self.model_params,
+                    band=d,
+                    is_v51_model=self.is_vr_51_model,
+                )
 
                 if not np.any(X_wave[d]) and is_mp3:
                     X_wave[d] = rerun_mp3(audio_file, bp["sr"])
@@ -245,14 +349,33 @@ class VRSeparator(CommonSeparator):
                 if X_wave[d].ndim == 1:
                     X_wave[d] = np.asarray([X_wave[d], X_wave[d]])
             else:  # lower bands
-                X_wave[d] = librosa.resample(X_wave[d + 1], orig_sr=self.model_params.param["band"][d + 1]["sr"], target_sr=bp["sr"], res_type=wav_resolution)
-                X_spec_s[d] = spec_utils.wave_to_spectrogram(X_wave[d], bp["hl"], bp["n_fft"], self.model_params, band=d, is_v51_model=self.is_vr_51_model)
+                X_wave[d] = librosa.resample(
+                    X_wave[d + 1],
+                    orig_sr=self.model_params.param["band"][d + 1]["sr"],
+                    target_sr=bp["sr"],
+                    res_type=wav_resolution,
+                )
+                X_spec_s[d] = spec_utils.wave_to_spectrogram(
+                    X_wave[d],
+                    bp["hl"],
+                    bp["n_fft"],
+                    self.model_params,
+                    band=d,
+                    is_v51_model=self.is_vr_51_model,
+                )
 
             if d == bands_n and self.high_end_process:
-                self.input_high_end_h = (bp["n_fft"] // 2 - bp["crop_stop"]) + (self.model_params.param["pre_filter_stop"] - self.model_params.param["pre_filter_start"])
-                self.input_high_end = X_spec_s[d][:, bp["n_fft"] // 2 - self.input_high_end_h : bp["n_fft"] // 2, :]
+                self.input_high_end_h = (bp["n_fft"] // 2 - bp["crop_stop"]) + (
+                    self.model_params.param["pre_filter_stop"]
+                    - self.model_params.param["pre_filter_start"]
+                )
+                self.input_high_end = X_spec_s[d][
+                    :, bp["n_fft"] // 2 - self.input_high_end_h : bp["n_fft"] // 2, :
+                ]
 
-        X_spec = spec_utils.combine_spectrograms(X_spec_s, self.model_params, is_v51_model=self.is_vr_51_model)
+        X_spec = spec_utils.combine_spectrograms(
+            X_spec_s, self.model_params, is_v51_model=self.is_vr_51_model
+        )
 
         del X_wave, X_spec_s, audio_file
 
@@ -263,14 +386,22 @@ class VRSeparator(CommonSeparator):
             X_dataset = []
             patches = (X_mag_pad.shape[2] - 2 * self.model_run.offset) // roi_size
 
-            self.logger.debug(f"inference_vr appending to X_dataset for each of {patches} patches")
+            self.logger.debug(
+                f"inference_vr appending to X_dataset for each of {patches} patches"
+            )
             for i in tqdm(range(patches)):
                 start = i * roi_size
                 X_mag_window = X_mag_pad[:, :, start : start + self.window_size]
                 X_dataset.append(X_mag_window)
 
-            total_iterations = patches // self.batch_size if not self.enable_tta else (patches // self.batch_size) * 2
-            self.logger.debug(f"inference_vr iterating through {total_iterations} batches, batch_size = {self.batch_size}")
+            total_iterations = (
+                patches // self.batch_size
+                if not self.enable_tta
+                else (patches // self.batch_size) * 2
+            )
+            self.logger.debug(
+                f"inference_vr iterating through {total_iterations} batches, batch_size = {self.batch_size}"
+            )
 
             X_dataset = np.asarray(X_dataset)
             self.model_run.eval()
@@ -283,12 +414,16 @@ class VRSeparator(CommonSeparator):
                     X_batch = torch.from_numpy(X_batch).to(device)
                     pred = self.model_run.predict_mask(X_batch)
                     if not pred.size()[3] > 0:
-                        raise ValueError(f"Window size error: h1_shape[3] must be greater than h2_shape[3]")
+                        raise ValueError(
+                            f"Window size error: h1_shape[3] must be greater than h2_shape[3]"
+                        )
                     pred = pred.detach().cpu().numpy()
                     pred = np.concatenate(pred, axis=2)
                     mask.append(pred)
                 if len(mask) == 0:
-                    raise ValueError(f"Window size error: h1_shape[3] must be greater than h2_shape[3]")
+                    raise ValueError(
+                        f"Window size error: h1_shape[3] must be greater than h2_shape[3]"
+                    )
 
                 mask = np.concatenate(mask, axis=2)
             return mask
@@ -302,7 +437,9 @@ class VRSeparator(CommonSeparator):
             mask = spec_utils.adjust_aggr(mask, is_non_accom_stem, aggressiveness)
 
             if self.enable_post_process:
-                mask = spec_utils.merge_artifacts(mask, thres=self.post_process_threshold)
+                mask = spec_utils.merge_artifacts(
+                    mask, thres=self.post_process_threshold
+                )
 
             y_spec = mask * X_mag * np.exp(1.0j * X_phase)
             v_spec = (1 - mask) * X_mag * np.exp(1.0j * X_phase)
@@ -311,7 +448,9 @@ class VRSeparator(CommonSeparator):
 
         X_mag, X_phase = spec_utils.preprocess(X_spec)
         n_frame = X_mag.shape[2]
-        pad_l, pad_r, roi_size = spec_utils.make_padding(n_frame, self.window_size, self.model_run.offset)
+        pad_l, pad_r, roi_size = spec_utils.make_padding(
+            n_frame, self.window_size, self.model_run.offset
+        )
         X_mag_pad = np.pad(X_mag, ((0, 0), (0, 0), (pad_l, pad_r)), mode="constant")
         X_mag_pad /= X_mag_pad.max()
         mask = _execute(X_mag_pad, roi_size)
@@ -332,11 +471,25 @@ class VRSeparator(CommonSeparator):
         return y_spec, v_spec
 
     def spec_to_wav(self, spec):
-        if self.high_end_process and isinstance(self.input_high_end, np.ndarray) and self.input_high_end_h:
-            input_high_end_ = spec_utils.mirroring("mirroring", spec, self.input_high_end, self.model_params)
-            wav = spec_utils.cmb_spectrogram_to_wave(spec, self.model_params, self.input_high_end_h, input_high_end_, is_v51_model=self.is_vr_51_model)
+        if (
+            self.high_end_process
+            and isinstance(self.input_high_end, np.ndarray)
+            and self.input_high_end_h
+        ):
+            input_high_end_ = spec_utils.mirroring(
+                "mirroring", spec, self.input_high_end, self.model_params
+            )
+            wav = spec_utils.cmb_spectrogram_to_wave(
+                spec,
+                self.model_params,
+                self.input_high_end_h,
+                input_high_end_,
+                is_v51_model=self.is_vr_51_model,
+            )
         else:
-            wav = spec_utils.cmb_spectrogram_to_wave(spec, self.model_params, is_v51_model=self.is_vr_51_model)
+            wav = spec_utils.cmb_spectrogram_to_wave(
+                spec, self.model_params, is_v51_model=self.is_vr_51_model
+            )
 
         return wav
 
@@ -346,4 +499,6 @@ def rerun_mp3(audio_file, sample_rate=44100):
     with audioread.audio_open(audio_file) as f:
         track_length = int(f.duration)
 
-    return librosa.load(audio_file, duration=track_length, mono=False, sr=sample_rate)[0]
+    return librosa.load(audio_file, duration=track_length, mono=False, sr=sample_rate)[
+        0
+    ]

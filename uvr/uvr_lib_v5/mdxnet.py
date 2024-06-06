@@ -5,8 +5,20 @@ from pytorch_lightning import LightningModule
 
 dim_s = 4
 
+
 class AbstractMDXNet(LightningModule):
-    def __init__(self, target_name, lr, optimizer, dim_c, dim_f, dim_t, n_fft, hop_length, overlap):
+    def __init__(
+        self,
+        target_name,
+        lr,
+        optimizer,
+        dim_c,
+        dim_f,
+        dim_t,
+        n_fft,
+        hop_length,
+        overlap,
+    ):
         super().__init__()
         self.target_name = target_name
         self.lr = lr
@@ -17,23 +29,47 @@ class AbstractMDXNet(LightningModule):
         self.n_fft = n_fft
         self.n_bins = n_fft // 2 + 1
         self.hop_length = hop_length
-        self.window = nn.Parameter(torch.hann_window(window_length=self.n_fft, periodic=True), requires_grad=False)
-        self.freq_pad = nn.Parameter(torch.zeros([1, dim_c, self.n_bins - self.dim_f, self.dim_t]), requires_grad=False)
+        self.window = nn.Parameter(
+            torch.hann_window(window_length=self.n_fft, periodic=True),
+            requires_grad=False,
+        )
+        self.freq_pad = nn.Parameter(
+            torch.zeros([1, dim_c, self.n_bins - self.dim_f, self.dim_t]),
+            requires_grad=False,
+        )
 
     def get_optimizer(self):
-        if self.optimizer == 'rmsprop':
+        if self.optimizer == "rmsprop":
             return torch.optim.RMSprop(self.parameters(), self.lr)
-        
-        if self.optimizer == 'adamw':
+
+        if self.optimizer == "adamw":
             return torch.optim.AdamW(self.parameters(), self.lr)
 
+
 class ConvTDFNet(AbstractMDXNet):
-    def __init__(self, target_name, lr, optimizer, dim_c, dim_f, dim_t, n_fft, hop_length,
-                 num_blocks, l, g, k, bn, bias, overlap):
+    def __init__(
+        self,
+        target_name,
+        lr,
+        optimizer,
+        dim_c,
+        dim_f,
+        dim_t,
+        n_fft,
+        hop_length,
+        num_blocks,
+        l,
+        g,
+        k,
+        bn,
+        bias,
+        overlap,
+    ):
 
         super(ConvTDFNet, self).__init__(
-            target_name, lr, optimizer, dim_c, dim_f, dim_t, n_fft, hop_length, overlap)
-        #self.save_hyperparameters()
+            target_name, lr, optimizer, dim_c, dim_f, dim_t, n_fft, hop_length, overlap
+        )
+        # self.save_hyperparameters()
 
         self.num_blocks = num_blocks
         self.l = l
@@ -42,12 +78,12 @@ class ConvTDFNet(AbstractMDXNet):
         self.bn = bn
         self.bias = bias
 
-        if optimizer == 'rmsprop':
+        if optimizer == "rmsprop":
             norm = nn.BatchNorm2d
-            
-        if optimizer == 'adamw':
-            norm = lambda input:nn.GroupNorm(2, input)
-            
+
+        if optimizer == "adamw":
+            norm = lambda input: nn.GroupNorm(2, input)
+
         self.n = num_blocks // 2
         scale = (2, 2)
 
@@ -65,9 +101,14 @@ class ConvTDFNet(AbstractMDXNet):
             self.encoding_blocks.append(TFC_TDF(c, l, f, k, bn, bias=bias, norm=norm))
             self.ds.append(
                 nn.Sequential(
-                    nn.Conv2d(in_channels=c, out_channels=c + g, kernel_size=scale, stride=scale),
+                    nn.Conv2d(
+                        in_channels=c,
+                        out_channels=c + g,
+                        kernel_size=scale,
+                        stride=scale,
+                    ),
                     norm(c + g),
-                    nn.ReLU()
+                    nn.ReLU(),
                 )
             )
             f = f // 2
@@ -80,9 +121,14 @@ class ConvTDFNet(AbstractMDXNet):
         for i in range(self.n):
             self.us.append(
                 nn.Sequential(
-                    nn.ConvTranspose2d(in_channels=c, out_channels=c - g, kernel_size=scale, stride=scale),
+                    nn.ConvTranspose2d(
+                        in_channels=c,
+                        out_channels=c - g,
+                        kernel_size=scale,
+                        stride=scale,
+                    ),
                     norm(c - g),
-                    nn.ReLU()
+                    nn.ReLU(),
                 )
             )
             f = f * 2
@@ -118,19 +164,18 @@ class ConvTDFNet(AbstractMDXNet):
         x = self.final_conv(x)
 
         return x
-    
+
+
 class Mixer(nn.Module):
     def __init__(self, device, mixer_path):
-        
+
         super(Mixer, self).__init__()
-        
-        self.linear = nn.Linear((dim_s+1)*2, dim_s*2, bias=False)
-        
-        self.load_state_dict(
-            torch.load(mixer_path, map_location=device)
-        )
+
+        self.linear = nn.Linear((dim_s + 1) * 2, dim_s * 2, bias=False)
+
+        self.load_state_dict(torch.load(mixer_path, map_location=device))
 
     def forward(self, x):
-        x = x.reshape(1,(dim_s+1)*2,-1).transpose(-1,-2)
+        x = x.reshape(1, (dim_s + 1) * 2, -1).transpose(-1, -2)
         x = self.linear(x)
-        return x.transpose(-1,-2).reshape(dim_s,2,-1)
+        return x.transpose(-1, -2).reshape(dim_s, 2, -1)
