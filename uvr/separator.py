@@ -127,7 +127,6 @@ class Separator:
         self.log_onnxruntime_packages()
         self.setup_torch_device()
 
-
     def log_onnxruntime_packages(self):
         """
         This method logs the ONNX Runtime package versions, including the GPU and Silicon packages if available.
@@ -137,7 +136,6 @@ class Separator:
             "onnxruntime-silicon"
         )
         onnxruntime_cpu_package = self.get_package_distribution("onnxruntime")
-
 
     def setup_torch_device(self):
         """
@@ -172,6 +170,7 @@ class Separator:
                 "ONNXruntime has CUDAExecutionProvider available, enabling acceleration"
             )
             self.onnx_execution_provider = ["CUDAExecutionProvider"]
+
     def configure_mps(self, ort_providers):
         """
         This method configures the Apple Silicon MPS/CoreML device for PyTorch and ONNX Runtime, if available.
@@ -729,9 +728,7 @@ class Separator:
         )
 
         module_name, class_name = separator_classes[model_type].split(".")
-        module = importlib.import_module(
-            f"uvr.architectures.{module_name}"
-        )
+        module = importlib.import_module(f"uvr.architectures.{module_name}")
         separator_class = getattr(module, class_name)
 
         self.logger.debug(
