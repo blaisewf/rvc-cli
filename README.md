@@ -158,14 +158,14 @@ _Refer to `python rvc.py preprocess -h` for additional help._
 #### Extract Features
 
 ```bash
-python rvc.py extract --model_name "model_name" --rvc_version "rvc_version" --f0method "f0method" --hop_length "hop_length" --sampling_rate "sampling_rate"
+python rvc.py extract --model_name "model_name" --rvc_version "rvc_version" --pitch_guidance "pitch_guidance" --hop_length "hop_length" --sampling_rate "sampling_rate"
 ```
 
 | Parameter Name   | Required | Default | Valid Options                              | Description                                                                                                                                                                            |
 | ---------------- | -------- | ------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `model_name`     | Yes      | None    | Name of the model                          | Name of the model                                                                                                                                                                      |
 | `rvc_version`    | No       | v2      | v1 or v2                                   | Version of the model                                                                                                                                                                   |
-| `f0method`       | No       | rmvpe   | pm, harvest, dio, crepe, crepe-tiny, rmvpe | Pitch extraction algorithm to use for the audio conversion. The default algorithm is rmvpe, which is recommended for most cases.                                                       |
+| `pitch_guidance`         | No       | True    | True or False                                                           | By employing pitch guidance, it becomes feasible to mirror the intonation of the original voice, including its pitch. This feature is particularly valuable for singing and other scenarios where preserving the original melody or pitch pattern is essential. |
 | `hop_length`     | No       | 128     | 1 to 512                                   | Denotes the duration it takes for the system to transition to a significant pitch change. Smaller hop lengths require more time for inference but tend to yield higher pitch accuracy. |
 | `sampling_rate`  | Yes      | None    | 32000, 40000, or 48000                     | Sampling rate of the audio data                                                                                                                                                        |
 | `embedder_model` | No       | hubert  | hubert or contentvec                       | Embedder model to use for the audio conversion. The default model is hubert, which is recommended for most cases.                                                                      |
