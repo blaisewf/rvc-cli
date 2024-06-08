@@ -135,7 +135,7 @@ class FeatureInput:
 
     def get_rmvpe(self, x):
         if not hasattr(self, "model_rmvpe"):
-            from rvc.lib.rmvpe import RMVPE
+            from rvc.lib.predictor.RMVPE import RMVPE
 
             self.model_rmvpe = RMVPE("rmvpe.pt", is_half=False, device="cpu")
         return self.model_rmvpe.infer_from_audio(x, thred=0.03)
@@ -214,9 +214,9 @@ class FeatureInput:
 if __name__ == "__main__":
     feature_input = FeatureInput()
     paths = []
-    input_root = f"{exp_dir}/1_16k_wavs"
-    output_root1 = f"{exp_dir}/2a_f0"
-    output_root2 = f"{exp_dir}/2b-f0nsf"
+    input_root = f"{exp_dir}/sliced_audios_16k"
+    output_root1 = f"{exp_dir}/f0"
+    output_root2 = f"{exp_dir}/f0_voiced"
 
     os.makedirs(output_root1, exist_ok=True)
     os.makedirs(output_root2, exist_ok=True)
