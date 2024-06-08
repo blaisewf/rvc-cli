@@ -473,7 +473,7 @@ def run_api_script(ip, port):
 # Parse arguments
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="Run the main.py script with specific parameters."
+        description="Run the rvc.py script with specific parameters."
     )
     subparsers = parser.add_subparsers(
         title="subcommands", dest="mode", help="Choose a mode"

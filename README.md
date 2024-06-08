@@ -21,7 +21,7 @@ Ensure that you have the necessary Python packages installed by following these 
 
 #### Windows
 
-Execute the [install.bat](./install.bat) file to activate a Conda environment. Afterward, launch the application using `env/python.exe main.py` instead of the conventional `python main.py` command.
+Execute the [install.bat](./install.bat) file to activate a Conda environment. Afterward, launch the application using `env/python.exe rvc.py` instead of the conventional `python rvc.py` command.
 
 #### Linux
 
@@ -35,7 +35,7 @@ chmod +x install.sh
 Download the necessary models and executables by running the following command:
 
 ```bash
-python main.py prerequisites
+python rvc.py prerequisites
 ```
 
 _More information about the prerequisites command [here](#prerequisites-download)_
@@ -43,7 +43,7 @@ _More information about the prerequisites command [here](#prerequisites-download
 For detailed information and command-line options, refer to the help command:
 
 ```bash
-python main.py -h
+python rvc.py -h
 ```
 
 This command provides a clear overview of the available modes and their corresponding parameters, facilitating effective utilization of the RVC CLI.
@@ -53,7 +53,7 @@ This command provides a clear overview of the available modes and their correspo
 #### Single Inference
 
 ```bash
-python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_path "input_path" --output_path "output_path" --pth_path "pth_path" --index_path "index_path" --split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength" --export_format "export_format"
+python rvc.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_path "input_path" --output_path "output_path" --pth_path "pth_path" --index_path "index_path" --split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength" --export_format "export_format"
 ```
 
 | Parameter Name   | Required | Default | Valid Options                                                                                                                           | Description                                                                                                                                                                                                                                                                                                           |
@@ -77,12 +77,12 @@ python main.py infer --f0up_key "f0up_key" --filter_radius "filter_radius" --ind
 | `embedder_model` | No       | hubert  | hubert or contentvec                                                                                                                    | Embedder model to use for the audio conversion. The default model is hubert, which is recommended for most cases.                                                                                                                                                                                                     |
 | `upscale_audio`  | No       | False   | True or False                                                                                                                           | Upscale the audio to 48kHz for better results.                                                                                                                                                                                                                                                                        |
 
-_Refer to `python main.py infer -h` for additional help._
+_Refer to `python rvc.py infer -h` for additional help._
 
 #### Batch Inference
 
 ```bash
-python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_folder_path "input_folder_path" --output_folder_path "output_folder_path" --pth_path "pth_path" --index_path "index_path" --split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength" --export_format "export_format"
+python rvc.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --input_folder_path "input_folder_path" --output_folder_path "output_folder_path" --pth_path "pth_path" --index_path "index_path" --split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength" --export_format "export_format"
 ```
 
 | Parameter Name       | Required | Default | Valid Options                                                                                                                           | Description                                                                                                                                                                                                                                                                                                           |
@@ -106,12 +106,12 @@ python main.py batch_infer --f0up_key "f0up_key" --filter_radius "filter_radius"
 | `embedder_model`     | No       | hubert  | hubert or contentvec                                                                                                                    | Embedder model to use for the audio conversion. The default model is hubert, which is recommended for most cases.                                                                                                                                                                                                     |
 | `upscale_audio`      | No       | False   | True or False                                                                                                                           | Upscale the audio to 48kHz for better results.                                                                                                                                                                                                                                                                        |
 
-_Refer to `python main.py batch_infer -h` for additional help._
+_Refer to `python rvc.py batch_infer -h` for additional help._
 
 #### TTS Inference
 
 ```bash
-python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --output_tts_path "output_tts_path" --output_rvc_path "output_rvc_path" --pth_path "pth_path" --index_path "index_path"--split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength" --export_format "export_format"
+python rvc.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_key "f0up_key" --filter_radius "filter_radius" --index_rate "index_rate" --hop_length "hop_length" --rms_mix_rate "rms_mix_rate" --protect "protect" --f0autotune "f0autotune" --f0method "f0method" --output_tts_path "output_tts_path" --output_rvc_path "output_rvc_path" --pth_path "pth_path" --index_path "index_path"--split_audio "split_audio" --clean_audio "clean_audio" --clean_strength "clean_strength" --export_format "export_format"
 ```
 
 | Parameter Name    | Required | Default | Valid Options                                                                                                                           | Description                                                                                                                                                                                                                                                                                                           |
@@ -137,14 +137,14 @@ python main.py tts_infer --tts_text "tts_text" --tts_voice "tts_voice" --f0up_ke
 | `embedder_model`  | No       | hubert  | hubert or contentvec                                                                                                                    | Embedder model to use for the audio conversion. The default model is hubert, which is recommended for most cases.                                                                                                                                                                                                     |
 | `upscale_audio`   | No       | False   | True or False                                                                                                                           | Upscale the audio to 48kHz for better results.                                                                                                                                                                                                                                                                        |
 
-_Refer to `python main.py tts_infer -h` for additional help._
+_Refer to `python rvc.py tts_infer -h` for additional help._
 
 ### Training
 
 #### Preprocess Dataset
 
 ```bash
-python main.py preprocess --model_name "model_name" --dataset_path "dataset_path" --sampling_rate "sampling_rate"
+python rvc.py preprocess --model_name "model_name" --dataset_path "dataset_path" --sampling_rate "sampling_rate"
 ```
 
 | Parameter Name  | Required | Default | Valid Options                                                             | Description                     |
@@ -153,12 +153,12 @@ python main.py preprocess --model_name "model_name" --dataset_path "dataset_path
 | `dataset_path`  | Yes      | None    | Full path to the dataset folder (The folder may only contain audio files) | Full path to the dataset folder |
 | `sampling_rate` | Yes      | None    | 32000, 40000, or 48000                                                    | Sampling rate of the audio data |
 
-_Refer to `python main.py preprocess -h` for additional help._
+_Refer to `python rvc.py preprocess -h` for additional help._
 
 #### Extract Features
 
 ```bash
-python main.py extract --model_name "model_name" --rvc_version "rvc_version" --f0method "f0method" --hop_length "hop_length" --sampling_rate "sampling_rate"
+python rvc.py extract --model_name "model_name" --rvc_version "rvc_version" --f0method "f0method" --hop_length "hop_length" --sampling_rate "sampling_rate"
 ```
 
 | Parameter Name   | Required | Default | Valid Options                              | Description                                                                                                                                                                            |
@@ -173,7 +173,7 @@ python main.py extract --model_name "model_name" --rvc_version "rvc_version" --f
 #### Start Training
 
 ```bash
-python main.py train --model_name "model_name" --rvc_version "rvc_version" --save_every_epoch "save_every_epoch" --save_only_latest "save_only_latest" --save_every_weights "save_every_weights" --total_epoch "total_epoch" --sampling_rate "sampling_rate" --batch_size "batch_size" --gpu "gpu" --pitch_guidance "pitch_guidance" --overtraining_detector "overtraining_detector" --overtraining_threshold "overtraining_threshold"  --sync_graph "sync_graph" --pretrained "pretrained" --custom_pretrained "custom_pretrained" [--g_pretrained "g_pretrained"] [--d_pretrained "d_pretrained"]
+python rvc.py train --model_name "model_name" --rvc_version "rvc_version" --save_every_epoch "save_every_epoch" --save_only_latest "save_only_latest" --save_every_weights "save_every_weights" --total_epoch "total_epoch" --sampling_rate "sampling_rate" --batch_size "batch_size" --gpu "gpu" --pitch_guidance "pitch_guidance" --overtraining_detector "overtraining_detector" --overtraining_threshold "overtraining_threshold"  --sync_graph "sync_graph" --pretrained "pretrained" --custom_pretrained "custom_pretrained" [--g_pretrained "g_pretrained"] [--d_pretrained "d_pretrained"]
 ```
 
 | Parameter Name           | Required | Default | Valid Options                                                           | Description                                                                                                                                                                                                                                                     |
@@ -196,12 +196,12 @@ python main.py train --model_name "model_name" --rvc_version "rvc_version" --sav
 | `d_pretrained`           | No       | None    | Full path to pretrained file D, only if you have used custom_pretrained | Full path to pretrained file D                                                                                                                                                                                                                                  |
 | `sync_graph`             | No       | False   | True or False                                                           | Synchronize the graph of the tensorbaord. Only enable this setting if you are training a new model.                                                                                                                                                             |
 
-_Refer to `python main.py train -h` for additional help._
+_Refer to `python rvc.py train -h` for additional help._
 
 #### Generate Index File
 
 ```bash
-python main.py index --model_name "model_name" --rvc_version "rvc_version"
+python rvc.py index --model_name "model_name" --rvc_version "rvc_version"
 ```
 
 | Parameter Name | Required | Default | Valid Options     | Description          |
@@ -209,7 +209,7 @@ python main.py index --model_name "model_name" --rvc_version "rvc_version"
 | `model_name`   | Yes      | None    | Name of the model | Name of the model    |
 | `rvc_version`  | Yes      | None    | v1 or v2          | Version of the model |
 
-_Refer to `python main.py index -h` for additional help._
+_Refer to `python rvc.py index -h` for additional help._
 
 ### UVR
 
@@ -291,7 +291,7 @@ python uvr.py [audio_file] [options]
 #### Model Extract
 
 ```bash
-python main.py model_extract --pth_path "pth_path" --model_name "model_name" --sampling_rate "sampling_rate" --pitch_guidance "pitch_guidance" --rvc_version "rvc_version" --epoch "epoch" --step "step"
+python rvc.py model_extract --pth_path "pth_path" --model_name "model_name" --sampling_rate "sampling_rate" --pitch_guidance "pitch_guidance" --rvc_version "rvc_version" --epoch "epoch" --step "step"
 ```
 
 | Parameter Name   | Required | Default | Valid Options          | Description                                                                                                                                                                                                                                                     |
@@ -307,7 +307,7 @@ python main.py model_extract --pth_path "pth_path" --model_name "model_name" --s
 #### Model Information
 
 ```bash
-python main.py model_information --pth_path "pth_path"
+python rvc.py model_information --pth_path "pth_path"
 ```
 
 | Parameter Name | Required | Default | Valid Options        | Description               |
@@ -317,7 +317,7 @@ python main.py model_information --pth_path "pth_path"
 #### Model Blender
 
 ```bash
-python main.py model_blender --model_name "model_name" --pth_path_1 "pth_path_1" --pth_path_2 "pth_path_2" --ratio "ratio"
+python rvc.py model_blender --model_name "model_name" --pth_path_1 "pth_path_1" --pth_path_2 "pth_path_2" --ratio "ratio"
 ```
 
 | Parameter Name | Required | Default | Valid Options               | Description                      |
@@ -330,7 +330,7 @@ python main.py model_blender --model_name "model_name" --pth_path_1 "pth_path_1"
 #### Launch TensorBoard
 
 ```bash
-python main.py tensorboard
+python rvc.py tensorboard
 ```
 
 #### Download Models
@@ -338,31 +338,31 @@ python main.py tensorboard
 Run the download script with the following command:
 
 ```bash
-python main.py download --model_link "model_link"
+python rvc.py download --model_link "model_link"
 ```
 
 | Parameter Name | Required | Default | Valid Options                                                               | Description       |
 | -------------- | -------- | ------- | --------------------------------------------------------------------------- | ----------------- |
 | `model_link`   | Yes      | None    | Link of the model (enclosed in double quotes; Google Drive or Hugging Face) | Link of the model |
 
-_Refer to `python main.py download -h` for additional help._
+_Refer to `python rvc.py download -h` for additional help._
 
 #### Audio Analyzer
 
 ```bash
-python main.py audio_analyzer --input_path "input_path"
+python rvc.py audio_analyzer --input_path "input_path"
 ```
 
 | Parameter Name | Required | Default | Valid Options                     | Description                       |
 | -------------- | -------- | ------- | --------------------------------- | --------------------------------- |
 | `input_path`   | Yes      | None    | Full path to the input audio file | Full path to the input audio file |
 
-_Refer to `python main.py audio_analyzer -h` for additional help._
+_Refer to `python rvc.py audio_analyzer -h` for additional help._
 
 #### Prerequisites Download
 
 ```bash
-python main.py prerequisites --pretraineds_v1 "pretraineds_v1" --pretraineds_v2 "--pretraineds_v2" --models "models" --exe "exe"
+python rvc.py prerequisites --pretraineds_v1 "pretraineds_v1" --pretraineds_v2 "--pretraineds_v2" --models "models" --exe "exe"
 ```
 
 | Parameter Name   | Required | Default | Valid Options | Description                                                                                   |
@@ -375,7 +375,7 @@ python main.py prerequisites --pretraineds_v1 "pretraineds_v1" --pretraineds_v2 
 ### API
 
 ```bash
-python main.py api --host "host" --port "port"
+python rvc.py api --host "host" --port "port"
 ```
 
 | Parameter Name | Required | Default   | Valid Options         | Description           |

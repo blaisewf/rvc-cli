@@ -17,70 +17,70 @@ def execute_command(command):
 # Infer
 @app.post("/infer")
 async def infer(request: Request):
-    command = ["python", "main.py", "infer"] + await request.json()
+    command = ["python", "rvc.py", "infer"] + await request.json()
     return execute_command(command)
 
 
 # Batch Infer
 @app.post("/batch_infer")
 async def batch_infer(request: Request):
-    command = ["python", "main.py", "batch_infer"] + await request.json()
+    command = ["python", "rvc.py", "batch_infer"] + await request.json()
     return execute_command(command)
 
 
 # TTS
 @app.post("/tts")
 async def tts(request: Request):
-    command = ["python", "main.py", "tts"] + await request.json()
+    command = ["python", "rvc.py", "tts"] + await request.json()
     return execute_command(command)
 
 
 # Preprocess
 @app.post("/preprocess")
 async def preprocess(request: Request):
-    command = ["python", "main.py", "preprocess"] + await request.json()
+    command = ["python", "rvc.py", "preprocess"] + await request.json()
     return execute_command(command)
 
 
 # Extract
 @app.post("/extract")
 async def extract(request: Request):
-    command = ["python", "main.py", "extract"] + await request.json()
+    command = ["python", "rvc.py", "extract"] + await request.json()
     return execute_command(command)
 
 
 # Train
 @app.post("/train")
 async def train(request: Request):
-    command = ["python", "main.py", "train"] + await request.json()
+    command = ["python", "rvc.py", "train"] + await request.json()
     return execute_command(command)
 
 
 # Index
 @app.post("/index")
 async def index(request: Request):
-    command = ["python", "main.py", "index"] + await request.json()
+    command = ["python", "rvc.py", "index"] + await request.json()
     return execute_command(command)
 
 
 # Model Information
 @app.post("/model_information")
 async def model_information(request: Request):
-    command = ["python", "main.py", "model_information"] + await request.json()
+    command = ["python", "rvc.py", "model_information"] + await request.json()
     return execute_command(command)
 
 
 # Model Fusion
 @app.post("/model_fusion")
 async def model_fusion(request: Request):
-    command = ["python", "main.py", "model_fusion"] + await request.json()
+    command = ["python", "rvc.py", "model_fusion"] + await request.json()
     return execute_command(command)
 
 
 # Download
 @app.post("/download")
 async def download(request: Request):
-    command = ["python", "main.py", "download"] + await request.json()
+    command = ["python", "rvc.py", "download"] + await request.json()
     return execute_command(command)
 
 
