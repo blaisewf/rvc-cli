@@ -406,11 +406,8 @@ The RVC CLI builds upon the foundations of the following projects:
 
 - [ContentVec](https://github.com/auspicious3000/contentvec/) by auspicious3000
 - [HIFIGAN](https://github.com/jik876/hifi-gan) by jik876
-- [Gradio](https://github.com/gradio-app/gradio) by gradio-app
-- [FFmpeg](https://github.com/FFmpeg/FFmpeg) by FFmpeg
 - [audio-slicer](https://github.com/openvpi/audio-slicer) by openvpi
 - [python-audio-separator](https://github.com/karaokenerds/python-audio-separator) by karaokenerds
-- [ultimatevocalremovergui](https://github.com/Anjok07/ultimatevocalremovergui) by Anjok07
 - [RMVPE](https://github.com/Dream-High/RMVPE) by Dream-High
 - [FCPE](https://github.com/CNChTu/FCPE) by CNChTu
 - [VITS](https://github.com/jaywalnut310/vits) by jaywalnut310
@@ -418,5 +415,6 @@ The RVC CLI builds upon the foundations of the following projects:
 - [Harmonify](https://huggingface.co/Eempostor/Harmonify) by Eempostor
 - [Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) by RVC-Project
 - [Mangio-RVC-Fork](https://github.com/Mangio621/Mangio-RVC-Fork) by Mangio621
+- [anyf0](https://github.com/SoulMelody/anyf0) by SoulMelody
 
 We acknowledge and appreciate the contributions of the respective authors and communities involved in these projects.
