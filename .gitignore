@@ -13,14 +13,6 @@
 # Ignore Python bytecode files
 *.pyc
 
-# Ignore audio files
-*.wav
-*.flac
-*.mp3
-
-# Ignore generated logs
-logs/
-
 # Ignore environment and virtual environment directories
 env/
 venv/
