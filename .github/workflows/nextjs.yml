@@ -34,7 +34,12 @@ jobs:
       - name: Detect package manager
         id: detect-package-manager
         run: |
-          if [ -f "${{ github.workspace }}/docs/yarn.lock" ]; then
+          if [ -f "${{ github.workspace }}/docs/pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> $GITHUB_OUTPUT
+            echo "command=install" >> $GITHUB_OUTPUT
+            echo "runner=pnpm" >> $GITHUB_OUTPUT
+            exit 0
+          elif [ -f "${{ github.workspace }}/docs/yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
             echo "command=install" >> $GITHUB_OUTPUT
             echo "runner=yarn" >> $GITHUB_OUTPUT
@@ -47,7 +52,7 @@ jobs:
           else
             echo "Unable to determine package manager"
             exit 1
-          fi
+        shell: bash
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -67,14 +72,16 @@ jobs:
           path: |
             .next/cache
           # Generate a new cache whenever packages or source files change.
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('docs/package-lock.json', 'docs/yarn.lock') }}-${{ hashFiles('docs/**/*.[jt]s', 'docs/**/*.[jt]sx') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('docs/pnpm-lock.yaml', 'docs/package-lock.json', 'docs/yarn.lock') }}-${{ hashFiles('docs/**/*.[jt]s', 'docs/**/*.[jt]sx') }}
           # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('docs/package-lock.json', 'docs/yarn.lock') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('docs/pnpm-lock.yaml', 'docs/package-lock.json', 'docs/yarn.lock') }}-
       - name: Install dependencies
-        run: cd docs && ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        run: cd docs && ${{ steps.detect-package-manager.outputs.runner }} ${{ steps.detect-package-manager.outputs.command }}
+        shell: bash
       - name: Build with Next.js
         run: cd docs && ${{ steps.detect-package-manager.outputs.runner }} next build
+        shell: bash
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

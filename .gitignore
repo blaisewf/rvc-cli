@@ -11,7 +11,6 @@ logs
 *.index
 *.bin
 *.ckpt
-*.yaml
 *.txt
 
 # Ignore Python bytecode files
@@ -23,6 +22,8 @@ venv/
 
 # Ignore cached files
 .cache/
+docs/.next
+node_modules
 
 # Ignore specific project directories
 /tracks/
