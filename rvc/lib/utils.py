@@ -14,12 +14,12 @@ now_dir = os.getcwd()
 sys.path.append(now_dir)
 
 
-def load_audio(file, sampling_rate):
+def load_audio(file, sample_rate):
     try:
         file = file.strip(" ").strip('"').strip("\n").strip('"').strip(" ")
         out, _ = (
             ffmpeg.input(file, threads=0)
-            .output("-", format="f32le", acodec="pcm_f32le", ac=1, ar=sampling_rate)
+            .output("-", format="f32le", acodec="pcm_f32le", ac=1, ar=sample_rate)
             .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
         )
     except Exception as error:
@@ -39,7 +39,6 @@ def format_title(title):
 
 
 def load_embedding(embedder_model, custom_embedder=None):
-
     embedder_root = os.path.join(now_dir, "rvc", "models", "embedders")
     embedding_list = {
         "contentvec": os.path.join(embedder_root, "contentvec_base.pt"),

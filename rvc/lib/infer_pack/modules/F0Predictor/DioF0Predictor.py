@@ -4,11 +4,11 @@ import numpy as np
 
 
 class DioF0Predictor(F0Predictor):
-    def __init__(self, hop_length=512, f0_min=50, f0_max=1100, sampling_rate=44100):
+    def __init__(self, hop_length=512, f0_min=50, f0_max=1100, sample_rate=44100):
         self.hop_length = hop_length
         self.f0_min = f0_min
         self.f0_max = f0_max
-        self.sampling_rate = sampling_rate
+        self.sample_rate = sample_rate
 
     def interpolate_f0(self, f0):
         data = np.reshape(f0, (f0.size, 1))
@@ -60,12 +60,12 @@ class DioF0Predictor(F0Predictor):
             p_len = wav.shape[0] // self.hop_length
         f0, t = pyworld.dio(
             wav.astype(np.double),
-            fs=self.sampling_rate,
+            fs=self.sample_rate,
             f0_floor=self.f0_min,
             f0_ceil=self.f0_max,
-            frame_period=1000 * self.hop_length / self.sampling_rate,
+            frame_period=1000 * self.hop_length / self.sample_rate,
         )
-        f0 = pyworld.stonemask(wav.astype(np.double), f0, t, self.sampling_rate)
+        f0 = pyworld.stonemask(wav.astype(np.double), f0, t, self.sample_rate)
         for index, pitch in enumerate(f0):
             f0[index] = round(pitch, 1)
         return self.interpolate_f0(self.resize_f0(f0, p_len))[0]
@@ -75,12 +75,12 @@ class DioF0Predictor(F0Predictor):
             p_len = wav.shape[0] // self.hop_length
         f0, t = pyworld.dio(
             wav.astype(np.double),
-            fs=self.sampling_rate,
+            fs=self.sample_rate,
             f0_floor=self.f0_min,
             f0_ceil=self.f0_max,
-            frame_period=1000 * self.hop_length / self.sampling_rate,
+            frame_period=1000 * self.hop_length / self.sample_rate,
         )
-        f0 = pyworld.stonemask(wav.astype(np.double), f0, t, self.sampling_rate)
+        f0 = pyworld.stonemask(wav.astype(np.double), f0, t, self.sample_rate)
         for index, pitch in enumerate(f0):
             f0[index] = round(pitch, 1)
         return self.interpolate_f0(self.resize_f0(f0, p_len))

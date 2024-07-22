@@ -4,11 +4,11 @@ import numpy as np
 
 
 class PMF0Predictor(F0Predictor):
-    def __init__(self, hop_length=512, f0_min=50, f0_max=1100, sampling_rate=44100):
+    def __init__(self, hop_length=512, f0_min=50, f0_max=1100, sample_rate=44100):
         self.hop_length = hop_length
         self.f0_min = f0_min
         self.f0_max = f0_max
-        self.sampling_rate = sampling_rate
+        self.sample_rate = sample_rate
 
     def interpolate_f0(self, f0):
         data = np.reshape(f0, (f0.size, 1))
@@ -50,9 +50,9 @@ class PMF0Predictor(F0Predictor):
             p_len = x.shape[0] // self.hop_length
         else:
             assert abs(p_len - x.shape[0] // self.hop_length) < 4, "pad length error"
-        time_step = self.hop_length / self.sampling_rate * 1000
+        time_step = self.hop_length / self.sample_rate * 1000
         f0 = (
-            parselmouth.Sound(x, self.sampling_rate)
+            parselmouth.Sound(x, self.sample_rate)
             .to_pitch_ac(
                 time_step=time_step / 1000,
                 voicing_threshold=0.6,
@@ -74,9 +74,9 @@ class PMF0Predictor(F0Predictor):
             p_len = x.shape[0] // self.hop_length
         else:
             assert abs(p_len - x.shape[0] // self.hop_length) < 4, "pad length error"
-        time_step = self.hop_length / self.sampling_rate * 1000
+        time_step = self.hop_length / self.sample_rate * 1000
         f0 = (
-            parselmouth.Sound(x, self.sampling_rate)
+            parselmouth.Sound(x, self.sample_rate)
             .to_pitch_ac(
                 time_step=time_step / 1000,
                 voicing_threshold=0.6,

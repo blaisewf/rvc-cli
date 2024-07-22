@@ -1,3 +1,9 @@
+#temp
+docs 
+
+# Ignore logs folder
+logs
+
 # Ignore compiled executables
 *.exe
 
@@ -9,6 +15,7 @@
 *.bin
 *.ckpt
 *.yaml
+*.txt
 
 # Ignore Python bytecode files
 *.pyc

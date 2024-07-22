@@ -125,12 +125,13 @@ def main():
         print("GPU not detected, reverting to CPU (not recommended)")
         n_gpus = 1
 
-    if hps.sync_graph == 1:
+    print(f"Value of sg {hps.sync_graph}")
+    if hps.sync_graph == True:
         print(
             "Sync graph is now activated! With sync graph enabled, the model undergoes a single epoch of training. Once the graphs are synchronized, training proceeds for the previously specified number of epochs."
         )
         hps.custom_total_epoch = 1
-        hps.custom_save_every_weights = "1"
+        hps.custom_save_every_weights = True
         start()
 
         # Synchronize graphs by modifying config files
@@ -237,10 +238,12 @@ def run(
         torch.cuda.set_device(rank)
 
     # Create datasets and dataloaders
-    if hps.if_f0 == 1:
+    if hps.pitch_guidance == True:
         train_dataset = TextAudioLoaderMultiNSFsid(hps.data)
-    else:
+    elif hps.pitch_guidance == False:
         train_dataset = TextAudioLoader(hps.data)
+    else:
+        raise ValueError(f"Unexpected value for hps.pitch_guidance: {hps.pitch_guidance}")
 
     train_sampler = DistributedBucketSampler(
         train_dataset,
@@ -251,10 +254,11 @@ def run(
         shuffle=True,
     )
 
-    if hps.if_f0 == 1:
+    if hps.pitch_guidance == True:
         collate_fn = TextAudioCollateMultiNSFsid()
-    else:
+    elif hps.pitch_guidance == False:
         collate_fn = TextAudioCollate()
+    
     train_loader = DataLoader(
         train_dataset,
         num_workers=4,
@@ -271,7 +275,7 @@ def run(
         hps.data.filter_length // 2 + 1,
         hps.train.segment_size // hps.data.hop_length,
         **hps.model,
-        use_f0=hps.if_f0 == 1,
+        use_f0=hps.pitch_guidance == True,
         is_half=hps.train.fp16_run,
         sr=hps.sample_rate,
     )
@@ -422,7 +426,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         data_iterator = cache
         if cache == []:
             for batch_idx, info in enumerate(train_loader):
-                if hps.if_f0 == 1:
+                if hps.pitch_guidance == True:
                     (
                         phone,
                         phone_lengths,
@@ -434,7 +438,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                         wave_lengths,
                         sid,
                     ) = info
-                else:
+                elif hps.pitch_guidance == False:
                     (
                         phone,
                         phone_lengths,
@@ -447,7 +451,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                 if torch.cuda.is_available():
                     phone = phone.cuda(rank, non_blocking=True)
                     phone_lengths = phone_lengths.cuda(rank, non_blocking=True)
-                    if hps.if_f0 == 1:
+                    if hps.pitch_guidance == True:
                         pitch = pitch.cuda(rank, non_blocking=True)
                         pitchf = pitchf.cuda(rank, non_blocking=True)
                     sid = sid.cuda(rank, non_blocking=True)
@@ -455,7 +459,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     spec_lengths = spec_lengths.cuda(rank, non_blocking=True)
                     wave = wave.cuda(rank, non_blocking=True)
                     wave_lengths = wave_lengths.cuda(rank, non_blocking=True)
-                if hps.if_f0 == 1:
+                if hps.pitch_guidance == True:
                     cache.append(
                         (
                             batch_idx,
@@ -472,7 +476,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                             ),
                         )
                     )
-                else:
+                elif hps.pitch_guidance == False:
                     cache.append(
                         (
                             batch_idx,
@@ -495,7 +499,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
     epoch_recorder = EpochRecorder()
     with tqdm(total=len(train_loader), leave=False) as pbar:
         for batch_idx, info in data_iterator:
-            if hps.if_f0 == 1:
+            if hps.pitch_guidance == True:
                 (
                     phone,
                     phone_lengths,
@@ -507,12 +511,12 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     wave_lengths,
                     sid,
                 ) = info
-            else:
+            elif hps.pitch_guidance == False:
                 phone, phone_lengths, spec, spec_lengths, wave, wave_lengths, sid = info
             if (hps.if_cache_data_in_gpu == False) and torch.cuda.is_available():
                 phone = phone.cuda(rank, non_blocking=True)
                 phone_lengths = phone_lengths.cuda(rank, non_blocking=True)
-                if hps.if_f0 == 1:
+                if hps.pitch_guidance == True:
                     pitch = pitch.cuda(rank, non_blocking=True)
                     pitchf = pitchf.cuda(rank, non_blocking=True)
                 sid = sid.cuda(rank, non_blocking=True)
@@ -522,7 +526,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
             # Forward pass
             with autocast(enabled=hps.train.fp16_run):
-                if hps.if_f0 == 1:
+                if hps.pitch_guidance == True:
                     (
                         y_hat,
                         ids_slice,
@@ -532,7 +536,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     ) = net_g(
                         phone, phone_lengths, pitch, pitchf, spec, spec_lengths, sid
                     )
-                else:
+                elif hps.pitch_guidance == False:
                     (
                         y_hat,
                         ids_slice,
@@ -544,7 +548,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     spec,
                     hps.data.filter_length,
                     hps.data.n_mel_channels,
-                    hps.data.sampling_rate,
+                    hps.data.sample_rate,
                     hps.data.mel_fmin,
                     hps.data.mel_fmax,
                 )
@@ -556,7 +560,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                         y_hat.float().squeeze(1),
                         hps.data.filter_length,
                         hps.data.n_mel_channels,
-                        hps.data.sampling_rate,
+                        hps.data.sample_rate,
                         hps.data.hop_length,
                         hps.data.win_length,
                         hps.data.mel_fmin,
@@ -669,9 +673,9 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             pbar.update(1)
 
     # Save checkpoint
-    if epoch % hps.save_every_epoch == 0 and rank == 0:
+    if epoch % hps.save_every_epoch == False and rank == 0:
         checkpoint_suffix = "{}.pth".format(
-            global_step if hps.if_latest == 0 else 2333333
+            global_step if hps.if_latest == False else 2333333
         )
         save_checkpoint(
             net_g,
@@ -688,7 +692,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             os.path.join(hps.model_dir, "D_" + checkpoint_suffix),
         )
 
-        if rank == 0 and hps.custom_save_every_weights == "1":
+        if rank == 0 and hps.custom_save_every_weights == True:
             if hasattr(net_g, "module"):
                 ckpt = net_g.module.state_dict()
             else:
@@ -696,7 +700,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             extract_model(
                 ckpt,
                 hps.sample_rate,
-                hps.if_f0 == 1,
+                hps.pitch_guidance == True,
                 hps.name,
                 os.path.join(
                     hps.model_dir, "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
@@ -708,7 +712,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             )
 
     # Overtraining detection and best model saving
-    if hps.overtraining_detector == 1:
+    if hps.overtraining_detector == True:
         if epoch >= (lowest_value["epoch"] + hps.overtraining_threshold):
             print(
                 "Stopping training due to possible overtraining. Lowest generator loss: {} at epoch {}, step {}".format(
@@ -737,7 +741,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             extract_model(
                 ckpt,
                 hps.sample_rate,
-                hps.if_f0 == 1,
+                hps.pitch_guidance == True,
                 hps.name,
                 os.path.join(
                     hps.model_dir,
@@ -756,11 +760,11 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             lowest_value_rounded, 3
         )  # Round to 3 decimal place
 
-        if epoch > 1 and hps.overtraining_detector == 1:
+        if epoch > 1 and hps.overtraining_detector == True:
             print(
                 f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowest_value={lowest_value_rounded} (epoch {lowest_value['epoch']} and step {lowest_value['step']}) | Number of epochs remaining for overtraining: {lowest_value['epoch'] + hps.overtraining_threshold - epoch}"
             )
-        elif epoch > 1 and hps.overtraining_detector == 0:
+        elif epoch > 1 and hps.overtraining_detector == False:
             print(
                 f"{hps.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowest_value={lowest_value_rounded} (epoch {lowest_value['epoch']} and step {lowest_value['step']})"
             )
@@ -794,7 +798,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         extract_model(
             ckpt,
             hps.sample_rate,
-            hps.if_f0 == 1,
+            hps.pitch_guidance == True,
             hps.name,
             os.path.join(
                 hps.model_dir, "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
