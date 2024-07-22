@@ -1,4 +1,4 @@
-## RVC_CLI: 🚀 RVC + UVR = A perfect set of tools for voice cloning, easily and free!
+## 🚀 RVC + UVR = A perfect set of tools for voice cloning, easily and free!
 
 [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/iahispano/applio/blob/master/assets/Applio_NoUI.ipynb)
 
@@ -26,7 +26,7 @@ python rvc_cli.py -h
 python uvr_cli.py -h
 ```
 
-This command provides a clear overview of the available modes and their corresponding parameters, facilitating effective utilization of the RVC CLI, but if you need more information, you can check the [documentation](https://blaisewf.github.io/RVC_CLI/).
+This command provides a clear overview of the available modes and their corresponding parameters, facilitating effective utilization of the RVC CLI, but if you need more information, you can check the [documentation](https://rvc-cli.pages.dev/).
 
 ### References
 
