@@ -1,0 +1,12 @@
+{
+  "index": "Introduction",
+  "installation": "Installation",
+  "rvc": "RVC",
+  "uvr": "UVR",
+  "contact": {
+    "title": "Contact ↗",
+    "type": "page",
+    "href": "https://twitter.com/blaisewf",
+    "newWindow": true
+  }
+}
