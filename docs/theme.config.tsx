@@ -51,8 +51,8 @@ const config: DocsThemeConfig = {
         content="🚀 RVC + UVR = A perfect set of tools for voice cloning, easily and free!"
       />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site:domain" content="https://rvc_cli.github.io" />
-      <meta name="twitter:url" content="https://rvc_cli.github.io" />
+      <meta name="twitter:site:domain" content="https://blaisewf.github.io/RVC_CLI/" />
+      <meta name="twitter:url" content="https://blaisewf.github.io/RVC_CLI/" />
       <meta
         name="og:title"
         content={frontMatter.title || 'RVC CLI'}
