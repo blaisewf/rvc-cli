@@ -1,5 +1,6 @@
 import os, sys
-import ffmpeg
+import librosa
+import soundfile as sf
 import numpy as np
 import re
 import unicodedata
@@ -17,15 +18,15 @@ sys.path.append(now_dir)
 def load_audio(file, sample_rate):
     try:
         file = file.strip(" ").strip('"').strip("\n").strip('"').strip(" ")
-        out, _ = (
-            ffmpeg.input(file, threads=0)
-            .output("-", format="f32le", acodec="pcm_f32le", ac=1, ar=sample_rate)
-            .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
-        )
+        audio, sr = sf.read(file)
+        if len(audio.shape) > 1:
+            audio = librosa.to_mono(audio.T)
+        if sr != sample_rate:
+            audio = librosa.resample(audio, orig_sr=sr, target_sr=sample_rate)
     except Exception as error:
         raise RuntimeError(f"Failed to load audio: {error}")
 
-    return np.frombuffer(out, np.float32).flatten()
+    return audio.flatten()
 
 
 def format_title(title):
