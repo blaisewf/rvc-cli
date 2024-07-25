@@ -1302,12 +1302,12 @@ def main():
     try:
         if args.mode == "infer":
             run_infer_script(
-                str(args.f0_up_key),
-                str(args.filter_radius),
-                str(args.index_rate),
-                str(args.rms_mix_rate),
-                str(args.protect),
-                str(args.hop_length),
+                int(args.f0_up_key),
+                int(args.filter_radius),
+                float(args.index_rate),
+                float(args.rms_mix_rate),
+                float(args.protect),
+                int(args.hop_length),
                 str(args.f0_method),
                 str(args.input_path),
                 str(args.output_path),
@@ -1325,12 +1325,12 @@ def main():
             )
         elif args.mode == "batch_infer":
             run_batch_infer_script(
-                str(args.f0_up_key),
-                str(args.filter_radius),
-                str(args.index_rate),
-                str(args.rms_mix_rate),
-                str(args.protect),
-                str(args.hop_length),
+                int(args.f0_up_key),
+                int(args.filter_radius),
+                float(args.index_rate),
+                float(args.rms_mix_rate),
+                float(args.protect),
+                int(args.hop_length),
                 str(args.f0_method),
                 str(args.input_folder),
                 str(args.output_folder),
@@ -1350,13 +1350,13 @@ def main():
             run_tts_script(
                 str(args.tts_text),
                 str(args.tts_voice),
-                str(args.tts_rate),
-                str(args.f0_up_key),
-                str(args.filter_radius),
-                str(args.index_rate),
-                str(args.rms_mix_rate),
-                str(args.protect),
-                str(args.hop_length),
+                int(args.tts_rate),
+                int(args.f0_up_key),
+                int(args.filter_radius),
+                float(args.index_rate),
+                float(args.rms_mix_rate),
+                float(args.protect),
+                int(args.hop_length),
                 str(args.f0_method),
                 str(args.output_tts_path),
                 str(args.output_rvc_path),
@@ -1376,8 +1376,8 @@ def main():
             run_preprocess_script(
                 str(args.model_name),
                 str(args.dataset_path),
-                str(args.sampling_rate),
-                str(args.cpu_cores),
+                int(args.sampling_rate),
+                int(args.cpu_cores),
             )
         elif args.mode == "extract":
             run_extract_script(
@@ -1385,9 +1385,9 @@ def main():
                 str(args.rvc_version),
                 str(args.f0_method),
                 str(args.pitch_guidance),
-                str(args.hop_length),
-                str(args.cpu_cores),
-                str(args.sampling_rate),
+                int(args.hop_length),
+                int(args.cpu_cores),
+                int(args.sampling_rate),
                 str(args.embedder_model),
                 str(args.embedder_model_custom),
             )
@@ -1398,13 +1398,13 @@ def main():
                 str(args.save_every_epoch),
                 str(args.save_only_latest),
                 str(args.save_every_weights),
-                str(args.total_epoch),
-                str(args.sampling_rate),
-                str(args.batch_size),
-                str(args.gpu),
+                int(args.total_epoch),
+                int(args.sampling_rate),
+                int(args.batch_size),
+                int(args.gpu),
                 str(args.pitch_guidance),
                 str(args.overtraining_detector),
-                str(args.overtraining_threshold),
+                int(args.overtraining_threshold),
                 str(args.pretrained),
                 str(args.custom_pretrained),
                 str(args.sync_graph),
@@ -1421,11 +1421,11 @@ def main():
             run_model_extract_script(
                 str(args.pth_path),
                 str(args.model_name),
-                str(args.sampling_rate),
+                int(args.sampling_rate),
                 str(args.pitch_guidance),
                 str(args.rvc_version),
-                str(args.epoch),
-                str(args.step),
+                int(args.epoch),
+                int(args.step),
             )
         elif args.mode == "model_information":
             run_model_information_script(
@@ -1436,7 +1436,7 @@ def main():
                 str(args.model_name),
                 str(args.pth_path_1),
                 str(args.pth_path_2),
-                str(args.ratio),
+                float(args.ratio),
             )
         elif args.mode == "tensorboard":
             run_tensorboard_script()
@@ -1458,7 +1458,7 @@ def main():
         elif args.mode == "api":
             run_api_script(
                 str(args.host),
-                str(args.port),
+                int(args.port),
             )
     except Exception as error:
         print(f"Error: {error}")
