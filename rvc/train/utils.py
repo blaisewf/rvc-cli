@@ -1,8 +1,6 @@
 import os
 import glob
-import json
 import torch
-import sys
 import numpy as np
 from scipy.io.wavfile import read
 from collections import OrderedDict
@@ -239,55 +237,6 @@ def load_filepaths_and_text(filename, split="|"):
     with open(filename, encoding="utf-8") as f:
         filepaths_and_text = [line.strip().split(split) for line in f]
     return filepaths_and_text
-
-
-def get_hparams():
-    """
-    Parses command line arguments and loads hyperparameters from a configuration file.
-    """
-    args = {}
-    for i in range(1, len(sys.argv), 2):
-        if i + 1 < len(sys.argv):
-            key = sys.argv[i].replace('--', '')
-            value = sys.argv[i + 1]
-            if value.isdigit():
-                args[key] = int(value)
-            elif value.lower() == 'true':
-                args[key] = True
-            elif value.lower() == 'false':
-                args[key] = False
-            else:
-                args[key] = value
-
-    experiment_dir = os.path.join("./logs", args["experiment_dir"])
-    config_save_path = os.path.join(experiment_dir, "config.json")
-    with open(config_save_path, "r") as f:
-        config = json.load(f)
-    
-    hparams = HParams(**config)
-    hparams.model_dir = hparams.experiment_dir = experiment_dir
-    hparams.save_every_epoch = args.get("save_every_epoch")
-    hparams.name = args.get("experiment_dir")
-    hparams.total_epoch = args.get("total_epoch")
-    hparams.pretrainG = args.get("pretrainG")
-    hparams.pretrainD = args.get("pretrainD")
-    hparams.version = args.get("version")
-    hparams.gpus = args.get("gpus")
-    hparams.batch_size = args.get("batch_size")
-    hparams.sample_rate = args.get("sample_rate")
-    hparams.pitch_guidance = args.get("pitch_guidance")
-    hparams.if_latest = args.get("if_latest")
-    hparams.save_every_weights = args.get("save_every_weights")
-    hparams.if_cache_data_in_gpu = args.get("if_cache_data_in_gpu")
-    hparams.data.training_files = f"{experiment_dir}/filelist.txt"
-    hparams.overtraining_detector = args.get("overtraining_detector")
-    hparams.overtraining_threshold = args.get("overtraining_threshold")
-    hparams.sync_graph = args.get("sync_graph")
-
-    print(hparams)
-    return hparams
-
-
 class HParams:
     """
     A class for storing and accessing hyperparameters.
