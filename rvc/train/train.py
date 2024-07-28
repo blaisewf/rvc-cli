@@ -55,31 +55,33 @@ from rvc.lib.algorithm.discriminators import MultiPeriodDiscriminatorV2
 from rvc.lib.algorithm.synthesizers import Synthesizer
 
 # Parse command line arguments
-experiment_dir = sys.argv[2]
+model_name = sys.argv[1]
+save_every_epoch = int(sys.argv[2])
+total_epoch = int(sys.argv[3])
+pretrainG = sys.argv[4]
+pretrainD = sys.argv[5]
+version = sys.argv[6]
+gpus = sys.argv[7]
+batch_size = int(sys.argv[8])
+sample_rate = int(sys.argv[9])
+pitch_guidance = bool(sys.argv[10])
+save_only_latest = bool(sys.argv[11])
+save_every_weights = bool(sys.argv[12])
+cache_data_in_gpu = bool(sys.argv[13])
+overtraining_detector = bool(sys.argv[14])
+overtraining_threshold = int(sys.argv[15])
+sync_graph = bool(sys.argv[16])
+
+experiment_dir = os.path.join("logs", model_name)
+training_files = os.path.join(experiment_dir, "filelist.txt")
 config_save_path = os.path.join(experiment_dir, "config.json")
+
 with open(config_save_path, "r") as f:
     config = json.load(f)
 config = HParams(**config)
-config.model_dir = experiment_dir
-config.save_every_epoch = int(sys.argv[4])
-config.total_epoch = int(sys.argv[6])
-config.pretrainG = sys.argv[8]
-config.pretrainD = sys.argv[10]
-config.version = sys.argv[12]
-config.gpus = sys.argv[14]
-config.batch_size = int(sys.argv[16])
-config.sample_rate = int(sys.argv[18])
-config.pitch_guidance = bool(sys.argv[20])
-config.if_latest = bool(sys.argv[22])
-config.save_every_weights = bool(sys.argv[24])
-config.if_cache_data_in_gpu = bool(sys.argv[26])
-config.data.training_files = f"{experiment_dir}/filelist.txt"
-config.overtraining_detector = bool(sys.argv[28])
-config.overtraining_threshold = int(sys.argv[30])
-config.sync_graph = bool(sys.argv[32])
-print(config)
-os.environ["CUDA_VISIBLE_DEVICES"] = config.gpus.replace("-", ",")
-n_gpus = len(config.gpus.split("-"))
+
+os.environ["CUDA_VISIBLE_DEVICES"] = gpus.replace("-", ",")
+n_gpus = len(gpus.split("-"))
 
 torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = False
@@ -130,7 +132,17 @@ def main():
             for i in range(n_gpus):
                 subproc = mp.Process(
                     target=run,
-                    args=(i, n_gpus, hps),
+                    args=(
+                        i,
+                        n_gpus,
+                        experiment_dir,
+                        pretrainG,
+                        pretrainD,
+                        pitch_guidance,
+                        custom_total_epoch,
+                        custom_save_every_weights,
+                        config,
+                    ),
                 )
                 children.append(subproc)
                 subproc.start()
@@ -147,29 +159,28 @@ def main():
         print("GPU not detected, reverting to CPU (not recommended)")
         n_gpus = 1
 
-    print(f"Value of sg {config.sync_graph}")
-    if config.sync_graph == True:
+    print(f"Value of sg {sync_graph}")
+    if sync_graph == True:
         print(
             "Sync graph is now activated! With sync graph enabled, the model undergoes a single epoch of training. Once the graphs are synchronized, training proceeds for the previously specified number of epochs."
         )
-        config.custom_total_epoch = 1
-        config.custom_save_every_weights = True
+        custom_total_epoch = 1
+        custom_save_every_weights = True
         start()
 
         # Synchronize graphs by modifying config files
-        logs_path = os.path.join(now_dir, "logs")
-        model_config_file = os.path.join(now_dir, "logs", config.name, "config.json")
+        model_config_file = os.path.join(experiment_dir, "config.json")
         rvc_config_file = os.path.join(
-            now_dir, "rvc", "configs", config.version, str(config.sample_rate) + ".json"
+            now_dir, "rvc", "configs", version, str(sample_rate) + ".json"
         )
         if not os.path.exists(rvc_config_file):
             rvc_config_file = os.path.join(
-                now_dir, "rvc", "configs", "v1", str(config.sample_rate) + ".json"
+                now_dir, "rvc", "configs", "v1", str(sample_rate) + ".json"
             )
 
-        pattern = rf"{os.path.basename(config.name)}_1e_(\d+)s\.pth"
+        pattern = rf"{os.path.basename(model_name)}_1e_(\d+)s\.pth"
 
-        for filename in os.listdir(logs_path):
+        for filename in os.listdir(experiment_dir):
             match = re.match(pattern, filename)
             if match:
                 steps = int(match.group(1))
@@ -200,7 +211,7 @@ def main():
 
         # Clean up unnecessary files
         for root, dirs, files in os.walk(
-            os.path.join(now_dir, "logs", config.name), topdown=False
+            os.path.join(now_dir, "logs", model_name), topdown=False
         ):
             for name in files:
                 file_path = os.path.join(root, name)
@@ -223,19 +234,25 @@ def main():
                     os.rmdir(folder_path)
 
         print("Successfully synchronized graphs!")
-        config.custom_total_epoch = config.total_epoch
-        config.custom_save_every_weights = config.save_every_weights
+        custom_total_epoch = total_epoch
+        custom_save_every_weights = save_every_weights
         start()
     else:
-        config.custom_total_epoch = config.total_epoch
-        config.custom_save_every_weights = config.save_every_weights
+        custom_total_epoch = total_epoch
+        custom_save_every_weights = save_every_weights
         start()
 
 
 def run(
     rank,
     n_gpus,
-    hps,
+    experiment_dir,
+    pretrainG,
+    pretrainD,
+    pitch_guidance,
+    custom_total_epoch,
+    custom_save_every_weights,
+    config,
 ):
     """
     Runs the training loop on a specific GPU.
@@ -243,12 +260,11 @@ def run(
     Args:
         rank (int): Rank of the current GPU.
         n_gpus (int): Total number of GPUs.
-        hps (Namespace): Hyperparameters.
     """
     global global_step
     if rank == 0:
-        writer = SummaryWriter(log_dir=config.model_dir)
-        writer_eval = SummaryWriter(log_dir=os.path.join(config.model_dir, "eval"))
+        writer = SummaryWriter(log_dir=experiment_dir)
+        writer_eval = SummaryWriter(log_dir=os.path.join(experiment_dir, "eval"))
 
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = str(randint(20000, 55555))
@@ -260,12 +276,12 @@ def run(
         torch.cuda.set_device(rank)
 
     # Create datasets and dataloaders
-    if config.pitch_guidance == True:
+    if pitch_guidance == True:
         train_dataset = TextAudioLoaderMultiNSFsid(config.data)
-    elif config.pitch_guidance == False:
+    elif pitch_guidance == False:
         train_dataset = TextAudioLoader(config.data)
     else:
-        raise ValueError(f"Unexpected value for config.pitch_guidance: {config.pitch_guidance}")
+        raise ValueError(f"Unexpected value for pitch_guidance: {pitch_guidance}")
 
     train_sampler = DistributedBucketSampler(
         train_dataset,
@@ -276,11 +292,11 @@ def run(
         shuffle=True,
     )
 
-    if config.pitch_guidance == True:
+    if pitch_guidance == True:
         collate_fn = TextAudioCollateMultiNSFsid()
-    elif config.pitch_guidance == False:
+    elif pitch_guidance == False:
         collate_fn = TextAudioCollate()
-    
+
     train_loader = DataLoader(
         train_dataset,
         num_workers=4,
@@ -334,40 +350,40 @@ def run(
     try:
         print("Starting training...")
         _, _, _, epoch_str = load_checkpoint(
-            latest_checkpoint_path(config.model_dir, "D_*.pth"), net_d, optim_d
+            latest_checkpoint_path(experiment_dir, "D_*.pth"), net_d, optim_d
         )
         _, _, _, epoch_str = load_checkpoint(
-            latest_checkpoint_path(config.model_dir, "G_*.pth"), net_g, optim_g
+            latest_checkpoint_path(experiment_dir, "G_*.pth"), net_g, optim_g
         )
         global_step = (epoch_str - 1) * len(train_loader)
 
     except:
         epoch_str = 1
         global_step = 0
-        if config.pretrainG != "":
+        if pretrainG != "":
             if rank == 0:
-                print(f"Loaded pretrained (G) '{config.pretrainG}'")
+                print(f"Loaded pretrained (G) '{pretrainG}'")
             if hasattr(net_g, "module"):
                 net_g.module.load_state_dict(
-                    torch.load(config.pretrainG, map_location="cpu")["model"]
+                    torch.load(pretrainG, map_location="cpu")["model"]
                 )
 
             else:
                 net_g.load_state_dict(
-                    torch.load(config.pretrainG, map_location="cpu")["model"]
+                    torch.load(pretrainG, map_location="cpu")["model"]
                 )
 
-        if config.pretrainD != "":
+        if pretrainD != "":
             if rank == 0:
-                print(f"Loaded pretrained (D) '{config.pretrainD}'")
+                print(f"Loaded pretrained (D) '{pretrainD}'")
             if hasattr(net_d, "module"):
                 net_d.module.load_state_dict(
-                    torch.load(config.pretrainD, map_location="cpu")["model"]
+                    torch.load(pretrainD, map_location="cpu")["model"]
                 )
 
             else:
                 net_d.load_state_dict(
-                    torch.load(config.pretrainD, map_location="cpu")["model"]
+                    torch.load(pretrainD, map_location="cpu")["model"]
                 )
 
     # Initialize schedulers and scaler
@@ -386,32 +402,48 @@ def run(
             train_and_evaluate(
                 rank,
                 epoch,
-                hps,
+                config,
                 [net_g, net_d],
                 [optim_g, optim_d],
                 scaler,
                 [train_loader, None],
                 [writer, writer_eval],
                 cache,
+                custom_save_every_weights,
+                custom_total_epoch,
             )
         else:
             train_and_evaluate(
                 rank,
                 epoch,
-                hps,
+                config,
                 [net_g, net_d],
                 [optim_g, optim_d],
                 scaler,
                 [train_loader, None],
                 None,
                 cache,
+                custom_save_every_weights,
+                custom_total_epoch,
             )
 
         scheduler_g.step()
         scheduler_d.step()
 
 
-def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
+def train_and_evaluate(
+    rank,
+    epoch,
+    hps,
+    nets,
+    optims,
+    scaler,
+    loaders,
+    writers,
+    cache,
+    custom_save_every_weights,
+    custom_total_epoch,
+):
     """
     Trains and evaluates the model for one epoch.
 
@@ -444,11 +476,11 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
     net_d.train()
 
     # Data caching
-    if config.if_cache_data_in_gpu == True:
+    if cache_data_in_gpu == True:
         data_iterator = cache
         if cache == []:
             for batch_idx, info in enumerate(train_loader):
-                if config.pitch_guidance == True:
+                if pitch_guidance == True:
                     (
                         phone,
                         phone_lengths,
@@ -460,7 +492,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                         wave_lengths,
                         sid,
                     ) = info
-                elif config.pitch_guidance == False:
+                elif pitch_guidance == False:
                     (
                         phone,
                         phone_lengths,
@@ -473,7 +505,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                 if torch.cuda.is_available():
                     phone = phone.cuda(rank, non_blocking=True)
                     phone_lengths = phone_lengths.cuda(rank, non_blocking=True)
-                    if config.pitch_guidance == True:
+                    if pitch_guidance == True:
                         pitch = pitch.cuda(rank, non_blocking=True)
                         pitchf = pitchf.cuda(rank, non_blocking=True)
                     sid = sid.cuda(rank, non_blocking=True)
@@ -481,7 +513,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     spec_lengths = spec_lengths.cuda(rank, non_blocking=True)
                     wave = wave.cuda(rank, non_blocking=True)
                     wave_lengths = wave_lengths.cuda(rank, non_blocking=True)
-                if config.pitch_guidance == True:
+                if pitch_guidance == True:
                     cache.append(
                         (
                             batch_idx,
@@ -498,7 +530,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                             ),
                         )
                     )
-                elif config.pitch_guidance == False:
+                elif pitch_guidance == False:
                     cache.append(
                         (
                             batch_idx,
@@ -521,7 +553,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
     epoch_recorder = EpochRecorder()
     with tqdm(total=len(train_loader), leave=False) as pbar:
         for batch_idx, info in data_iterator:
-            if config.pitch_guidance == True:
+            if pitch_guidance == True:
                 (
                     phone,
                     phone_lengths,
@@ -533,12 +565,12 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     wave_lengths,
                     sid,
                 ) = info
-            elif config.pitch_guidance == False:
+            elif pitch_guidance == False:
                 phone, phone_lengths, spec, spec_lengths, wave, wave_lengths, sid = info
-            if (config.if_cache_data_in_gpu == False) and torch.cuda.is_available():
+            if (cache_data_in_gpu == False) and torch.cuda.is_available():
                 phone = phone.cuda(rank, non_blocking=True)
                 phone_lengths = phone_lengths.cuda(rank, non_blocking=True)
-                if config.pitch_guidance == True:
+                if pitch_guidance == True:
                     pitch = pitch.cuda(rank, non_blocking=True)
                     pitchf = pitchf.cuda(rank, non_blocking=True)
                 sid = sid.cuda(rank, non_blocking=True)
@@ -548,7 +580,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
             # Forward pass
             with autocast(enabled=config.train.fp16_run):
-                if config.pitch_guidance == True:
+                if pitch_guidance == True:
                     (
                         y_hat,
                         ids_slice,
@@ -558,7 +590,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                     ) = net_g(
                         phone, phone_lengths, pitch, pitchf, spec, spec_lengths, sid
                     )
-                elif config.pitch_guidance == False:
+                elif pitch_guidance == False:
                     (
                         y_hat,
                         ids_slice,
@@ -612,7 +644,9 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
                 y_d_hat_r, y_d_hat_g, fmap_r, fmap_g = net_d(wave, y_hat)
                 with autocast(enabled=False):
                     loss_mel = F.l1_loss(y_mel, y_hat_mel) * config.train.c_mel
-                    loss_kl = kl_loss(z_p, logs_q, m_p, logs_p, z_mask) * config.train.c_kl
+                    loss_kl = (
+                        kl_loss(z_p, logs_q, m_p, logs_p, z_mask) * config.train.c_kl
+                    )
                     loss_fm = feature_loss(fmap_r, fmap_g)
                     loss_gen, losses_gen = generator_loss(y_d_hat_g)
                     loss_gen_all = loss_gen + loss_fm + loss_mel + loss_kl
@@ -695,47 +729,48 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             pbar.update(1)
 
     # Save checkpoint
-    if epoch % config.save_every_epoch == False and rank == 0:
+    if epoch % save_every_epoch == False and rank == 0:
         checkpoint_suffix = "{}.pth".format(
-            global_step if config.if_latest == False else 2333333
+            global_step if save_only_latest == False else 2333333
         )
         save_checkpoint(
             net_g,
             optim_g,
             config.train.learning_rate,
             epoch,
-            os.path.join(config.model_dir, "G_" + checkpoint_suffix),
+            os.path.join(experiment_dir, "G_" + checkpoint_suffix),
         )
         save_checkpoint(
             net_d,
             optim_d,
             config.train.learning_rate,
             epoch,
-            os.path.join(config.model_dir, "D_" + checkpoint_suffix),
+            os.path.join(experiment_dir, "D_" + checkpoint_suffix),
         )
 
-        if rank == 0 and config.custom_save_every_weights == True:
+        if rank == 0 and custom_save_every_weights == True:
             if hasattr(net_g, "module"):
                 ckpt = net_g.module.state_dict()
             else:
                 ckpt = net_g.state_dict()
             extract_model(
                 ckpt,
-                config.sample_rate,
-                config.pitch_guidance == True,
-                config.name,
+                sample_rate,
+                pitch_guidance == True,
+                model_name,
                 os.path.join(
-                    config.model_dir, "{}_{}e_{}s.pth".format(config.name, epoch, global_step)
+                    experiment_dir,
+                    "{}_{}e_{}s.pth".format(model_name, epoch, global_step),
                 ),
                 epoch,
                 global_step,
-                config.version,
+                version,
                 hps,
             )
 
     # Overtraining detection and best model saving
-    if config.overtraining_detector == True:
-        if epoch >= (lowest_value["epoch"] + config.overtraining_threshold):
+    if overtraining_detector == True:
+        if epoch >= (lowest_value["epoch"] + overtraining_threshold):
             print(
                 "Stopping training due to possible overtraining. Lowest generator loss: {} at epoch {}, step {}".format(
                     lowest_value["value"], lowest_value["epoch"], lowest_value["step"]
@@ -743,13 +778,13 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             )
             os._exit(2333333)
 
-        best_epoch = lowest_value["epoch"] + config.overtraining_threshold - epoch
+        best_epoch = lowest_value["epoch"] + overtraining_threshold - epoch
 
-        if best_epoch == config.overtraining_threshold:
+        if best_epoch == overtraining_threshold:
             old_model_files = glob.glob(
                 os.path.join(
-                    config.model_dir,
-                    "{}_{}e_{}s_best_epoch.pth".format(config.name, "*", "*"),
+                    experiment_dir,
+                    "{}_{}e_{}s_best_epoch.pth".format(model_name, "*", "*"),
                 )
             )
             for file in old_model_files:
@@ -762,16 +797,16 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
             extract_model(
                 ckpt,
-                config.sample_rate,
-                config.pitch_guidance == True,
-                config.name,
+                sample_rate,
+                pitch_guidance == True,
+                model_name,
                 os.path.join(
-                    config.model_dir,
-                    "{}_{}e_{}s_best_epoch.pth".format(config.name, epoch, global_step),
+                    experiment_dir,
+                    "{}_{}e_{}s_best_epoch.pth".format(model_name, epoch, global_step),
                 ),
                 epoch,
                 global_step,
-                config.version,
+                version,
                 hps,
             )
 
@@ -782,22 +817,22 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             lowest_value_rounded, 3
         )  # Round to 3 decimal place
 
-        if epoch > 1 and config.overtraining_detector == True:
+        if epoch > 1 and overtraining_detector == True:
             print(
-                f"{config.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowest_value={lowest_value_rounded} (epoch {lowest_value['epoch']} and step {lowest_value['step']}) | Number of epochs remaining for overtraining: {lowest_value['epoch'] + config.overtraining_threshold - epoch}"
+                f"{model_name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowest_value={lowest_value_rounded} (epoch {lowest_value['epoch']} and step {lowest_value['step']}) | Number of epochs remaining for overtraining: {lowest_value['epoch'] + config.overtraining_threshold - epoch}"
             )
-        elif epoch > 1 and config.overtraining_detector == False:
+        elif epoch > 1 and overtraining_detector == False:
             print(
-                f"{config.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowest_value={lowest_value_rounded} (epoch {lowest_value['epoch']} and step {lowest_value['step']})"
+                f"{model_name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowest_value={lowest_value_rounded} (epoch {lowest_value['epoch']} and step {lowest_value['step']})"
             )
         else:
             print(
-                f"{config.name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()}"
+                f"{model_name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()}"
             )
         last_loss_gen_all = loss_gen_all
 
     # Save the final model
-    if epoch >= config.custom_total_epoch and rank == 0:
+    if epoch >= custom_total_epoch and rank == 0:
         lowest_value_rounded = float(lowest_value["value"])  # Convert to float
         lowest_value_rounded = round(
             lowest_value_rounded, 3
@@ -819,15 +854,16 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
         extract_model(
             ckpt,
-            config.sample_rate,
-            config.pitch_guidance == True,
-            config.name,
+            sample_rate,
+            pitch_guidance == True,
+            model_name,
             os.path.join(
-                config.model_dir, "{}_{}e_{}s.pth".format(config.name, epoch, global_step)
+                experiment_dir,
+                "{}_{}e_{}s.pth".format(model_name, epoch, global_step),
             ),
             epoch,
             global_step,
-            config.version,
+            config,
             hps,
         )
         sleep(1)
