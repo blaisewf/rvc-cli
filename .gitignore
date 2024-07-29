@@ -1,3 +1,6 @@
+# Ignore logs folder
+logs
+
 # Ignore compiled executables
 *.exe
 
@@ -8,7 +11,7 @@
 *.index
 *.bin
 *.ckpt
-*.yaml
+*.txt
 
 # Ignore Python bytecode files
 *.pyc
@@ -19,6 +22,8 @@ venv/
 
 # Ignore cached files
 .cache/
+docs/.next
+node_modules
 
 # Ignore specific project directories
 /tracks/

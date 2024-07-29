@@ -1,0 +1,235 @@
+# RVC
+
+Learn how to use the `rvc_cli.py` script to perform various operations with RVC.
+
+## Usage
+
+To use the RVC CLI, navigate to the directory containing `rvc_cli.py` in your terminal and execute the script using the following syntax:
+
+```
+python rvc_cli.py <mode> [arguments]
+```
+
+Replace `<mode>` with the desired mode of operation (e.g., `infer`, `train`, `index`) and provide the necessary arguments. For a detailed list of arguments available for each mode, run:
+
+```
+python rvc_cli.py <mode> -h
+```
+
+This will display a help message with explanations for each argument.
+
+## Modes
+
+### Infer
+
+Performs a voice cloning conversion on a single audio file.
+
+| Argument                  | Description                                                                                                                                                                                                                   | Type  | Default    | Required |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------- | -------- |
+| `--pitch`                 | Set the pitch of the audio. Higher values result in a higher pitch.                                                                                                                                                           | int   | 0          | No       |
+| `--filter_radius`         | Apply median filtering to the extracted pitch values if this value is greater than or equal to three. This can help reduce breathiness in the output audio.                                                                   | int   | 3          | No       |
+| `--index_rate`            | Control the influence of the index file on the output. Higher values mean stronger influence. Lower values can help reduce artifacts but may result in less accurate voice cloning.                                           | float | 0.3        | No       |
+| `--volume_envelope`       | Control the blending of the output's volume envelope. A value of 1 means the output envelope is fully used.                                                                                                                   | float | 1          | No       |
+| `--protect`               | Protect consonants and breathing sounds from artifacts. A value of 0.5 offers the strongest protection, while lower values may reduce the protection level but potentially mitigate the indexing effect.                      | float | 0.33       | No       |
+| `--hop_length`            | Only applicable for the Crepe pitch extraction method. Determines the time it takes for the system to react to a significant pitch change. Smaller values require more processing time but can lead to better pitch accuracy. | int   | 128        | No       |
+| `--f0_method`             | Choose the pitch extraction algorithm for the conversion. 'rmvpe' is the default and generally recommended.                                                                                                                   | str   | rmvpe      | No       |
+| `--input_path`            | Full path to the input audio file.                                                                                                                                                                                            | str   |            | Yes      |
+| `--output_path`           | Full path to the output audio file.                                                                                                                                                                                           | str   |            | Yes      |
+| `--pth_path`              | Full path to the RVC model file (.pth).                                                                                                                                                                                       | str   |            | Yes      |
+| `--index_path`            | Full path to the index file (.index).                                                                                                                                                                                         | str   |            | Yes      |
+| `--split_audio`           | Split the audio into smaller segments before inference. This can improve the quality of the output for longer audio files.                                                                                                    | bool  | False      | No       |
+| `--f0_autotune`           | Apply a light autotune to the inferred audio. Particularly useful for singing voice conversions.                                                                                                                              | bool  | False      | No       |
+| `--clean_audio`           | Clean the output audio using noise reduction algorithms. Recommended for speech conversions.                                                                                                                                  | bool  | False      | No       |
+| `--clean_strength`        | Adjust the intensity of the audio cleaning process. Higher values result in stronger cleaning, but may lead to a more compressed sound.                                                                                       | float | 0.7        | No       |
+| `--export_format`         | Select the desired output audio format.                                                                                                                                                                                       | str   | WAV        | No       |
+| `--embedder_model`        | Choose the model used for generating speaker embeddings.                                                                                                                                                                      | str   | contentvec | No       |
+| `--embedder_model_custom` | Specify the path to a custom model for speaker embedding. Only applicable if 'embedder_model' is set to 'custom'.                                                                                                             | str   | None       | No       |
+| `--upscale_audio`         | Upscale the input audio to a higher quality before processing. This can improve the overall quality of the output, especially for low-quality input audio.                                                                    | bool  | False      | No       |
+| `--f0_file`               | Full path to an external F0 file (.f0). This allows you to use pre-computed pitch values for the input audio.                                                                                                                 | str   | None       | No       |
+
+### Batch Infer
+
+Performs real-time voice cloning on all supported audio files within a specified folder. This mode utilizes the same arguments as the `infer` mode, except it requires an `--input_folder` and `--output_folder` instead of `--input_path` and `--output_path`, respectively.
+
+| Argument          | Description                                       | Type | Required |
+| ----------------- | ------------------------------------------------- | ---- | -------- |
+| `--input_folder`  | Path to the folder containing input audio files.  | str  | Yes      |
+| `--output_folder` | Path to the folder for saving output audio files. | str  | Yes      |
+
+### TTS
+
+Synthesizes text into speech using the specified voice and then applies voice conversion using the provided RVC model.
+
+| Argument            | Description                                                                                                                                                                                                                             | Type | Default | Required |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ------- | -------- |
+| `--tts_text`        | Text to be synthesized.                                                                                                                                                                                                                 | str  |         | Yes      |
+| `--tts_voice`       | Voice to be used for TTS synthesis. Refer to [Microsoft's TTS voice list](https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list?trustedclienttoken=6A5AA1D4EAFF4E9FB37E23D68491D6F4) for available options. | str  |         | Yes      |
+| `--tts_rate`        | Control the speaking rate of the TTS. Values range from -100 (slower) to 100 (faster).                                                                                                                                                  | int  | 0       | No       |
+| `--output_tts_path` | Full path to save the synthesized TTS audio.                                                                                                                                                                                            | str  |         | Yes      |
+| `--output_rvc_path` | Full path to save the voice-converted audio using the synthesized TTS.                                                                                                                                                                  | str  |         | Yes      |
+
+This mode utilizes the same arguments as the `infer` mode for voice conversion settings.
+
+### Preprocess
+
+Preprocesses a dataset for training an RVC model.
+
+| Argument         | Description                                   | Type | Required |
+| ---------------- | --------------------------------------------- | ---- | -------- |
+| `--model_name`   | Name of the model to be trained.              | str  | Yes      |
+| `--dataset_path` | Path to the dataset directory.                | str  | Yes      |
+| `--sample_rate`  | Target sampling rate for the audio data.      | int  | Yes      |
+| `--cpu_cores`    | Number of CPU cores to use for preprocessing. | int  | No       |
+
+### Extract
+
+Extracts features from a dataset for training an RVC model.
+
+| Argument                  | Description                                                                                                       | Type | Default    | Required |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---- | ---------- | -------- |
+| `--model_name`            | Name of the model.                                                                                                | str  |            | Yes      |
+| `--rvc_version`           | Version of the RVC model ('v1' or 'v2').                                                                          | str  | v2         | No       |
+| `--f0_method`             | Pitch extraction method to use.                                                                                   | str  | rmvpe      | No       |
+| `--pitch_guidance`        | Enable or disable pitch guidance during feature extraction.                                                       | bool | True       | No       |
+| `--hop_length`            | Hop length for feature extraction. Only applicable for Crepe pitch extraction.                                    | int  | 128        | No       |
+| `--cpu_cores`             | Number of CPU cores to use for feature extraction (optional).                                                     | int  | None       | No       |
+| `--sample_rate`           | Target sampling rate for the audio data.                                                                          | int  |            | Yes      |
+| `--embedder_model`        | Choose the model used for generating speaker embeddings.                                                          | str  | contentvec | No       |
+| `--embedder_model_custom` | Specify the path to a custom model for speaker embedding. Only applicable if 'embedder_model' is set to 'custom'. | str  | None       | No       |
+
+### Train
+
+Trains an RVC model.
+
+| Argument                   | Description                                            | Type | Default | Required |
+| -------------------------- | ------------------------------------------------------ | ---- | ------- | -------- |
+| `--model_name`             | Name of the model to be trained.                       | str  |         | Yes      |
+| `--rvc_version`            | Version of the RVC model to train ('v1' or 'v2').      | str  | v2      | No       |
+| `--save_every_epoch`       | Save the model every specified number of epochs.       | int  |         | Yes      |
+| `--save_only_latest`       | Save only the latest model checkpoint.                 | bool | False   | No       |
+| `--save_every_weights`     | Save model weights every epoch.                        | bool | True    | No       |
+| `--total_epoch`            | Total number of epochs to train for.                   | int  | 1000    | No       |
+| `--sample_rate`            | Sampling rate of the training data.                    | int  |         | Yes      |
+| `--batch_size`             | Batch size for training.                               | int  | 8       | No       |
+| `--gpu`                    | GPU device to use for training (e.g., '0').            | str  | 0       | No       |
+| `--pitch_guidance`         | Enable or disable pitch guidance during training.      | bool | True    | No       |
+| `--pretrained`             | Use a pretrained model for initialization.             | bool | True    | No       |
+| `--custom_pretrained`      | Use a custom pretrained model.                         | bool | False   | No       |
+| `--g_pretrained_path`      | Path to the pretrained generator model file.           | str  | None    | No       |
+| `--d_pretrained_path`      | Path to the pretrained discriminator model file.       | str  | None    | No       |
+| `--overtraining_detector`  | Enable overtraining detection.                         | bool | False   | No       |
+| `--overtraining_threshold` | Threshold for overtraining detection.                  | int  | 50      | No       |
+| `--sync_graph`             | Enable graph synchronization for distributed training. | bool | False   | No       |
+| `--cache_data_in_gpu`      | Cache training data in GPU memory.                     | bool | False   | No       |
+
+### Index
+
+Generates an index file for an RVC model.
+
+| Argument        | Description                              | Type | Default | Required |
+| --------------- | ---------------------------------------- | ---- | ------- | -------- |
+| `--model_name`  | Name of the model.                       | str  |         | Yes      |
+| `--rvc_version` | Version of the RVC model ('v1' or 'v2'). | str  | v2      | No       |
+
+### Model Extract
+
+Extracts a checkpoint of the trained model.
+
+| Argument           | Description                                               | Type | Default | Required |
+| ------------------ | --------------------------------------------------------- | ---- | ------- | -------- |
+| `--pth_path`       | Path to the main .pth model file.                         | str  |         | Yes      |
+| `--model_name`     | Name of the model.                                        | str  |         | Yes      |
+| `--sample_rate`    | Sampling rate of the extracted model.                     | int  |         | Yes      |
+| `--pitch_guidance` | Enable or disable pitch guidance for the extracted model. | bool |         | Yes      |
+| `--rvc_version`    | Version of the extracted RVC model ('v1' or 'v2').        | str  | v2      | No       |
+| `--epoch`          | Epoch number to extract from the model.                   | int  |         | Yes      |
+| `--step`           | Step number to extract from the model (optional).         | int  | None    | No       |
+
+### Model Information
+
+Displays information about a trained model.
+
+| Argument     | Description                  | Type | Required |
+| ------------ | ---------------------------- | ---- | -------- |
+| `--pth_path` | Path to the .pth model file. | str  | Yes      |
+
+### Model Blender
+
+Fuses two RVC models together.
+
+| Argument       | Description                                     | Type  | Default | Required |
+| -------------- | ----------------------------------------------- | ----- | ------- | -------- |
+| `--model_name` | Name of the new fused model.                    | str   |         | Yes      |
+| `--pth_path_1` | Path to the first .pth model file.              | str   |         | Yes      |
+| `--pth_path_2` | Path to the second .pth model file.             | str   |         | Yes      |
+| `--ratio`      | Ratio for blending the two models (0.0 to 1.0). | float | 0.5     | No       |
+
+### Tensorboard
+
+Launches TensorBoard for monitoring training progress. This mode requires no arguments.
+
+### Download
+
+Downloads a model from a provided link.
+
+| Argument       | Description                    | Type | Required |
+| -------------- | ------------------------------ | ---- | -------- |
+| `--model_link` | Direct link to the model file. | str  | Yes      |
+
+### Prerequisites
+
+Installs prerequisites for RVC.
+
+| Argument           | Description                            | Type | Default | Required |
+| ------------------ | -------------------------------------- | ---- | ------- | -------- |
+| `--pretraineds_v1` | Download pretrained models for RVC v1. | bool | True    | No       |
+| `--pretraineds_v2` | Download pretrained models for RVC v2. | bool | True    | No       |
+| `--models`         | Download additional models.            | bool | True    | No       |
+| `--exe`            | Download required executables.         | bool | True    | No       |
+
+### Audio Analyzer
+
+Analyzes an audio file and displays its information.
+
+| Argument       | Description                   | Type | Required |
+| -------------- | ----------------------------- | ---- | -------- |
+| `--input_path` | Path to the input audio file. | str  | Yes      |
+
+### API
+
+Starts the RVC API server.
+
+| Argument | Description                      | Type | Default   | Required |
+| -------- | -------------------------------- | ---- | --------- | -------- |
+| `--host` | Host address for the API server. | str  | 127.0.0.1 | No       |
+| `--port` | Port for the API server.         | int  | 8000      | No       |
+
+
+
+## Examples
+
+Here are a few examples of how to use the RVC CLI:
+
+- **Inferring voice on an audio file:**
+
+```
+python rvc_cli.py infer --pitch 5 --input_path "path/to/input.wav" --output_path "path/to/output.wav" --pth_path "path/to/model.pth" --index_path "path/to/index.index"
+```
+
+- **Training a new RVC model:**
+
+```
+python rvc_cli.py train --model_name "my_model" --dataset_path "path/to/dataset" --sample_rate 48000 --total_epoch 500 --gpu 0
+```
+
+- **Generating an index file for a trained model:**
+
+```
+python rvc_cli.py index --model_name "my_model"
+```
+
+- **Starting the RVC API server:**
+
+```
+python rvc_cli.py api --host 0.0.0.0 --port 5000
+```
