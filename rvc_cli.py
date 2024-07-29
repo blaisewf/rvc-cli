@@ -4,7 +4,7 @@ import json
 import argparse
 import subprocess
 from functools import lru_cache
-
+from distutils.util import strtobool
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 
@@ -578,7 +578,7 @@ def parse_arguments():
     split_audio_description = "Split the audio into smaller segments before inference. This can improve the quality of the output for longer audio files."
     infer_parser.add_argument(
         "--split_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=split_audio_description,
         default=False,
@@ -586,7 +586,7 @@ def parse_arguments():
     f0_autotune_description = "Apply a light autotune to the inferred audio. Particularly useful for singing voice conversions."
     infer_parser.add_argument(
         "--f0_autotune",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=f0_autotune_description,
         default=False,
@@ -594,7 +594,7 @@ def parse_arguments():
     clean_audio_description = "Clean the output audio using noise reduction algorithms. Recommended for speech conversions."
     infer_parser.add_argument(
         "--clean_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=clean_audio_description,
         default=False,
@@ -640,7 +640,7 @@ def parse_arguments():
     upscale_audio_description = "Upscale the input audio to a higher quality before processing. This can improve the overall quality of the output, especially for low-quality input audio."
     infer_parser.add_argument(
         "--upscale_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=upscale_audio_description,
         default=False,
@@ -736,21 +736,21 @@ def parse_arguments():
     )
     batch_infer_parser.add_argument(
         "--split_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=split_audio_description,
         default=False,
     )
     batch_infer_parser.add_argument(
         "--f0_autotune",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=f0_autotune_description,
         default=False,
     )
     batch_infer_parser.add_argument(
         "--clean_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=clean_audio_description,
         default=False,
@@ -789,7 +789,7 @@ def parse_arguments():
     )
     batch_infer_parser.add_argument(
         "--upscale_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=upscale_audio_description,
         default=False,
@@ -898,21 +898,21 @@ def parse_arguments():
     )
     tts_parser.add_argument(
         "--split_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=split_audio_description,
         default=False,
     )
     tts_parser.add_argument(
         "--f0_autotune",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=f0_autotune_description,
         default=False,
     )
     tts_parser.add_argument(
         "--clean_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=clean_audio_description,
         default=False,
@@ -951,7 +951,7 @@ def parse_arguments():
     )
     tts_parser.add_argument(
         "--upscale_audio",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help=upscale_audio_description,
         default=False,
@@ -1014,7 +1014,7 @@ def parse_arguments():
     )
     extract_parser.add_argument(
         "--pitch_guidance",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Enable or disable pitch guidance during feature extraction.",
         default=True,
@@ -1080,14 +1080,14 @@ def parse_arguments():
     )
     train_parser.add_argument(
         "--save_only_latest",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Save only the latest model checkpoint.",
         default=False,
     )
     train_parser.add_argument(
         "--save_every_weights",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Save model weights every epoch.",
         default=True,
@@ -1121,21 +1121,21 @@ def parse_arguments():
     )
     train_parser.add_argument(
         "--pitch_guidance",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Enable or disable pitch guidance during training.",
         default=True,
     )
     train_parser.add_argument(
         "--pretrained",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Use a pretrained model for initialization.",
         default=True,
     )
     train_parser.add_argument(
         "--custom_pretrained",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Use a custom pretrained model.",
         default=False,
@@ -1156,7 +1156,7 @@ def parse_arguments():
     )
     train_parser.add_argument(
         "--overtraining_detector",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Enable overtraining detection.",
         default=False,
@@ -1170,14 +1170,14 @@ def parse_arguments():
     )
     train_parser.add_argument(
         "--sync_graph",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Enable graph synchronization for distributed training.",
         default=False,
     )
     train_parser.add_argument(
         "--cache_data_in_gpu",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Cache training data in GPU memory.",
         default=False,
@@ -1217,7 +1217,7 @@ def parse_arguments():
     )
     model_extract_parser.add_argument(
         "--pitch_guidance",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         help="Enable or disable pitch guidance for the extracted model.",
         required=True,
@@ -1297,28 +1297,28 @@ def parse_arguments():
     )
     prerequisites_parser.add_argument(
         "--pretraineds_v1",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         default=True,
         help="Download pretrained models for RVC v1.",
     )
     prerequisites_parser.add_argument(
         "--pretraineds_v2",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         default=True,
         help="Download pretrained models for RVC v2.",
     )
     prerequisites_parser.add_argument(
         "--models",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         default=True,
         help="Download additional models.",
     )
     prerequisites_parser.add_argument(
         "--exe",
-        type=bool,
+        type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         default=True,
         help="Download required executables.",

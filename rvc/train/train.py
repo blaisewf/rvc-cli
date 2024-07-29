@@ -5,6 +5,7 @@ import datetime
 import glob
 import json
 import re
+from distutils.util import strtobool
 
 from utils import (
     HParams,
@@ -64,21 +65,21 @@ version = sys.argv[6]
 gpus = sys.argv[7]
 batch_size = int(sys.argv[8])
 sample_rate = int(sys.argv[9])
-pitch_guidance = bool(sys.argv[10])
-save_only_latest = bool(sys.argv[11])
-save_every_weights = bool(sys.argv[12])
-cache_data_in_gpu = bool(sys.argv[13])
-overtraining_detector = bool(sys.argv[14])
+pitch_guidance = strtobool(sys.argv[10])
+save_only_latest = strtobool(sys.argv[11])
+save_every_weights = strtobool(sys.argv[12])
+cache_data_in_gpu = strtobool(sys.argv[13])
+overtraining_detector = strtobool(sys.argv[14])
 overtraining_threshold = int(sys.argv[15])
-sync_graph = bool(sys.argv[16])
+sync_graph = strtobool(sys.argv[16])
 
 experiment_dir = os.path.join("logs", model_name)
-training_files = os.path.join(experiment_dir, "filelist.txt")
 config_save_path = os.path.join(experiment_dir, "config.json")
 
 with open(config_save_path, "r") as f:
     config = json.load(f)
 config = HParams(**config)
+config.data.training_files = os.path.join(experiment_dir, "filelist.txt")
 
 os.environ["CUDA_VISIBLE_DEVICES"] = gpus.replace("-", ",")
 n_gpus = len(gpus.split("-"))
@@ -160,7 +161,7 @@ def main():
         n_gpus = 1
 
     print(f"Value of sg {sync_graph}")
-    if sync_graph == True:
+    if sync_graph:
         print(
             "Sync graph is now activated! With sync graph enabled, the model undergoes a single epoch of training. Once the graphs are synchronized, training proceeds for the previously specified number of epochs."
         )
@@ -285,7 +286,7 @@ def run(
 
     train_sampler = DistributedBucketSampler(
         train_dataset,
-        config.batch_size * n_gpus,
+        batch_size * n_gpus,
         [100, 200, 300, 400, 500, 600, 700, 800, 900],
         num_replicas=n_gpus,
         rank=rank,
@@ -313,13 +314,13 @@ def run(
         config.data.filter_length // 2 + 1,
         config.train.segment_size // config.data.hop_length,
         **config.model,
-        use_f0=config.pitch_guidance == True,
+        use_f0=pitch_guidance == True,
         is_half=config.train.fp16_run,
-        sr=config.sample_rate,
+        sr=sample_rate,
     )
     if torch.cuda.is_available():
         net_g = net_g.cuda(rank)
-    if config.version == "v1":
+    if version == "v1":
         net_d = MultiPeriodDiscriminator(config.model.use_spectral_norm)
     else:
         net_d = MultiPeriodDiscriminatorV2(config.model.use_spectral_norm)
@@ -397,7 +398,7 @@ def run(
     scaler = GradScaler(enabled=config.train.fp16_run)
 
     cache = []
-    for epoch in range(epoch_str, config.total_epoch + 1):
+    for epoch in range(epoch_str, total_epoch + 1):
         if rank == 0:
             train_and_evaluate(
                 rank,
@@ -819,7 +820,7 @@ def train_and_evaluate(
 
         if epoch > 1 and overtraining_detector == True:
             print(
-                f"{model_name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowest_value={lowest_value_rounded} (epoch {lowest_value['epoch']} and step {lowest_value['step']}) | Number of epochs remaining for overtraining: {lowest_value['epoch'] + config.overtraining_threshold - epoch}"
+                f"{model_name} | epoch={epoch} | step={global_step} | {epoch_recorder.record()} | lowest_value={lowest_value_rounded} (epoch {lowest_value['epoch']} and step {lowest_value['step']}) | Number of epochs remaining for overtraining: {lowest_value['epoch'] + overtraining_threshold - epoch}"
             )
         elif epoch > 1 and overtraining_detector == False:
             print(
