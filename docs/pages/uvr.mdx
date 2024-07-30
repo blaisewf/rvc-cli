@@ -1,3 +1,96 @@
 # UVR
 
-🚧 Page under construction!
+Learn how to use the `uvr_cli.py` script to perform various operations with UVR.
+
+## Usage
+
+To use the UVR CLI, navigate to the directory containing `uvr_cli.py` in your terminal and execute the script using the following syntax:
+
+```
+python uvr_cli.py --audio_file <path/to/audio_file> [options]
+```
+
+Replace `<path/to/audio_file>` with the path to the audio file you want to process and `[options]` with the necessary arguments. For a detailed list of arguments available for each mode, run:
+
+
+```
+python uvr_cli.py <mode> -h
+```
+
+This will display a help message with explanations for each argument.
+
+## Modes
+
+### Info and Debugging
+
+| Argument              | Description                                                   | Type | Default | Required |
+| --------------------- | ------------------------------------------------------------- | ---- | ------- | -------- |
+| `-d`, `--debug`       | Enable debug logging. Equivalent to `--log_level=debug`.      | bool | False   | No       |
+| `-e`, `--env_info`    | Print environment information and exit.                       | bool | False   | No       |
+| `-l`, `--list_models` | List all supported models and exit.                           | bool | False   | No       |
+| `--log_level`         | Log level, e.g. `info`, `debug`, `warning` (default: `info`). | str  | info    | No       |
+
+### Separation I/O Params
+
+| Argument                 | Description                                                                                                 | Type | Default                                            | Required |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- | ---- | -------------------------------------------------- | -------- |
+| `-m`, `--model_filename` | Model to use for separation. Example: `-m 2_HP-UVR.pth`                                                     | str  | `model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt` | No       |
+| `--output_format`        | Output format for separated files, any common format (default: `WAV`). Example: `--output_format=MP3`       | str  | `WAV`                                              | No       |
+| `--output_dir`           | Directory to write output files (default: `<current dir>`). Example: `--output_dir=/app/separated`          | str  | `None`                                             | No       |
+| `--model_file_dir`       | Model files directory (default: `uvr/tmp/audio-separator-models/`). Example: `--model_file_dir=/app/models` | str  | `uvr/tmp/audio-separator-models/`                  | No       |
+
+### Common Separation Parameters
+
+| Argument          | Description                                                                                                                                | Type  | Default | Required |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----- | ------- | -------- |
+| `--invert_spect`  | Invert secondary stem using spectrogram (default: `False`). Example: `--invert_spect`                                                      | bool  | False   | No       |
+| `--normalization` | Max peak amplitude to normalize input and output audio to (default: `0.9`). Example: `--normalization=0.7`                                 | float | 0.9     | No       |
+| `--single_stem`   | Output only single stem, e.g. `Instrumental`, `Vocals`, `Drums`, `Bass`, `Guitar`, `Piano`, `Other`. Example: `--single_stem=Instrumental` | str   | None    | No       |
+| `--sample_rate`   | Modify the sample rate of the output audio (default: `44100`). Example: `--sample_rate=44100`                                              | int   | 44100   | No       |
+
+### MDX Architecture Parameters
+
+| Argument               | Description                                                                                                                             | Type  | Default | Required |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----- | ------- | -------- |
+| `--mdx_segment_size`   | Larger consumes more resources, but may give better results (default: `256`). Example: `--mdx_segment_size=256`                         | int   | 256     | No       |
+| `--mdx_overlap`        | Amount of overlap between prediction windows, 0.001-0.999. Higher is better but slower (default: `0.25`). Example: `--mdx_overlap=0.25` | float | 0.25    | No       |
+| `--mdx_batch_size`     | Larger consumes more RAM but may process slightly faster (default: `1`). Example: `--mdx_batch_size=4`                                  | int   | 1       | No       |
+| `--mdx_hop_length`     | Usually called stride in neural networks, only change if you know what you're doing (default: `1024`). Example: `--mdx_hop_length=1024` | int   | 1024    | No       |
+| `--mdx_enable_denoise` | Enable denoising during separation (default: `False`). Example: `--mdx_enable_denoise`                                                  | bool  | False   | No       |
+
+### VR Architecture Parameters
+
+| Argument                      | Description                                                                                                                                    | Type  | Default | Required |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ------- | -------- |
+| `--vr_batch_size`             | Number of batches to process at a time. Higher = more RAM, slightly faster processing (default: `4`). Example: `--vr_batch_size=16`            | int   | 4       | No       |
+| `--vr_window_size`            | Balance quality and speed. `1024` = fast but lower, `320` = slower but better quality. (default: `512`). Example: `--vr_window_size=320`       | int   | 512     | No       |
+| `--vr_aggression`             | Intensity of primary stem extraction, `-100` - `100`. Typically `5` for vocals & instrumentals (default: `5`). Example: `--vr_aggression=2`    | int   | 5       | No       |
+| `--vr_enable_tta`             | Enable Test-Time-Augmentation; slow but improves quality (default: `False`). Example: `--vr_enable_tta`                                        | bool  | False   | No       |
+| `--vr_high_end_process`       | Mirror the missing frequency range of the output (default: `False`). Example: `--vr_high_end_process`                                          | bool  | False   | No       |
+| `--vr_enable_post_process`    | Identify leftover artifacts within vocal output; may improve separation for some songs (default: `False`). Example: `--vr_enable_post_process` | bool  | False   | No       |
+| `--vr_post_process_threshold` | Threshold for post_process feature: `0.1`-`0.3` (default: `0.2`). Example: `--vr_post_process_threshold=0.1`                                   | float | 0.2     | No       |
+
+### Demucs Architecture Parameters
+
+| Argument                    | Description                                                                                                                                            | Type  | Default   | Required |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- | --------- | -------- |
+| `--demucs_segment_size`     | Size of segments into which the audio is split, `1-100`. Higher = slower but better quality (default: `Default`). Example: `--demucs_segment_size=256` | str   | `Default` | No       |
+| `--demucs_shifts`           | Number of predictions with random shifts, higher = slower but better quality (default: `2`). Example: `--demucs_shifts=4`                              | int   | 2         | No       |
+| `--demucs_overlap`          | Overlap between prediction windows, 0.001-0.999. Higher = slower but better quality (default: `0.25`). Example: `--demucs_overlap=0.25`                | float | 0.25      | No       |
+| `--demucs_segments_enabled` | Enable segment-wise processing (default: `True`). Example: `--demucs_segments_enabled=False`                                                           | bool  | `True`    | No       |
+
+### MDXC Architecture Parameters
+
+| Argument                             | Description                                                                                                                                           | Type | Default | Required |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ------- | -------- |
+| `--mdxc_segment_size`                | Larger consumes more resources, but may give better results (default: `256`). Example: `--mdxc_segment_size=256`                                      | int  | 256     | No       |
+| `--mdxc_override_model_segment_size` | Override model default segment size instead of using the model default value. Example: `--mdxc_override_model_segment_size`                           | bool | False   | No       |
+| `--mdxc_overlap`                     | Amount of overlap between prediction windows, `2-50`. Higher is better but slower (default: `8`). Example: `--mdxc_overlap=8`                         | int  | 8       | No       |
+| `--mdxc_batch_size`                  | Larger consumes more RAM but may process slightly faster (default: `1`). Example: `--mdxc_batch_size=4`                                               | int  | 1       | No       |
+| `--mdxc_pitch_shift`                 | Shift audio pitch by a number of semitones while processing. May improve output for deep/high vocals. (default: `0`). Example: `--mdxc_pitch_shift=2` | int  | 0       | No       |
+
+**Example:**
+
+```bash
+uvr_cli.py --audio_file "my_song.mp3" --output_format MP3 --output_dir "/path/to/output" --model_filename "2_HP-UVR.pth" --vr_aggression 10
+```
