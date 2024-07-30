@@ -195,14 +195,6 @@ Analyzes an audio file and displays its information.
 | -------------- | ----------------------------- | ---- | -------- |
 | `--input_path` | Path to the input audio file. | str  | Yes      |
 
-### API
-
-Starts the RVC API server.
-
-| Argument | Description                      | Type | Default   | Required |
-| -------- | -------------------------------- | ---- | --------- | -------- |
-| `--host` | Host address for the API server. | str  | 127.0.0.1 | No       |
-| `--port` | Port for the API server.         | int  | 8000      | No       |
 
 
 
@@ -226,10 +218,4 @@ python rvc_cli.py train --model_name "my_model" --dataset_path "path/to/dataset"
 
 ```
 python rvc_cli.py index --model_name "my_model"
-```
-
-- **Starting the RVC API server:**
-
-```
-python rvc_cli.py api --host 0.0.0.0 --port 5000
 ```
