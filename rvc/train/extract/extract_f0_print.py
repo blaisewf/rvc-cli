@@ -105,7 +105,7 @@ class FeatureInput:
             coarse_pit = self.coarse_f0(feature_pit)
             np.save(opt_path1, coarse_pit, allow_pickle=False)
         except Exception as error:
-            print(f"F0 extraction failed for {inp_path}: {error}")
+            print(f"An error occurred extracting file {inp_path}: {error}")
 
 
 if __name__ == "__main__":
@@ -124,7 +124,7 @@ if __name__ == "__main__":
         input_path = os.path.join(input_root, name)
         output_path1 = os.path.join(output_root1, name)
         output_path2 = os.path.join(output_root2, name)
-        np_arr = load_audio(input_path, 16000) #self.fs?
+        np_arr = load_audio(input_path, 16000)  # self.fs?
         paths.append([input_path, output_path1, output_path2, np_arr])
 
     print(f"Starting extraction with {num_processes} cores and {f0_method}...")
