@@ -199,12 +199,17 @@ def run_tts_script(
         os.remove(output_tts_path)
 
     command_tts = [
-        python,
-        tts_script_path,
-        tts_text,
-        tts_voice,
-        tts_rate,
-        output_tts_path,
+        *map(
+            str,
+            [
+                python,
+                tts_script_path,
+                tts_text,
+                tts_voice,
+                tts_rate,
+                output_tts_path,
+            ],
+        ),
     ]
     subprocess.run(command_tts)
     infer_pipeline = import_voice_converter()
@@ -270,6 +275,7 @@ def run_extract_script(
     pitch_guidance: bool,
     hop_length: int,
     cpu_cores: int,
+    gpu: int,
     sample_rate: int,
     embedder_model: str,
     embedder_model_custom: str = None,
@@ -293,6 +299,7 @@ def run_extract_script(
                 f0_method,
                 hop_length,
                 cpu_cores,
+                gpu,
             ],
         ),
     ]
@@ -303,13 +310,9 @@ def run_extract_script(
         *map(
             str,
             [
-                config.device,
-                1,
-                0,
-                0,
                 model_path,
                 rvc_version,
-                config.is_half,
+                gpu,
                 embedder_model,
                 embedder_model_custom,
             ],
@@ -1036,6 +1039,12 @@ def parse_arguments():
         default=None,
     )
     extract_parser.add_argument(
+        "--gpu",
+        type=int,
+        help="GPU device to use for feature extraction (optional).",
+        default="-",
+    )
+    extract_parser.add_argument(
         "--sample_rate",
         type=int,
         help="Target sampling rate for the audio data.",
@@ -1441,6 +1450,7 @@ def main():
                 pitch_guidance=args.pitch_guidance,
                 hop_length=args.hop_length,
                 cpu_cores=args.cpu_cores,
+                gpu=args.gpu,
                 sample_rate=args.sample_rate,
                 embedder_model=args.embedder_model,
                 embedder_model_custom=args.embedder_model_custom,
