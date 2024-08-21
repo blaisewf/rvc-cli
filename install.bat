@@ -1,4 +1,6 @@
 @echo off
+setlocal
+title Installer
 
 set "principal=%cd%"
 set "URL_EXTRA=https://huggingface.co/IAHispano/applio/resolve/main"
@@ -14,7 +16,7 @@ if not exist "%cd%\env.zip" (
 
 if not exist "%cd%\env.zip" (
     echo Download failed, trying with the powershell method
-    powershell -Command "& {Invoke-WebRequest -Uri '%URL_EXTRA%/env.zip' -OutFile 'mingit.zip'}"
+    powershell -Command "& {Invoke-WebRequest -Uri '%URL_EXTRA%/env.zip' -OutFile 'env.zip'}"
 )
 
 if not exist "%cd%\env" (
@@ -52,16 +54,20 @@ if not exist "%CONDA_EXECUTABLE%" (
 
 call "%CONDA_ROOT_PREFIX%\_conda.exe" create --no-shortcuts -y -k --prefix "%INSTALL_ENV_DIR%" python=3.9
 
+if exist "%cd%\env\python.exe" (
+    echo Installing pip version less than 24.1...
+    "%cd%\env\python.exe" -m pip install "pip<24.1"
+)
+
 echo Installing the dependencies...
 call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" activate "%INSTALL_ENV_DIR%"
 pip install --upgrade setuptools
 pip install -r "%principal%\requirements.txt"
-pip install future==0.18.2
 pip uninstall torch torchvision torchaudio -y
 pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu121
 call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" deactivate
 echo.
 
-echo RVC_CLI has been installed successfully!
+echo RVC CLI has been installed successfully!
 pause
 cls

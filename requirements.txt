@@ -1,63 +1,50 @@
 # General dependencies
-beautifulsoup4
+pip==23.3; sys_platform == 'darwin'
+wheel; sys_platform == 'darwin'
+PyYAML; sys_platform == 'darwin'
 ffmpeg-python>=0.2.0
 numpy==1.23.5
-requests==2.31.0
+requests==2.32.0
 tqdm
 wget
-six>=1.16
-samplerate==0.1.0
-pyyaml
-ml_collections
-beartype==0.18.5
-rotary-embedding-torch==0.6.1
 
 # Audio processing
 faiss-cpu==1.7.3
 librosa==0.9.2
-pydub==0.25.1
 pyworld==0.3.4
-praat-parselmouth==0.4.2
-resampy==0.4.2
 scipy==1.11.1
-sounddevice==0.4.6
 soundfile==0.12.1
-torchaudio==2.1.1
 praat-parselmouth
 noisereduce
 audio_upscaler==0.1.4
+pedalboard
 
 # Machine learning
+omegaconf==2.0.5; sys_platform == 'darwin'
 git+https://github.com/IAHispano/fairseq; sys_platform == 'linux'
-fairseq==0.12.2; sys_platform == 'win32'
+fairseq==0.12.2; sys_platform == 'darwin' or sys_platform == 'win32'
 numba; sys_platform == 'linux'
-numba==0.56.4; sys_platform == 'win32'
-onnxruntime
-onnxruntime_gpu==1.15.1
-onnx2torch>=1.5
+numba==0.57.0; sys_platform == 'darwin' or sys_platform == 'win32'
+torchaudio==2.1.1
 torch==2.1.1
-torchcrepe==0.0.22
-torchgen>=0.0.1
-torch_directml
+torchcrepe==0.0.23
 torchvision==0.16.1
 einops
-local-attention
-onnx>=1.14
-onnxruntime
-onnxruntime_gpu==1.15.1
+libf0
+torchfcpe
 
 # Visualization
 matplotlib==3.7.2
 tensorboard
+gradio==4.36.0
 
 # Miscellaneous
+certifi==2024.7.4; sys_platform == 'darwin'
+antlr4-python3-runtime==4.8; sys_platform == 'darwin'
 ffmpy==0.3.1
 tensorboardX
 edge-tts==6.1.9
-julius>=0.2
-diffq>=0.2
-
-# API
-pydantic
-fastapi
-uvicorn
+pypresence
+beautifulsoup4
+flask
+local-attention

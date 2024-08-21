@@ -13,7 +13,6 @@ current_script_directory = os.path.dirname(os.path.realpath(__file__))
 logs_path = os.path.join(current_script_directory, "logs")
 
 from rvc.lib.tools.prerequisites_download import prequisites_download_pipeline
-from rvc.train.extract.preparing_files import generate_config, generate_filelist
 from rvc.train.process.model_blender import model_blender
 from rvc.train.process.model_information import model_information
 from rvc.train.process.extract_small_model import extract_small_model
@@ -71,8 +70,50 @@ def run_infer_script(
     f0_file: str,
     embedder_model: str,
     embedder_model_custom: str = None,
+    formant_shifting: bool = False,
+    formant_qfrency: float = 1.0,
+    formant_timbre: float = 1.0,
+    post_process: bool = False,
+    reverb: bool = False,
+    pitch_shift: bool = False,
+    limiter: bool = False,
+    gain: bool = False,
+    distortion: bool = False,
+    chorus: bool = False,
+    bitcrush: bool = False,
+    clipping: bool = False,
+    compressor: bool = False,
+    delay: bool = False,
+    *sliders: list,
 ):
     infer_pipeline = import_voice_converter()
+    additional_params = {
+        "reverb_room_size": sliders[0],
+        "reverb_damping": sliders[1],
+        "reverb_wet_level": sliders[2],
+        "reverb_dry_level": sliders[3],
+        "reverb_width": sliders[4],
+        "reverb_freeze_mode": sliders[5],
+        "pitch_shift_semitones": sliders[6],
+        "limiter_threshold": sliders[7],
+        "limiter_release": sliders[8],
+        "gain_db": sliders[9],
+        "distortion_gain": sliders[10],
+        "chorus_rate": sliders[11],
+        "chorus_depth": sliders[12],
+        "chorus_delay": sliders[13],
+        "chorus_feedback": sliders[14],
+        "chorus_mix": sliders[15],
+        "bitcrush_bit_depth": sliders[16],
+        "clipping_threshold": sliders[17],
+        "compressor_threshold": sliders[18],
+        "compressor_ratio": sliders[19],
+        "compressor_attack": sliders[20],
+        "compressor_release": sliders[21],
+        "delay_seconds": sliders[22],
+        "delay_feedback": sliders[23],
+        "delay_mix": sliders[24],
+    }
     infer_pipeline.convert_audio(
         pitch=pitch,
         filter_radius=filter_radius,
@@ -94,6 +135,21 @@ def run_infer_script(
         f0_file=f0_file,
         embedder_model=embedder_model,
         embedder_model_custom=embedder_model_custom,
+        formant_shifting=formant_shifting,
+        formant_qfrency=formant_qfrency,
+        formant_timbre=formant_timbre,
+        post_process=post_process,
+        reverb=reverb,
+        pitch_shift=pitch_shift,
+        limiter=limiter,
+        gain=gain,
+        distortion=distortion,
+        chorus=chorus,
+        bitcrush=bitcrush,
+        clipping=clipping,
+        compressor=compressor,
+        delay=delay,
+        sliders=additional_params,
     )
     return f"File {input_path} inferred successfully.", output_path.replace(
         ".wav", f".{export_format.lower()}"
@@ -122,46 +178,92 @@ def run_batch_infer_script(
     f0_file: str,
     embedder_model: str,
     embedder_model_custom: str = None,
+    formant_shifting: bool = False,
+    formant_qfrency: float = 1.0,
+    formant_timbre: float = 1.0,
+    post_process: bool = False,
+    reverb: bool = False,
+    pitch_shift: bool = False,
+    limiter: bool = False,
+    gain: bool = False,
+    distortion: bool = False,
+    chorus: bool = False,
+    bitcrush: bool = False,
+    clipping: bool = False,
+    compressor: bool = False,
+    delay: bool = False,
+    *sliders: list,
 ):
     audio_files = [
         f for f in os.listdir(input_folder) if f.endswith((".mp3", ".wav", ".flac"))
     ]
     print(f"Detected {len(audio_files)} audio files for inference.")
-
-    for audio_file in audio_files:
-        if "_output" in audio_file:
-            pass
-        else:
-            input_path = os.path.join(input_folder, audio_file)
-            output_file_name = os.path.splitext(os.path.basename(audio_file))[0]
-            output_path = os.path.join(
-                output_folder,
-                f"{output_file_name}_output{os.path.splitext(audio_file)[1]}",
-            )
-            infer_pipeline = import_voice_converter()
-            print(f"Inferring {input_path}...")
-            infer_pipeline.convert_audio(
-                pitch=pitch,
-                filter_radius=filter_radius,
-                index_rate=index_rate,
-                volume_envelope=volume_envelope,
-                protect=protect,
-                hop_length=hop_length,
-                f0_method=f0_method,
-                audio_input_path=input_path,
-                audio_output_path=output_path,
-                model_path=pth_path,
-                index_path=index_path,
-                split_audio=split_audio,
-                f0_autotune=f0_autotune,
-                clean_audio=clean_audio,
-                clean_strength=clean_strength,
-                export_format=export_format,
-                upscale_audio=upscale_audio,
-                f0_file=f0_file,
-                embedder_model=embedder_model,
-                embedder_model_custom=embedder_model_custom,
-            )
+    infer_pipeline = import_voice_converter()
+    additional_params = {
+        "reverb_room_size": sliders[0],
+        "reverb_damping": sliders[1],
+        "reverb_wet_level": sliders[2],
+        "reverb_dry_level": sliders[3],
+        "reverb_width": sliders[4],
+        "reverb_freeze_mode": sliders[5],
+        "pitch_shift_semitones": sliders[6],
+        "limiter_threshold": sliders[7],
+        "limiter_release": sliders[8],
+        "gain_db": sliders[9],
+        "distortion_gain": sliders[10],
+        "chorus_rate": sliders[11],
+        "chorus_depth": sliders[12],
+        "chorus_delay": sliders[13],
+        "chorus_feedback": sliders[14],
+        "chorus_mix": sliders[15],
+        "bitcrush_bit_depth": sliders[16],
+        "clipping_threshold": sliders[17],
+        "compressor_threshold": sliders[18],
+        "compressor_ratio": sliders[19],
+        "compressor_attack": sliders[20],
+        "compressor_release": sliders[21],
+        "delay_seconds": sliders[22],
+        "delay_feedback": sliders[23],
+        "delay_mix": sliders[24],
+    }
+    infer_pipeline.convert_audio_batch(
+        pitch=pitch,
+        filter_radius=filter_radius,
+        index_rate=index_rate,
+        volume_envelope=volume_envelope,
+        protect=protect,
+        hop_length=hop_length,
+        f0_method=f0_method,
+        audio_input_paths=input_folder,
+        audio_output_path=output_folder,
+        model_path=pth_path,
+        index_path=index_path,
+        split_audio=split_audio,
+        f0_autotune=f0_autotune,
+        clean_audio=clean_audio,
+        clean_strength=clean_strength,
+        export_format=export_format,
+        upscale_audio=upscale_audio,
+        f0_file=f0_file,
+        embedder_model=embedder_model,
+        embedder_model_custom=embedder_model_custom,
+        formant_shifting=formant_shifting,
+        formant_qfrency=formant_qfrency,
+        formant_timbre=formant_timbre,
+        pid_file_path=os.path.join(now_dir, "assets", "infer_pid.txt"),
+        post_process=post_process,
+        reverb=reverb,
+        pitch_shift=pitch_shift,
+        limiter=limiter,
+        gain=gain,
+        distortion=distortion,
+        chorus=chorus,
+        bitcrush=bitcrush,
+        clipping=clipping,
+        compressor=compressor,
+        delay=delay,
+        sliders=additional_params,
+    )
 
     return f"Files from {input_folder} inferred successfully."
 
@@ -243,7 +345,12 @@ def run_tts_script(
 
 # Preprocess
 def run_preprocess_script(
-    model_name: str, dataset_path: str, sample_rate: int, cpu_cores: int
+    model_name: str,
+    dataset_path: str,
+    sample_rate: int,
+    cpu_cores: int,
+    cut_preprocess: bool,
+    process_effects: bool,
 ):
     config = get_config()
     per = 3.0 if config.is_half else 3.7
@@ -259,6 +366,8 @@ def run_preprocess_script(
                 sample_rate,
                 per,
                 cpu_cores,
+                cut_preprocess,
+                process_effects,
             ],
         ),
     ]
@@ -280,18 +389,13 @@ def run_extract_script(
     embedder_model: str,
     embedder_model_custom: str = None,
 ):
-    config = get_config()
+
     model_path = os.path.join(logs_path, model_name)
-    extract_f0_script_path = os.path.join(
-        "rvc", "train", "extract", "extract_f0_print.py"
-    )
-    extract_feature_script_path = os.path.join(
-        "rvc", "train", "extract", "extract_feature_print.py"
-    )
+    extract = os.path.join("rvc", "train", "extract", "extract.py")
 
     command_1 = [
         python,
-        extract_f0_script_path,
+        extract,
         *map(
             str,
             [
@@ -300,29 +404,17 @@ def run_extract_script(
                 hop_length,
                 cpu_cores,
                 gpu,
-            ],
-        ),
-    ]
-
-    command_2 = [
-        python,
-        extract_feature_script_path,
-        *map(
-            str,
-            [
-                model_path,
                 rvc_version,
-                gpu,
+                pitch_guidance,
+                sample_rate,
                 embedder_model,
                 embedder_model_custom,
             ],
         ),
     ]
-    subprocess.run(command_1)
-    subprocess.run(command_2)
 
-    generate_config(rvc_version, sample_rate, model_path)
-    generate_filelist(pitch_guidance, model_path, rvc_version, sample_rate)
+    subprocess.run(command_1)
+
     return f"Model {model_name} extracted successfully."
 
 
@@ -342,7 +434,8 @@ def run_train_script(
     overtraining_threshold: int,
     pretrained: bool,
     sync_graph: bool,
-    cache_data_in_gpu: bool,
+    index_algorithm: str = "Auto",
+    cache_data_in_gpu: bool = False,
     custom_pretrained: bool = False,
     g_pretrained_path: str = None,
     d_pretrained_path: str = None,
@@ -391,18 +484,19 @@ def run_train_script(
         ),
     ]
     subprocess.run(command)
-    run_index_script(model_name, rvc_version)
+    run_index_script(model_name, rvc_version, index_algorithm)
     return f"Model {model_name} trained successfully."
 
 
 # Index
-def run_index_script(model_name: str, rvc_version: str):
+def run_index_script(model_name: str, rvc_version: str, index_algorithm: str):
     index_script_path = os.path.join("rvc", "train", "process", "extract_index.py")
     command = [
         python,
         index_script_path,
         os.path.join(logs_path, model_name),
         rvc_version,
+        index_algorithm,
     ]
 
     subprocess.run(command)
@@ -629,8 +723,9 @@ def parse_arguments():
         help=embedder_model_description,
         choices=[
             "contentvec",
+            "chinese-hubert-base",
             "japanese-hubert-base",
-            "chinese-hubert-large",
+            "korean-hubert-base",
             "custom",
         ],
         default="contentvec",
@@ -656,6 +751,31 @@ def parse_arguments():
         type=str,
         help=f0_file_description,
         default=None,
+    )
+    formant_shifting_description = "Apply formant shifting to the input audio. This can help adjust the timbre of the voice."
+    infer_parser.add_argument(
+        "--formant_shifting",
+        type=lambda x: bool(strtobool(x)),
+        choices=[True, False],
+        help=formant_shifting_description,
+        default=False,
+        required=False,
+    )
+    formant_qfrency_description = "Control the frequency of the formant shifting effect. Higher values result in a more pronounced effect."
+    infer_parser.add_argument(
+        "--formant_qfrency",
+        type=float,
+        help=formant_qfrency_description,
+        default=1.0,
+        required=False,
+    )
+    formant_timbre_description = "Control the timbre of the formant shifting effect. Higher values result in a more pronounced effect."
+    infer_parser.add_argument(
+        "--formant_timbre",
+        type=float,
+        help=formant_timbre_description,
+        default=1.0,
+        required=False,
     )
 
     # Parser for 'batch_infer' mode
@@ -780,8 +900,9 @@ def parse_arguments():
         help=embedder_model_description,
         choices=[
             "contentvec",
+            "chinese-hubert-base",
             "japanese-hubert-base",
-            "chinese-hubert-large",
+            "korean-hubert-base",
             "custom",
         ],
         default="contentvec",
@@ -804,6 +925,28 @@ def parse_arguments():
         type=str,
         help=f0_file_description,
         default=None,
+    )
+    batch_infer_parser.add_argument(
+        "--formant_shifting",
+        type=lambda x: bool(strtobool(x)),
+        choices=[True, False],
+        help=formant_shifting_description,
+        default=False,
+        required=False,
+    )
+    batch_infer_parser.add_argument(
+        "--formant_qfrency",
+        type=float,
+        help=formant_qfrency_description,
+        default=1.0,
+        required=False,
+    )
+    batch_infer_parser.add_argument(
+        "--formant_timbre",
+        type=float,
+        help=formant_timbre_description,
+        default=1.0,
+        required=False,
     )
 
     # Parser for 'tts' mode
@@ -942,8 +1085,9 @@ def parse_arguments():
         help=embedder_model_description,
         choices=[
             "contentvec",
+            "chinese-hubert-base",
             "japanese-hubert-base",
-            "chinese-hubert-large",
+            "korean-hubert-base",
             "custom",
         ],
         default="contentvec",
@@ -990,6 +1134,22 @@ def parse_arguments():
         type=int,
         help="Number of CPU cores to use for preprocessing.",
         choices=range(1, 65),
+    )
+    preprocess_parser.add_argument(
+        "--cut_preprocess",
+        type=lambda x: bool(strtobool(x)),
+        choices=[True, False],
+        help="Cut the dataset into smaller segments for faster preprocessing.",
+        default=True,
+        required=False,
+    )
+    preprocess_parser.add_argument(
+        "--process_effects",
+        type=lambda x: bool(strtobool(x)),
+        choices=[True, False],
+        help="Disable all filters during preprocessing.",
+        default=False,
+        required=False,
     )
 
     # Parser for 'extract' mode
@@ -1057,8 +1217,9 @@ def parse_arguments():
         help=embedder_model_description,
         choices=[
             "contentvec",
+            "chinese-hubert-base",
             "japanese-hubert-base",
-            "chinese-hubert-large",
+            "korean-hubert-base",
             "custom",
         ],
         default="contentvec",
@@ -1193,6 +1354,14 @@ def parse_arguments():
         help="Cache training data in GPU memory.",
         default=False,
     )
+    train_parser.add_argument(
+        "--index_algorithm",
+        type=str,
+        choices=["Auto", "Faiss", "KMeans"],
+        help="Choose the method for generating the index file.",
+        default="Auto",
+        required=False,
+    )
 
     # Parser for 'index' mode
     index_parser = subparsers.add_parser(
@@ -1207,6 +1376,14 @@ def parse_arguments():
         help="Version of the RVC model ('v1' or 'v2').",
         choices=["v1", "v2"],
         default="v2",
+    )
+    index_parser.add_argument(
+        "--index_algorithm",
+        type=str,
+        choices=["Auto", "Faiss", "KMeans"],
+        help="Choose the method for generating the index file.",
+        default="Auto",
+        required=False,
     )
 
     # Parser for 'model_extract' mode
@@ -1441,6 +1618,8 @@ def main():
                 dataset_path=args.dataset_path,
                 sample_rate=args.sample_rate,
                 cpu_cores=args.cpu_cores,
+                cut_preprocess=args.cut_preprocess,
+                process_effects=args.process_effects,
             )
         elif args.mode == "extract":
             run_extract_script(
@@ -1472,6 +1651,7 @@ def main():
                 pretrained=args.pretrained,
                 custom_pretrained=args.custom_pretrained,
                 sync_graph=args.sync_graph,
+                index_algorithm=args.index_algorithm,
                 cache_data_in_gpu=args.cache_data_in_gpu,
                 g_pretrained_path=args.g_pretrained_path,
                 d_pretrained_path=args.d_pretrained_path,
@@ -1480,6 +1660,7 @@ def main():
             run_index_script(
                 model_name=args.model_name,
                 rvc_version=args.rvc_version,
+                index_algorithm=args.index_algorithm,
             )
         elif args.mode == "model_extract":
             run_model_extract_script(
