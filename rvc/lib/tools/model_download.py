@@ -2,7 +2,6 @@ import os
 import re
 import six
 import sys
-import wget
 import shutil
 import zipfile
 import requests
@@ -205,7 +204,13 @@ def download_from_url(url):
                 if "huggingface.co" not in url:
                     url = "https://huggingface.co" + url
 
-                    wget.download(url)
+                response = requests.get(url, stream=True)
+                if response.status_code == 200:
+                    file_name = url.split("/")[-1]
+                    with open(file_name, "wb") as f:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            if chunk:
+                                f.write(chunk)
             else:
                 os.chdir(now_dir)
                 return None
@@ -237,7 +242,17 @@ def download_from_url(url):
         else:
             try:
                 os.chdir(zips_path)
-                wget.download(url)
+                response = requests.get(url, stream=True)
+                if response.status_code == 200:
+                    file_name = url.split("/")[-1]
+                    with open(file_name, "wb") as f:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            if chunk:
+                                f.write(chunk)
+                else:
+                    os.chdir(now_dir)
+                    print(f"Failed to download file: HTTP status code {response.status_code}")
+                    return None
             except Exception as error:
                 os.chdir(now_dir)
                 print(f"An error occurred downloading the file: {error}")
@@ -257,7 +272,6 @@ def download_from_url(url):
 
     os.chdir(now_dir)
     return None
-
 
 def extract_and_show_progress(zipfile_path, unzips_path):
     try:
