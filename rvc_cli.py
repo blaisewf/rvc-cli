@@ -340,6 +340,21 @@ def run_tts_script(
         f0_file=f0_file,
         embedder_model=embedder_model,
         embedder_model_custom=embedder_model_custom,
+        formant_shifting=None,
+        formant_qfrency=None,
+        formant_timbre=None,
+        post_process=None,
+        reverb=None,
+        pitch_shift=None,
+        limiter=None,
+        gain=None,
+        distortion=None,
+        chorus=None,
+        bitcrush=None,
+        clipping=None,
+        compressor=None,
+        delay=None,
+        sliders=None,
     )
 
     return f"Text {tts_text} synthesized successfully.", output_rvc_path.replace(
@@ -375,7 +390,6 @@ def run_preprocess_script(
             ],
         ),
     ]
-    os.makedirs(os.path.join(logs_path, model_name), exist_ok=True)
     subprocess.run(command)
     return f"Model {model_name} preprocessed successfully."
 
@@ -526,6 +540,7 @@ def run_model_extract_script(
 # Model information
 def run_model_information_script(pth_path: str):
     print(model_information(pth_path))
+    return model_information(pth_path)
 
 
 # Model blender
@@ -565,6 +580,19 @@ def run_audio_analyzer_script(
         f"Audio file {input_path} analyzed successfully. Plot saved at: {plot_path}",
     )
     return audio_info, plot_path
+
+
+def run_model_author_script(model_author: str):
+    with open(os.path.join(now_dir, "assets", "config.json"), "r") as f:
+        config = json.load(f)
+
+    config["model_author"] = model_author
+
+    with open(os.path.join(now_dir, "assets", "config.json"), "w") as f:
+        json.dump(config, f, indent=4)
+
+    print(f"Model author set to {model_author}.")
+    return f"Model author set to {model_author}."
 
 
 # API

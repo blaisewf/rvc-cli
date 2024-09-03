@@ -76,6 +76,7 @@ sync_graph = strtobool(sys.argv[16])
 current_dir = os.getcwd()
 experiment_dir = os.path.join(current_dir, "logs", model_name)
 config_save_path = os.path.join(experiment_dir, "config.json")
+dataset_path = os.path.join(experiment_dir, "sliced_audios")
 
 with open(config_save_path, "r") as f:
     config = json.load(f)
@@ -97,6 +98,7 @@ loss_disc_history = []
 smoothed_loss_disc_history = []
 lowest_value = {"step": 0, "value": float("inf"), "epoch": 0}
 training_file_path = os.path.join(experiment_dir, "training_data.json")
+overtrain_info = None
 
 import logging
 
@@ -137,8 +139,14 @@ def main():
         Starts the training process with multi-GPU support.
         """
         children = []
-        pid_file_path = os.path.join(experiment_dir, "train_pid.txt")
-        with open(pid_file_path, "w") as pid_file:
+        pid_data = {"process_pids": []}
+        with open(config_save_path, "r") as pid_file:
+            try:
+                existing_data = json.load(pid_file)
+                pid_data.update(existing_data)
+            except json.JSONDecodeError:
+                pass
+        with open(config_save_path, "w") as pid_file:
             for i in range(n_gpus):
                 subproc = mp.Process(
                     target=run,
@@ -156,7 +164,8 @@ def main():
                 )
                 children.append(subproc)
                 subproc.start()
-                pid_file.write(str(subproc.pid) + "\n")
+                pid_data["process_pids"].append(subproc.pid)
+            json.dump(pid_data, pid_file, indent=4)
 
         for i in range(n_gpus):
             children[i].join()
@@ -533,7 +542,7 @@ def train_and_evaluate(
     net_d.train()
 
     # Data caching
-    if True:
+    if cache_data_in_gpu:
         data_iterator = cache
         if cache == []:
             for batch_idx, info in enumerate(train_loader):
@@ -559,7 +568,7 @@ def train_and_evaluate(
                         wave_lengths,
                         sid,
                     ) = info
-                if cache_data_in_gpu == True and torch.cuda.is_available():
+                if torch.cuda.is_available():
                     phone = phone.cuda(rank, non_blocking=True)
                     phone_lengths = phone_lengths.cuda(rank, non_blocking=True)
                     if pitch_guidance == True:
@@ -604,6 +613,8 @@ def train_and_evaluate(
                     )
         else:
             shuffle(cache)
+    else:
+        data_iterator = enumerate(train_loader)
 
     epoch_recorder = EpochRecorder()
     with tqdm(total=len(train_loader), leave=False) as pbar:
@@ -806,6 +817,8 @@ def train_and_evaluate(
                 ckpt = net_g.module.state_dict()
             else:
                 ckpt = net_g.state_dict()
+            if overtraining_detector != True:
+                overtrain_info = None
             extract_model(
                 ckpt=ckpt,
                 sr=sample_rate,
@@ -819,6 +832,7 @@ def train_and_evaluate(
                 step=global_step,
                 version=version,
                 hps=hps,
+                overtrain_info=overtrain_info,
             )
 
     def check_overtraining(smoothed_loss_history, threshold, epsilon=0.004):
@@ -915,6 +929,8 @@ def train_and_evaluate(
             consecutive_increases_gen += 1
         else:
             consecutive_increases_gen = 0
+
+        overtrain_info = f"Smoothed loss_g {smoothed_value_gen:.3f} and loss_d {smoothed_value_disc:.3f}"
         # Save the data in the JSON file if the epoch is divisible by save_every_epoch
         if epoch % save_every_epoch == 0:
             save_to_json(
@@ -949,7 +965,8 @@ def train_and_evaluate(
                 ckpt = net_g.module.state_dict()
             else:
                 ckpt = net_g.state_dict()
-
+            if overtraining_detector != True:
+                overtrain_info = None
             extract_model(
                 ckpt=ckpt,
                 sr=sample_rate,
@@ -963,6 +980,7 @@ def train_and_evaluate(
                 step=global_step,
                 version=version,
                 hps=hps,
+                overtrain_info=overtrain_info,
             )
 
     # Print training progress
@@ -999,8 +1017,12 @@ def train_and_evaluate(
             f"Lowest generator loss: {lowest_value_rounded} at epoch {lowest_value['epoch']}, step {lowest_value['step']}"
         )
 
-        pid_file_path = os.path.join(experiment_dir, "train_pid.txt")
-        os.remove(pid_file_path)
+        pid_file_path = os.path.join(experiment_dir, "config.json")
+        with open(pid_file_path, "r") as pid_file:
+            pid_data = json.load(pid_file)
+        with open(pid_file_path, "w") as pid_file:
+            pid_data.pop("process_pids", None)
+            json.dump(pid_data, pid_file, indent=4)
 
         if not os.path.exists(
             os.path.join(experiment_dir, f"{model_name}_{epoch}e_{global_step}s.pth")
@@ -1009,7 +1031,8 @@ def train_and_evaluate(
                 ckpt = net_g.module.state_dict()
             else:
                 ckpt = net_g.state_dict()
-
+            if overtraining_detector != True:
+                overtrain_info = None
             extract_model(
                 ckpt=ckpt,
                 sr=sample_rate,
@@ -1023,6 +1046,7 @@ def train_and_evaluate(
                 step=global_step,
                 version=version,
                 hps=hps,
+                overtrain_info=overtrain_info,
             )
         sleep(1)
         os._exit(2333333)
