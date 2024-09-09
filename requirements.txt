@@ -47,3 +47,18 @@ pypresence
 beautifulsoup4
 flask
 local-attention
+
+# UVR
+samplerate==0.1.0
+six>=1.16
+pydub>=0.25
+onnx>=1.14
+onnx2torch>=1.5
+onnxruntime>=1.17; sys_platform != 'darwin'
+onnxruntime-gpu>=1.17; sys_platform != 'darwin'
+julius>=0.2
+diffq>=0.2
+ml_collections
+resampy>=0.4
+beartype==0.18.5
+rotary-embedding-torch==0.6.1
