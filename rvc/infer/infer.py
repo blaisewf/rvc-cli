@@ -22,9 +22,6 @@ from pedalboard import (
     Delay,
 )
 
-from scipy.io import wavfile
-from audio_upscaler import upscale
-
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 
@@ -211,6 +208,7 @@ class VoiceConverter:
         hop_length: int = 128,
         split_audio: bool = False,
         f0_autotune: bool = False,
+        f0_autotune_strength: float = 1,
         filter_radius: int = 3,
         embedder_model: str = "contentvec",
         embedder_model_custom: str = None,
@@ -257,6 +255,8 @@ class VoiceConverter:
             print(f"Converting audio '{audio_input_path}'...")
 
             if upscale_audio == True:
+                from audio_upscaler import upscale
+
                 upscale(audio_input_path, audio_input_path)
             audio = load_audio_infer(
                 audio_input_path,
@@ -309,6 +309,7 @@ class VoiceConverter:
                     protect=protect,
                     hop_length=hop_length,
                     f0_autotune=f0_autotune,
+                    f0_autotune_strength=f0_autotune_strength,
                     f0_file=f0_file,
                 )
                 converted_chunks.append(audio_opt)
@@ -407,9 +408,9 @@ class VoiceConverter:
                     audio_output_path=new_output,
                     **kwargs,
                 )
-                print(f"Conversion completed at '{audio_input_paths}'.")
-                elapsed_time = time.time() - start_time
-                print(f"Batch conversion completed in {elapsed_time:.2f} seconds.")
+            print(f"Conversion completed at '{audio_input_paths}'.")
+            elapsed_time = time.time() - start_time
+            print(f"Batch conversion completed in {elapsed_time:.2f} seconds.")
         except Exception as error:
             print(f"An error occurred during audio batch conversion: {error}")
             print(traceback.format_exc())
