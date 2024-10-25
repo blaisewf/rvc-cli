@@ -1,6 +1,6 @@
 {
   "name": "rvc_cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "🚀 RVC + UVR = A perfect set of tools for voice cloning, easily and free!",
   "scripts": {
     "dev": "next dev",

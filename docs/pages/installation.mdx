@@ -1,0 +1,55 @@
+## Installation Guides
+
+### Windows
+
+#### 1. **Install Dependencies:** 
+    - Open a Command Prompt or PowerShell window.
+    - Navigate to the directory containing the `install.bat` file.
+    - Run the `install.bat` file. This will create a Conda environment and install all necessary dependencies.
+#### 2. **Run the RVC CLI:**
+    - After installing requirements, you can start using the CLI. However, make sure you run the `prerequisites` command first to download additional models and executables.
+    - Launch the application using:
+      ```bash
+      env/python.exe cli.py prerequisites
+      ```
+    - Once the prerequisites are downloaded, you can use the RVC CLI as usual.
+### macOS & Linux
+
+#### 1. **Install Python (3.9 or 3.10):** 
+   - If you don't have Python installed, use your system's package manager. For example, on Ubuntu:
+      ```bash
+      sudo apt update
+      sudo apt install python3
+      ```
+#### 2. **Create a Virtual Environment:**
+   - Open a terminal window.
+   - Navigate to the directory containing the `rvc_cli.py` file.
+   - Run the following command to create a virtual environment:
+      ```bash
+      python3 -m venv venv
+      ```
+#### 3. **Activate the Environment:**
+   - Run the following command to activate the virtual environment:
+      ```bash
+      source venv/bin/activate
+      ```
+#### 4. **Install Dependencies:**
+   - Run the following command to install all necessary dependencies:
+      ```bash
+      pip install -r requirements.txt
+      ```
+#### 5. **Run the RVC CLI with `prerequisites`:**
+    - Launch the application and run the `prerequisites` command to download additional models and executables.
+      ```bash
+      python cli.py prerequisites
+      ```
+#### 6. **Run the RVC CLI:**
+    - After the prerequisites are downloaded, you can use the RVC CLI as usual.
+
+**Note:** 
+
+- For Linux, you may need to install additional packages depending on your system.
+- If you face any errors during the installation process, consult the respective package managers' documentation for further instructions.
+
+
+
