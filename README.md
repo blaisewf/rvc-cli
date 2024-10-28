@@ -2,6 +2,9 @@
 
 [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/iahispano/applio/blob/master/assets/Applio_NoUI.ipynb)
 
+> [!NOTE]  
+> Issues are not handled in this repository due to time constraints. For questions or discussions, feel free to join [AI Hispano on Discord](https://discord.gg/iahispano). If you're experiencing a technical issue, please report it on [Applio's Issues page](https://github.com/IAHispano/Applio/issues) and specify that the problem occurs via CLI.
+
 ### Installation
 
 Ensure that you have the necessary Python packages installed by following these steps (Python 3.9 is recommended):
