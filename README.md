@@ -11,7 +11,7 @@ Ensure that you have the necessary Python packages installed by following these 
 
 #### Windows
 
-Execute the [install.bat](./install.bat) file to activate a Conda environment. Afterward, launch the application using `env/python.exe cli.py` instead of the conventional `python cli.py` command.
+Execute the [install.bat](./install.bat) file to activate a Conda environment. Afterward, launch the application using `env/python.exe rvc_cli.py` instead of the conventional `python rvc_cli.py` command.
 
 #### Linux
 
@@ -27,9 +27,48 @@ For detailed information and command-line options, refer to the help command:
 ```bash
 python rvc_cli.py -h
 python uvr_cli.py -h
+
+python rvc_cli.py tts -h
+python rvc_cli.py prerequisites -h
 ```
 
 This command provides a clear overview of the available modes and their corresponding parameters, facilitating effective utilization of the RVC CLI, but if you need more information, you can check the [documentation](https://rvc-cli.pages.dev/).
+
+### Examples
+
+To do a text to speech from the command line, complete the prerequisites
+
+```bash
+python rvc_cli.py prerequisites --exe True
+```
+
+Grab a model from [https://applio.org/models](https://applio.org/models) and drop it in the `rvc/models/pretraineds/pretraineds_custom/` directory, e.g.
+
+```bash
+(cd rvc/models/pretraineds/pretraineds_custom
+wget https://huggingface.co/Coolwowsocoolwow/Sir_Topham_Hatt_2010s/resolve/main/Sir_Topham_Hatt_2010s_Voice_v2.zip
+unzip Sir_Topham_Hatt_2010s_Voice_v2.zip
+rm Sir_Topham_Hatt_2010s_Voice_v2.zip)
+```
+
+Get a short list of the standard voices available with:
+
+```bash
+venv/bin/edge-tts -l | grep en-US
+```
+
+and choose one for a test
+
+```bash
+python rvc_cli.py tts	\
+	--tts_voice en-US-EmmaNeural	\
+	--output_tts_path /tmp/one.mp3	\
+	--output_rvc_path /tmp/two.wav	\
+	--pth_path rvc/models/pretraineds/pretraineds_custom/Sir_Topham_Hatt_2010s_Voice_e220_s3740.pth	\
+	--index_path rvc/models/pretraineds/pretraineds_custom/added_IVF438_Flat_nprobe_1_Sir_Topham_Hatt_2010s_Voice_v2.index	\
+	--tts_file nofile	\
+	--tts_text "Hello useful little engine!"
+```
 
 ### References
 
