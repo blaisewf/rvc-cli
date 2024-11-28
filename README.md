@@ -11,7 +11,7 @@ Ensure that you have the necessary Python packages installed by following these 
 
 #### Windows
 
-Execute the [install.bat](./install.bat) file to activate a Conda environment. Afterward, launch the application using `env/python.exe cli.py` instead of the conventional `python cli.py` command.
+Execute the [install.bat](./install.bat) file to activate a Conda environment. Afterward, launch the application using `env/python.exe rvc_cli.py` or  instead of the conventional `python rvc_cli.py` command.
 
 #### Linux
 
