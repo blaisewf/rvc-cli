@@ -33,7 +33,7 @@ def load_voices_data():
 
 
 voices_data = load_voices_data()
-locales = list({voice["Locale"] for voice in voices_data})
+locales = list({voice["ShortName"] for voice in voices_data})
 
 
 @lru_cache(maxsize=None)
