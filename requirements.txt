@@ -2,7 +2,7 @@
 pip>=23.3; sys_platform == 'darwin'
 wheel; sys_platform == 'darwin'
 PyYAML; sys_platform == 'darwin'
-numpy==1.23.5
+numpy==1.26.4
 requests>=2.31.0,<2.32.0
 tqdm
 wget
@@ -16,24 +16,24 @@ soundfile==0.12.1
 noisereduce
 pedalboard
 stftpitchshift
+soxr
 
 # Machine learning and deep learning
 omegaconf>=2.0.6; sys_platform == 'darwin' 
 numba; sys_platform == 'linux'
-numba==0.57.0; sys_platform == 'darwin' or sys_platform == 'win32'
-torch==2.3.1
-torchaudio==2.3.1
-torchvision==0.18.1
+numba==0.61.0; sys_platform == 'darwin' or sys_platform == 'win32'
+torch==2.7.0
+torchaudio==2.7.0
+torchvision
 torchcrepe==0.0.23
 torchfcpe
 einops
-libf0
 transformers==4.44.2
 
 # Visualization and UI
 matplotlib==3.7.2
 tensorboard
-gradio==4.43.0
+gradio==5.23.1
 
 # Miscellaneous utilities
 certifi>=2023.07.22; sys_platform == 'darwin'  
@@ -42,7 +42,6 @@ tensorboardX
 edge-tts==6.1.9
 pypresence
 beautifulsoup4
-flask
 
 # UVR
 samplerate==0.1.0

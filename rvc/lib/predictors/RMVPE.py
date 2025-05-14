@@ -6,12 +6,10 @@ import numpy as np
 from librosa.filters import mel
 from typing import List
 
-# Constants for readability
 N_MELS = 128
 N_CLASS = 360
 
 
-# Define a helper function for creating convolutional blocks
 class ConvBlockRes(nn.Module):
     """
     A convolutional block with residual connection.
@@ -59,7 +57,6 @@ class ConvBlockRes(nn.Module):
             return self.conv(x) + x
 
 
-# Define a class for residual encoder blocks
 class ResEncoderBlock(nn.Module):
     """
     A residual encoder block.
@@ -94,7 +91,6 @@ class ResEncoderBlock(nn.Module):
             return x
 
 
-# Define a class for the encoder
 class Encoder(nn.Module):
     """
     The encoder part of the DeepUnet.
@@ -146,7 +142,6 @@ class Encoder(nn.Module):
         return x, concat_tensors
 
 
-# Define a class for the intermediate layer
 class Intermediate(nn.Module):
     """
     The intermediate layer of the DeepUnet.
@@ -177,7 +172,6 @@ class Intermediate(nn.Module):
         return x
 
 
-# Define a class for residual decoder blocks
 class ResDecoderBlock(nn.Module):
     """
     A residual decoder block.
@@ -220,7 +214,6 @@ class ResDecoderBlock(nn.Module):
         return x
 
 
-# Define a class for the decoder
 class Decoder(nn.Module):
     """
     The decoder part of the DeepUnet.
@@ -250,7 +243,6 @@ class Decoder(nn.Module):
         return x
 
 
-# Define a class for the DeepUnet architecture
 class DeepUnet(nn.Module):
     """
     The DeepUnet architecture.
@@ -294,7 +286,6 @@ class DeepUnet(nn.Module):
         return x
 
 
-# Define a class for the end-to-end model
 class E2E(nn.Module):
     """
     The end-to-end model.
@@ -348,13 +339,11 @@ class E2E(nn.Module):
         return x
 
 
-# Define a class for the MelSpectrogram extractor
 class MelSpectrogram(torch.nn.Module):
     """
     Extracts Mel-spectrogram features from audio.
 
     Args:
-        is_half (bool): Whether to use half-precision floating-point numbers.
         n_mel_channels (int): Number of Mel-frequency bands.
         sample_rate (int): Sampling rate of the audio.
         win_length (int): Length of the window function in samples.
@@ -367,7 +356,6 @@ class MelSpectrogram(torch.nn.Module):
 
     def __init__(
         self,
-        is_half,
         n_mel_channels,
         sample_rate,
         win_length,
@@ -396,7 +384,6 @@ class MelSpectrogram(torch.nn.Module):
         self.sample_rate = sample_rate
         self.n_mel_channels = n_mel_channels
         self.clamp = clamp
-        self.is_half = is_half
 
     def forward(self, audio, keyshift=0, speed=1, center=True):
         factor = 2 ** (keyshift / 12)
@@ -426,37 +413,30 @@ class MelSpectrogram(torch.nn.Module):
                 magnitude = F.pad(magnitude, (0, 0, 0, size - resize))
             magnitude = magnitude[:, :size, :] * self.win_length / win_length_new
         mel_output = torch.matmul(self.mel_basis, magnitude)
-        if self.is_half:
-            mel_output = mel_output.half()
         log_mel_spec = torch.log(torch.clamp(mel_output, min=self.clamp))
         return log_mel_spec
 
 
-# Define a class for the RMVPE0 predictor
 class RMVPE0Predictor:
     """
     A predictor for fundamental frequency (F0) based on the RMVPE0 model.
 
     Args:
         model_path (str): Path to the RMVPE0 model file.
-        is_half (bool): Whether to use half-precision floating-point numbers.
         device (str, optional): Device to use for computation. Defaults to None, which uses CUDA if available.
     """
 
-    def __init__(self, model_path, is_half, device=None):
+    def __init__(self, model_path, device=None):
         self.resample_kernel = {}
         model = E2E(4, 1, (2, 2))
-        ckpt = torch.load(model_path, map_location="cpu")
+        ckpt = torch.load(model_path, map_location="cpu", weights_only=True)
         model.load_state_dict(ckpt)
         model.eval()
-        if is_half:
-            model = model.half()
         self.model = model
         self.resample_kernel = {}
-        self.is_half = is_half
         self.device = device
         self.mel_extractor = MelSpectrogram(
-            is_half, N_MELS, 16000, 1024, 160, None, 30, 8000
+            N_MELS, 16000, 1024, 160, None, 30, 8000
         ).to(device)
         self.model = self.model.to(device)
         cents_mapping = 20 * np.arange(N_CLASS) + 1997.3794084376191
@@ -502,8 +482,6 @@ class RMVPE0Predictor:
         mel = self.mel_extractor(audio, center=True)
         hidden = self.mel2hidden(mel)
         hidden = hidden.squeeze(0).cpu().numpy()
-        if self.is_half == True:
-            hidden = hidden.astype("float32")
         f0 = self.decode(hidden, thred=thred)
         return f0
 
@@ -535,7 +513,6 @@ class RMVPE0Predictor:
         return devided
 
 
-# Define a class for BiGRU (bidirectional GRU)
 class BiGRU(nn.Module):
     """
     A bidirectional GRU layer.

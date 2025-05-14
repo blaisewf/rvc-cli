@@ -141,7 +141,7 @@ class STFT:
 
         spec = torch.stft(
             y,
-            n_fft_new,
+            n_fft=n_fft_new,
             hop_length=hop_length_new,
             win_length=win_size_new,
             window=hann_window[keyshift_key],
@@ -728,7 +728,9 @@ class FCPEInfer:
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
-        ckpt = torch.load(model_path, map_location=torch.device(self.device))
+        ckpt = torch.load(
+            model_path, map_location=torch.device(self.device), weights_only=True
+        )
         self.args = DotDict(ckpt["config"])
         self.dtype = dtype
         model = FCPE(
@@ -904,9 +906,7 @@ class FCPEF0Predictor(F0Predictor):
         p_len = x.shape[0] // self.hop_length if p_len is None else p_len
         f0 = self.fcpe(x, sr=self.sample_rate, threshold=self.threshold)[0, :, 0]
         if torch.all(f0 == 0):
-            return f0.cpu().numpy() if p_len is None else np.zeros(p_len), (
-                f0.cpu().numpy() if p_len is None else np.zeros(p_len)
-            )
+            return f0.cpu().numpy() if p_len is None else np.zeros(p_len)
         return self.post_process(x, self.sample_rate, f0, p_len)[0]
 
     def compute_f0_uv(self, wav, p_len=None):

@@ -8,13 +8,39 @@ echo.
 set "INSTALL_DIR=%cd%"
 set "MINICONDA_DIR=%UserProfile%\Miniconda3"
 set "ENV_DIR=%INSTALL_DIR%\env"
-set "MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-py39_23.9.0-0-Windows-x86_64.exe"
+set "MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Windows-x86_64.exe"
 set "CONDA_EXE=%MINICONDA_DIR%\Scripts\conda.exe"
+
+set "startTime=%TIME%"
+set "startHour=%TIME:~0,2%"
+set "startMin=%TIME:~3,2%"
+set "startSec=%TIME:~6,2%"
+set /a startHour=1%startHour% - 100
+set /a startMin=1%startMin% - 100
+set /a startSec=1%startSec% - 100
+set /a startTotal = startHour*3600 + startMin*60 + startSec
 
 call :cleanup
 call :install_miniconda
 call :create_conda_env
 call :install_dependencies
+
+set "endTime=%TIME%"
+set "endHour=%TIME:~0,2%"
+set "endMin=%TIME:~3,2%"
+set "endSec=%TIME:~6,2%"
+set /a endHour=1%endHour% - 100
+set /a endMin=1%endMin% - 100
+set /a endSec=1%endSec% - 100
+set /a endTotal = endHour*3600 + endMin*60 + endSec
+set /a elapsed = endTotal - startTotal
+if %elapsed% lss 0 set /a elapsed += 86400
+set /a hours = elapsed / 3600
+set /a minutes = (elapsed %% 3600) / 60
+set /a seconds = elapsed %% 60
+
+echo Installation time: %hours% hours, %minutes% minutes, %seconds% seconds.
+echo.
 
 echo RVC CLI has been installed successfully!
 echo.
@@ -48,16 +74,16 @@ exit /b 0
 
 :create_conda_env
 echo Creating Conda environment...
-call "%MINICONDA_DIR%\_conda.exe" create --no-shortcuts -y -k --prefix "%ENV_DIR%" python=3.9
+call "%MINICONDA_DIR%\_conda.exe" create --no-shortcuts -y -k --prefix "%ENV_DIR%" python=3.10
 if errorlevel 1 goto :error
 echo Conda environment created successfully.
 echo.
 
 if exist "%ENV_DIR%\python.exe" (
-    echo Installing specific pip version...
-    "%ENV_DIR%\python.exe" -m pip install "pip<24.1"
+    echo Installing uv package installer...
+    "%ENV_DIR%\python.exe" -m pip install uv
     if errorlevel 1 goto :error
-    echo Pip installation complete.
+    echo uv installation complete.
     echo.
 )
 exit /b 0
@@ -65,9 +91,9 @@ exit /b 0
 :install_dependencies
 echo Installing dependencies...
 call "%MINICONDA_DIR%\condabin\conda.bat" activate "%ENV_DIR%" || goto :error
-pip install --upgrade setuptools || goto :error
-pip install --no-cache-dir -r "%INSTALL_DIR%\requirements.txt" || goto :error
-pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --upgrade --index-url https://download.pytorch.org/whl/cu121 || goto :error
+uv pip install --upgrade setuptools || goto :error
+uv pip install torch==2.7.0 torchvision torchaudio==2.7.0 --upgrade --index-url https://download.pytorch.org/whl/cu128 || goto :error
+uv pip install -r "%INSTALL_DIR%\requirements.txt" || goto :error
 call "%MINICONDA_DIR%\condabin\conda.bat" deactivate
 echo Dependencies installation complete.
 echo.

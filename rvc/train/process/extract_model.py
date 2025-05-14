@@ -1,9 +1,11 @@
-import os, sys
-import torch
-import hashlib
 import datetime
-from collections import OrderedDict
+import hashlib
 import json
+import os
+import sys
+from collections import OrderedDict
+
+import torch
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -25,39 +27,28 @@ def replace_keys_in_dict(d, old_key_part, new_key_part):
 def extract_model(
     ckpt,
     sr,
-    pitch_guidance,
     name,
-    model_dir,
+    model_path,
     epoch,
     step,
-    version,
     hps,
     overtrain_info,
+    vocoder,
+    pitch_guidance=True,
+    version="v2",
 ):
     try:
-        print(f"Saved model '{model_dir}' (epoch {epoch} and step {step})")
+        model_dir = os.path.dirname(model_path)
+        os.makedirs(model_dir, exist_ok=True)
 
-        model_dir_path = os.path.dirname(model_dir)
-        os.makedirs(model_dir_path, exist_ok=True)
-
-        if "best_epoch" in model_dir:
-            pth_file = f"{name}_{epoch}e_{step}s_best_epoch.pth"
-        else:
-            pth_file = f"{name}_{epoch}e_{step}s.pth"
-
-        pth_file_old_version_path = os.path.join(
-            model_dir_path, f"{pth_file}_old_version.pth"
-        )
-
-        model_dir_path = os.path.dirname(model_dir)
-        if os.path.exists(os.path.join(model_dir_path, "model_info.json")):
-            with open(os.path.join(model_dir_path, "model_info.json"), "r") as f:
+        if os.path.exists(os.path.join(model_dir, "model_info.json")):
+            with open(os.path.join(model_dir, "model_info.json"), "r") as f:
                 data = json.load(f)
-                dataset_lenght = data.get("total_dataset_duration", None)
+                dataset_length = data.get("total_dataset_duration", None)
                 embedder_model = data.get("embedder_model", None)
                 speakers_id = data.get("speakers_id", 1)
         else:
-            dataset_lenght = None
+            dataset_length = None
 
         with open(os.path.join(now_dir, "assets", "config.json"), "r") as f:
             data = json.load(f)
@@ -96,31 +87,28 @@ def extract_model(
         opt["version"] = version
         opt["creation_date"] = datetime.datetime.now().isoformat()
 
-        hash_input = f"{str(ckpt)} {epoch} {step} {datetime.datetime.now().isoformat()}"
-        model_hash = hashlib.sha256(hash_input.encode()).hexdigest()
-        opt["model_hash"] = model_hash
+        hash_input = f"{name}-{epoch}-{step}-{sr}-{version}-{opt['config']}"
+        opt["model_hash"] = hashlib.sha256(hash_input.encode()).hexdigest()
         opt["overtrain_info"] = overtrain_info
-        opt["dataset_lenght"] = dataset_lenght
+        opt["dataset_length"] = dataset_length
         opt["model_name"] = name
         opt["author"] = model_author
         opt["embedder_model"] = embedder_model
         opt["speakers_id"] = speakers_id
+        opt["vocoder"] = vocoder
 
-        torch.save(opt, os.path.join(model_dir_path, pth_file))
-
-        model = torch.load(model_dir, map_location=torch.device("cpu"))
         torch.save(
             replace_keys_in_dict(
                 replace_keys_in_dict(
-                    model, ".parametrizations.weight.original1", ".weight_v"
+                    opt, ".parametrizations.weight.original1", ".weight_v"
                 ),
                 ".parametrizations.weight.original0",
                 ".weight_g",
             ),
-            pth_file_old_version_path,
+            model_path,
         )
-        os.remove(model_dir)
-        os.rename(pth_file_old_version_path, model_dir)
+
+        print(f"Saved model '{model_path}' (epoch {epoch} and step {step})")
 
     except Exception as error:
         print(f"An error occurred extracting the model: {error}")

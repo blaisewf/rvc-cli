@@ -17,8 +17,8 @@ def extract(ckpt):
 def model_blender(name, path1, path2, ratio):
     try:
         message = f"Model {path1} and {path2} are merged with alpha {ratio}."
-        ckpt1 = torch.load(path1, map_location="cpu")
-        ckpt2 = torch.load(path2, map_location="cpu")
+        ckpt1 = torch.load(path1, map_location="cpu", weights_only=True)
+        ckpt2 = torch.load(path2, map_location="cpu", weights_only=True)
 
         if ckpt1["sr"] != ckpt2["sr"]:
             return "The sample rates of the two models are not the same."
@@ -27,6 +27,7 @@ def model_blender(name, path1, path2, ratio):
         cfg_f0 = ckpt1["f0"]
         cfg_version = ckpt1["version"]
         cfg_sr = ckpt1["sr"]
+        vocoder = ckpt1.get("vocoder", "HiFi-GAN")
 
         if "model" in ckpt1:
             ckpt1 = extract(ckpt1)
@@ -59,6 +60,7 @@ def model_blender(name, path1, path2, ratio):
         opt["f0"] = cfg_f0
         opt["version"] = cfg_version
         opt["info"] = message
+        opt["vocoder"] = vocoder
 
         torch.save(opt, os.path.join("logs", f"{name}.pth"))
         print(message)

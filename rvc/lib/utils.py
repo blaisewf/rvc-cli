@@ -1,13 +1,12 @@
-import os, sys
+import os
+import sys
+import soxr
 import librosa
 import soundfile as sf
 import numpy as np
 import re
 import unicodedata
 import wget
-import subprocess
-from pydub import AudioSegment
-import tempfile
 from torch import nn
 
 import logging
@@ -42,7 +41,9 @@ def load_audio(file, sample_rate):
         if len(audio.shape) > 1:
             audio = librosa.to_mono(audio.T)
         if sr != sample_rate:
-            audio = librosa.resample(audio, orig_sr=sr, target_sr=sample_rate)
+            audio = librosa.resample(
+                audio, orig_sr=sr, target_sr=sample_rate, res_type="soxr_vhq"
+            )
     except Exception as error:
         raise RuntimeError(f"An error occurred loading the audio: {error}")
 
@@ -63,7 +64,9 @@ def load_audio_infer(
         if len(audio.shape) > 1:
             audio = librosa.to_mono(audio.T)
         if sr != sample_rate:
-            audio = librosa.resample(audio, orig_sr=sr, target_sr=sample_rate)
+            audio = librosa.resample(
+                audio, orig_sr=sr, target_sr=sample_rate, res_type="soxr_vhq"
+            )
         if formant_shifting:
             formant_qfrency = kwargs.get("formant_qfrency", 0.8)
             formant_timbre = kwargs.get("formant_timbre", 0.8)
@@ -83,11 +86,9 @@ def load_audio_infer(
 
 
 def format_title(title):
-    formatted_title = (
-        unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode("utf-8")
-    )
+    formatted_title = unicodedata.normalize("NFC", title)
     formatted_title = re.sub(r"[\u2500-\u257F]+", "", formatted_title)
-    formatted_title = re.sub(r"[^\w\s.-]", "", formatted_title)
+    formatted_title = re.sub(r"[^\w\s.-]", "", formatted_title, flags=re.UNICODE)
     formatted_title = re.sub(r"\s+", "_", formatted_title)
     return formatted_title
 

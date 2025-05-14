@@ -15,7 +15,6 @@ logs_path = os.path.join(current_script_directory, "logs")
 from rvc.lib.tools.prerequisites_download import prequisites_download_pipeline
 from rvc.train.process.model_blender import model_blender
 from rvc.train.process.model_information import model_information
-from rvc.train.process.extract_small_model import extract_small_model
 from rvc.lib.tools.analyzer import analyze_audio
 from rvc.lib.tools.launch_tensorboard import launch_tensorboard_pipeline
 from rvc.lib.tools.model_download import model_download_pipeline
@@ -53,7 +52,6 @@ def get_config():
 # Infer
 def run_infer_script(
     pitch: int,
-    filter_radius: int,
     index_rate: float,
     volume_envelope: int,
     protect: float,
@@ -119,7 +117,6 @@ def run_infer_script(
         "model_path": pth_path,
         "index_path": index_path,
         "pitch": pitch,
-        "filter_radius": filter_radius,
         "index_rate": index_rate,
         "volume_envelope": volume_envelope,
         "protect": protect,
@@ -189,7 +186,6 @@ def run_infer_script(
 # Batch infer
 def run_batch_infer_script(
     pitch: int,
-    filter_radius: int,
     index_rate: float,
     volume_envelope: int,
     protect: float,
@@ -255,7 +251,6 @@ def run_batch_infer_script(
         "model_path": pth_path,
         "index_path": index_path,
         "pitch": pitch,
-        "filter_radius": filter_radius,
         "index_rate": index_rate,
         "volume_envelope": volume_envelope,
         "protect": protect,
@@ -328,7 +323,6 @@ def run_tts_script(
     tts_voice: str,
     tts_rate: int,
     pitch: int,
-    filter_radius: int,
     index_rate: float,
     volume_envelope: int,
     protect: float,
@@ -352,7 +346,9 @@ def run_tts_script(
 
     tts_script_path = os.path.join("rvc", "lib", "tools", "tts.py")
 
-    if os.path.exists(output_tts_path):
+    if os.path.exists(output_tts_path) and os.path.abspath(output_tts_path).startswith(
+        os.path.abspath("assets")
+    ):
         os.remove(output_tts_path)
 
     command_tts = [
@@ -373,7 +369,6 @@ def run_tts_script(
     infer_pipeline = import_voice_converter()
     infer_pipeline.convert_audio(
         pitch=pitch,
-        filter_radius=filter_radius,
         index_rate=index_rate,
         volume_envelope=volume_envelope,
         protect=protect,
@@ -421,13 +416,13 @@ def run_preprocess_script(
     dataset_path: str,
     sample_rate: int,
     cpu_cores: int,
-    cut_preprocess: bool,
+    cut_preprocess: str,
     process_effects: bool,
     noise_reduction: bool,
     clean_strength: float,
+    chunk_len: float,
+    overlap_len: float,
 ):
-    config = get_config()
-    per = 3.0 if config.is_half else 3.7
     preprocess_script_path = os.path.join("rvc", "train", "preprocess", "preprocess.py")
     command = [
         python,
@@ -438,12 +433,13 @@ def run_preprocess_script(
                 os.path.join(logs_path, model_name),
                 dataset_path,
                 sample_rate,
-                per,
                 cpu_cores,
                 cut_preprocess,
                 process_effects,
                 noise_reduction,
                 clean_strength,
+                chunk_len,
+                overlap_len,
             ],
         ),
     ]
@@ -454,7 +450,6 @@ def run_preprocess_script(
 # Extract
 def run_extract_script(
     model_name: str,
-    rvc_version: str,
     f0_method: str,
     hop_length: int,
     cpu_cores: int,
@@ -462,6 +457,7 @@ def run_extract_script(
     sample_rate: int,
     embedder_model: str,
     embedder_model_custom: str = None,
+    include_mutes: int = 2,
 ):
 
     model_path = os.path.join(logs_path, model_name)
@@ -478,10 +474,10 @@ def run_extract_script(
                 hop_length,
                 cpu_cores,
                 gpu,
-                rvc_version,
                 sample_rate,
                 embedder_model,
                 embedder_model_custom,
+                include_mutes,
             ],
         ),
     ]
@@ -494,7 +490,6 @@ def run_extract_script(
 # Train
 def run_train_script(
     model_name: str,
-    rvc_version: str,
     save_every_epoch: int,
     save_only_latest: bool,
     save_every_weights: bool,
@@ -502,7 +497,6 @@ def run_train_script(
     sample_rate: int,
     batch_size: int,
     gpu: int,
-    pitch_guidance: bool,
     overtraining_detector: bool,
     overtraining_threshold: int,
     pretrained: bool,
@@ -512,15 +506,15 @@ def run_train_script(
     custom_pretrained: bool = False,
     g_pretrained_path: str = None,
     d_pretrained_path: str = None,
+    vocoder: str = "HiFi-GAN",
+    checkpointing: bool = False,
 ):
 
     if pretrained == True:
         from rvc.lib.tools.pretrained_selector import pretrained_selector
 
         if custom_pretrained == False:
-            pg, pd = pretrained_selector(bool(pitch_guidance))[str(rvc_version)][
-                int(sample_rate)
-            ]
+            pg, pd = pretrained_selector(str(vocoder), int(sample_rate))
         else:
             if g_pretrained_path is None or d_pretrained_path is None:
                 raise ValueError(
@@ -542,54 +536,37 @@ def run_train_script(
                 total_epoch,
                 pg,
                 pd,
-                rvc_version,
                 gpu,
                 batch_size,
                 sample_rate,
-                pitch_guidance,
                 save_only_latest,
                 save_every_weights,
                 cache_data_in_gpu,
                 overtraining_detector,
                 overtraining_threshold,
                 cleanup,
+                vocoder,
+                checkpointing,
             ],
         ),
     ]
     subprocess.run(command)
-    run_index_script(model_name, rvc_version, index_algorithm)
+    run_index_script(model_name, index_algorithm)
     return f"Model {model_name} trained successfully."
 
 
 # Index
-def run_index_script(model_name: str, rvc_version: str, index_algorithm: str):
+def run_index_script(model_name: str, index_algorithm: str):
     index_script_path = os.path.join("rvc", "train", "process", "extract_index.py")
     command = [
         python,
         index_script_path,
         os.path.join(logs_path, model_name),
-        rvc_version,
         index_algorithm,
     ]
 
     subprocess.run(command)
     return f"Index file for {model_name} generated successfully."
-
-
-# Model extract
-def run_model_extract_script(
-    pth_path: str,
-    model_name: str,
-    sample_rate: int,
-    pitch_guidance: bool,
-    rvc_version: str,
-    epoch: int,
-    step: int,
-):
-    extract_small_model(
-        pth_path, model_name, sample_rate, pitch_guidance, rvc_version, epoch, step
-    )
-    return f"Model {model_name} extracted successfully."
 
 
 # Model information
@@ -619,18 +596,12 @@ def run_download_script(model_link: str):
 
 # Prerequisites
 def run_prerequisites_script(
-    pretraineds_v1_f0: bool,
-    pretraineds_v1_nof0: bool,
-    pretraineds_v2_f0: bool,
-    pretraineds_v2_nof0: bool,
+    pretraineds_hifigan: bool,
     models: bool,
     exe: bool,
 ):
     prequisites_download_pipeline(
-        pretraineds_v1_f0,
-        pretraineds_v1_nof0,
-        pretraineds_v2_f0,
-        pretraineds_v2_nof0,
+        pretraineds_hifigan,
         models,
         exe,
     )
@@ -669,14 +640,6 @@ def parse_arguments():
         help=pitch_description,
         choices=range(-24, 25),
         default=0,
-    )
-    filter_radius_description = "Apply median filtering to the extracted pitch values if this value is greater than or equal to three. This can help reduce breathiness in the output audio."
-    infer_parser.add_argument(
-        "--filter_radius",
-        type=int,
-        help=filter_radius_description,
-        choices=range(11),
-        default=3,
     )
     index_rate_description = "Control the influence of the index file on the output. Higher values mean stronger influence. Lower values can help reduce artifacts but may result in less accurate voice cloning."
     infer_parser.add_argument(
@@ -1203,13 +1166,6 @@ def parse_arguments():
         default=0,
     )
     batch_infer_parser.add_argument(
-        "--filter_radius",
-        type=int,
-        help=filter_radius_description,
-        choices=range(11),
-        default=3,
-    )
-    batch_infer_parser.add_argument(
         "--index_rate",
         type=float,
         help=index_rate_description,
@@ -1690,13 +1646,6 @@ def parse_arguments():
         default=0,
     )
     tts_parser.add_argument(
-        "--filter_radius",
-        type=int,
-        help=filter_radius_description,
-        choices=range(11),
-        default=3,
-    )
-    tts_parser.add_argument(
         "--index_rate",
         type=float,
         help=index_rate_description,
@@ -1851,11 +1800,11 @@ def parse_arguments():
     )
     preprocess_parser.add_argument(
         "--cut_preprocess",
-        type=lambda x: bool(strtobool(x)),
-        choices=[True, False],
+        type=str,
+        choices=["Skip", "Simple", "Automatic"],
         help="Cut the dataset into smaller segments for faster preprocessing.",
-        default=True,
-        required=False,
+        default="Automatic",
+        required=True,
     )
     preprocess_parser.add_argument(
         "--process_effects",
@@ -1881,6 +1830,22 @@ def parse_arguments():
         default=0.7,
         required=False,
     )
+    preprocess_parser.add_argument(
+        "--chunk_len",
+        type=float,
+        help="Chunk length.",
+        choices=[i * 0.5 for i in range(1, 11)],
+        default=3.0,
+        required=False,
+    )
+    preprocess_parser.add_argument(
+        "--overlap_len",
+        type=float,
+        help="Overlap length.",
+        choices=[0.0, 0.1, 0.2, 0.3, 0.4],
+        default=0.3,
+        required=False,
+    )
 
     # Parser for 'extract' mode
     extract_parser = subparsers.add_parser(
@@ -1888,13 +1853,6 @@ def parse_arguments():
     )
     extract_parser.add_argument(
         "--model_name", type=str, help="Name of the model.", required=True
-    )
-    extract_parser.add_argument(
-        "--rvc_version",
-        type=str,
-        help="Version of the RVC model ('v1' or 'v2').",
-        choices=["v1", "v2"],
-        default="v2",
     )
     extract_parser.add_argument(
         "--f0_method",
@@ -1923,7 +1881,7 @@ def parse_arguments():
     )
     extract_parser.add_argument(
         "--gpu",
-        type=int,
+        type=str,
         help="GPU device to use for feature extraction (optional).",
         default="-",
     )
@@ -1931,7 +1889,7 @@ def parse_arguments():
         "--sample_rate",
         type=int,
         help="Target sampling rate for the audio data.",
-        choices=[32000, 40000, 48000],
+        choices=[32000, 40000, 44100, 48000],
         required=True,
     )
     extract_parser.add_argument(
@@ -1953,6 +1911,14 @@ def parse_arguments():
         help=embedder_model_custom_description,
         default=None,
     )
+    extract_parser.add_argument(
+        "--include_mutes",
+        type=int,
+        help="Number of silent files to include.",
+        choices=range(0, 11),
+        default=2,
+        required=True,
+    )
 
     # Parser for 'train' mode
     train_parser = subparsers.add_parser("train", help="Train an RVC model.")
@@ -1960,11 +1926,19 @@ def parse_arguments():
         "--model_name", type=str, help="Name of the model to be trained.", required=True
     )
     train_parser.add_argument(
-        "--rvc_version",
+        "--vocoder",
         type=str,
-        help="Version of the RVC model to train ('v1' or 'v2').",
-        choices=["v1", "v2"],
-        default="v2",
+        help="Vocoder name",
+        choices=["HiFi-GAN", "MRF HiFi-GAN", "RefineGAN"],
+        default="HiFi-GAN",
+    )
+    train_parser.add_argument(
+        "--checkpointing",
+        type=lambda x: bool(strtobool(x)),
+        choices=[True, False],
+        help="Enables memory-efficient training.",
+        default=False,
+        required=False,
     )
     train_parser.add_argument(
         "--save_every_epoch",
@@ -2013,13 +1987,6 @@ def parse_arguments():
         type=str,
         help="GPU device to use for training (e.g., '0').",
         default="0",
-    )
-    train_parser.add_argument(
-        "--pitch_guidance",
-        type=lambda x: bool(strtobool(x)),
-        choices=[True, False],
-        help="Enable or disable pitch guidance during training.",
-        default=True,
     )
     train_parser.add_argument(
         "--pretrained",
@@ -2094,63 +2061,11 @@ def parse_arguments():
         "--model_name", type=str, help="Name of the model.", required=True
     )
     index_parser.add_argument(
-        "--rvc_version",
-        type=str,
-        help="Version of the RVC model ('v1' or 'v2').",
-        choices=["v1", "v2"],
-        default="v2",
-    )
-    index_parser.add_argument(
         "--index_algorithm",
         type=str,
         choices=["Auto", "Faiss", "KMeans"],
         help="Choose the method for generating the index file.",
         default="Auto",
-        required=False,
-    )
-
-    # Parser for 'model_extract' mode
-    model_extract_parser = subparsers.add_parser(
-        "model_extract", help="Extract a specific epoch from a trained model."
-    )
-    model_extract_parser.add_argument(
-        "--pth_path", type=str, help="Path to the main .pth model file.", required=True
-    )
-    model_extract_parser.add_argument(
-        "--model_name", type=str, help="Name of the model.", required=True
-    )
-    model_extract_parser.add_argument(
-        "--sample_rate",
-        type=int,
-        help="Sampling rate of the extracted model.",
-        choices=[32000, 40000, 48000],
-        required=True,
-    )
-    model_extract_parser.add_argument(
-        "--pitch_guidance",
-        type=lambda x: bool(strtobool(x)),
-        choices=[True, False],
-        help="Enable or disable pitch guidance for the extracted model.",
-        required=True,
-    )
-    model_extract_parser.add_argument(
-        "--rvc_version",
-        type=str,
-        help="Version of the extracted RVC model ('v1' or 'v2').",
-        choices=["v1", "v2"],
-        default="v2",
-    )
-    model_extract_parser.add_argument(
-        "--epoch",
-        type=int,
-        help="Epoch number to extract from the model.",
-        choices=range(1, 10001),
-        required=True,
-    )
-    model_extract_parser.add_argument(
-        "--step",
-        type=str,
-        help="Step number to extract from the model (optional).",
         required=False,
     )
 
@@ -2207,32 +2122,11 @@ def parse_arguments():
         "prerequisites", help="Install prerequisites for RVC."
     )
     prerequisites_parser.add_argument(
-        "--pretraineds_v1_f0",
-        type=lambda x: bool(strtobool(x)),
-        choices=[True, False],
-        default=False,
-        help="Download pretrained models for RVC v1.",
-    )
-    prerequisites_parser.add_argument(
-        "--pretraineds_v2_f0",
+        "--pretraineds_hifigan",
         type=lambda x: bool(strtobool(x)),
         choices=[True, False],
         default=True,
         help="Download pretrained models for RVC v2.",
-    )
-    prerequisites_parser.add_argument(
-        "--pretraineds_v1_nof0",
-        type=lambda x: bool(strtobool(x)),
-        choices=[True, False],
-        default=False,
-        help="Download non f0 pretrained models for RVC v1.",
-    )
-    prerequisites_parser.add_argument(
-        "--pretraineds_v2_nof0",
-        type=lambda x: bool(strtobool(x)),
-        choices=[True, False],
-        default=False,
-        help="Download non f0 pretrained models for RVC v2.",
     )
     prerequisites_parser.add_argument(
         "--models",
@@ -2271,7 +2165,6 @@ def main():
         if args.mode == "infer":
             run_infer_script(
                 pitch=args.pitch,
-                filter_radius=args.filter_radius,
                 index_rate=args.index_rate,
                 volume_envelope=args.volume_envelope,
                 protect=args.protect,
@@ -2334,7 +2227,6 @@ def main():
         elif args.mode == "batch_infer":
             run_batch_infer_script(
                 pitch=args.pitch,
-                filter_radius=args.filter_radius,
                 index_rate=args.index_rate,
                 volume_envelope=args.volume_envelope,
                 protect=args.protect,
@@ -2401,7 +2293,6 @@ def main():
                 tts_voice=args.tts_voice,
                 tts_rate=args.tts_rate,
                 pitch=args.pitch,
-                filter_radius=args.filter_radius,
                 index_rate=args.index_rate,
                 volume_envelope=args.volume_envelope,
                 protect=args.protect,
@@ -2431,11 +2322,12 @@ def main():
                 process_effects=args.process_effects,
                 noise_reduction=args.noise_reduction,
                 clean_strength=args.noise_reduction_strength,
+                chunk_len=args.chunk_len,
+                overlap_len=args.overlap_len,
             )
         elif args.mode == "extract":
             run_extract_script(
                 model_name=args.model_name,
-                rvc_version=args.rvc_version,
                 f0_method=args.f0_method,
                 hop_length=args.hop_length,
                 cpu_cores=args.cpu_cores,
@@ -2443,11 +2335,11 @@ def main():
                 sample_rate=args.sample_rate,
                 embedder_model=args.embedder_model,
                 embedder_model_custom=args.embedder_model_custom,
+                include_mutes=args.include_mutes,
             )
         elif args.mode == "train":
             run_train_script(
                 model_name=args.model_name,
-                rvc_version=args.rvc_version,
                 save_every_epoch=args.save_every_epoch,
                 save_only_latest=args.save_only_latest,
                 save_every_weights=args.save_every_weights,
@@ -2455,7 +2347,6 @@ def main():
                 sample_rate=args.sample_rate,
                 batch_size=args.batch_size,
                 gpu=args.gpu,
-                pitch_guidance=args.pitch_guidance,
                 overtraining_detector=args.overtraining_detector,
                 overtraining_threshold=args.overtraining_threshold,
                 pretrained=args.pretrained,
@@ -2465,22 +2356,13 @@ def main():
                 cache_data_in_gpu=args.cache_data_in_gpu,
                 g_pretrained_path=args.g_pretrained_path,
                 d_pretrained_path=args.d_pretrained_path,
+                vocoder=args.vocoder,
+                checkpointing=args.checkpointing,
             )
         elif args.mode == "index":
             run_index_script(
                 model_name=args.model_name,
-                rvc_version=args.rvc_version,
                 index_algorithm=args.index_algorithm,
-            )
-        elif args.mode == "model_extract":
-            run_model_extract_script(
-                pth_path=args.pth_path,
-                model_name=args.model_name,
-                sample_rate=args.sample_rate,
-                pitch_guidance=args.pitch_guidance,
-                rvc_version=args.rvc_version,
-                epoch=args.epoch,
-                step=args.step,
             )
         elif args.mode == "model_information":
             run_model_information_script(
@@ -2501,10 +2383,7 @@ def main():
             )
         elif args.mode == "prerequisites":
             run_prerequisites_script(
-                pretraineds_v1_f0=args.pretraineds_v1_f0,
-                pretraineds_v1_nof0=args.pretraineds_v1_nof0,
-                pretraineds_v2_f0=args.pretraineds_v2_f0,
-                pretraineds_v2_nof0=args.pretraineds_v2_nof0,
+                pretraineds_hifigan=args.pretraineds_hifigan,
                 models=args.models,
                 exe=args.exe,
             )
