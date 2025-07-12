@@ -1,4 +1,4 @@
-""" This file contains the CommonSeparator class, common to all architecture-specific Separator classes. """
+"""This file contains the CommonSeparator class, common to all architecture-specific Separator classes."""
 
 from logging import Logger
 import os
